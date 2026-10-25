@@ -165,7 +165,7 @@
       pod.innerHTML = p.length ? p.map(card).join('') : '<p class="muted" style="grid-column:1/-1">No winner in this battle – nobody finished in profit.</p>';
     }
     if (body) body.innerHTML = r.rows.map(function (x) {
-      return '<tr><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank) + '</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '</td><td class="mono r" style="font-weight:700;color:' + (x.rank === 1 ? 'var(--gold)' : 'var(--text)') + '">' + (x.prize ? '$' + x.prize : '–') + '</td></tr>';
+      return '<tr><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank) + '</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '</td><td class="mono r" style="font-weight:700;color:' + (x.rank === 1 ? 'var(--gold)' : 'var(--text)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
     }).join('');
   }
   function renderPast() {
@@ -274,7 +274,7 @@
           if (x.dq) return '<tr class="dq-row"><td class="mono muted">–</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td colspan="3" class="r"><span class="dq-badge">DISQUALIFIED</span></td></tr>';
           return '<tr' + (x.rank === 1 && x.pnl > 0 ? ' class="lb-row first"' : '') + '><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank) + '</td><td style="font-weight:600">' + esc(x.name) +
             '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '<span class="pct-sm">' + pct(x.pct) + '</span></td><td class="mono r c-pct ' + cls(x.pnl) + '">' + pct(x.pct) +
-            '</td><td class="mono r" style="font-weight:700;color:' + (x.prize ? (x.rank === 1 ? 'var(--gold)' : 'var(--text)') : 'var(--dim)') + '">' + (x.prize ? '$' + x.prize : '–') + '</td></tr>';
+            '</td><td class="mono r" style="font-weight:700;color:' + (x.prize ? (x.rank === 1 ? 'var(--gold)' : 'var(--text)') : 'var(--dim)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
         }).join('') + '</tbody></table></div><div class="sample">P&amp;L counts only trades opened in the battle window. % is profit on the $1,000 starting balance.</div></div>';
       return;
     }
