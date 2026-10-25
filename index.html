@@ -14,73 +14,78 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0B1120">
-<link rel="icon" href="assets/favicon.svg?v=15" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=15" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=15" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=15">
+<link rel="icon" href="assets/favicon.svg?v=17" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=17" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=17" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=17">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Bodoni+Moda:ital,opsz,wght@1,6..96,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=15">
-<script src="assets/site.js?v=15" defer></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="assets/site.css?v=17">
+<script src="assets/site.js?v=17" defer></script>
+<script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
+<script>addEventListener("load",function(){var c=navigator.connection;if(c&&c.saveData)return;setTimeout(function(){var s=document.createElement("script");s.type="module";s.src="assets/3d.js?v=17";document.head.appendChild(s)},400)});</script>
 </head>
 <body>
-<header class="top"><div class="wrap">
-  <a class="brand" href="index.html"><svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#3B82F6"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#3EE6A8" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#3EE6A8"/></svg><b>PIP<span>CLASH</span></b></a>
-  <nav class="nav" aria-label="Main"><a href="arena.html">Live Arena</a><a href="winners.html">Results</a><a href="rules.html">Rules</a><a href="guide.html">MT5 Guide</a></nav>
-  <a class="btn" href="https://t.me/PipClashBot">Join on Telegram</a>
-</div></header>
+<div class="shell">
+<aside class="snav" id="snav" aria-label="Menu">
+  <a class="sn-logo" href="index.html"><svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#3B82F6"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#3EE6A8" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#3EE6A8"/></svg><b>PIP<span>CLASH</span></b></a>
+  <nav class="sn-list"><div class="sn-sec">BATTLE</div><a class="sn-it" href="index.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a><a class="sn-it" href="arena.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-6 4 4 8-9"/><path d="M15 6h5v5"/></svg><span>Live Arena</span><span class="sn-tag" data-live-tag hidden>LIVE</span></a><a class="sn-it" href="winners.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Results</span></a><div class="sn-sec">LEARN</div><a class="sn-it" href="rules.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span>Rules & FAQ</span></a><a class="sn-it" href="guide.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg><span>MT5 Guide</span></a><div class="sn-sec">JOIN</div><a class="sn-it" href="https://t.me/PipClashBot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/></svg><span>Join on Telegram</span></a><a class="sn-it" href="https://t.me/pipclash_official"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l6 4V6L7 10z"/><path d="M17 9a4 4 0 0 1 0 6"/></svg><span>Telegram channel</span></a></nav>
+  <div class="sn-foot">Free · demo accounts only<br><a href="legal.html">Terms &amp; privacy</a></div>
+</aside>
+<div class="scrim" data-scrim hidden></div>
+<div class="mcol">
+<header class="tbar">
+  <button class="mbtn" type="button" data-menu aria-label="Open menu" aria-controls="snav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <a class="tlogo" href="index.html" aria-label="PipClash home"><svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#3B82F6"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#3EE6A8" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#3EE6A8"/></svg></a>
+  <span class="tpill" data-status><span class="dot"></span>Daily battle · 4:30 PM UAE</span>
+  <a class="tjoin" href="https://t.me/PipClashBot" aria-label="Join on Telegram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/></svg><span>Join on Telegram</span></a>
+</header>
+<nav class="qnav" aria-label="Pages"><a href="index.html" aria-current="page">Home</a><a href="arena.html">Live Arena</a><a href="winners.html">Results</a><a href="rules.html">Rules</a><a href="guide.html">MT5 Guide</a></nav>
 <main>
 
-<section class="hero">
-  <div class="sky" data-sky aria-hidden="true"></div><div class="beam" aria-hidden="true"></div>
-  <div class="wrap hero-grid">
-    <div style="display:flex;flex-direction:column;gap:24px;position:relative;z-index:3">
-      <span class="pill" data-status style="align-self:flex-start"><span class="dot"></span>Daily battle · 4:30 PM UAE</span>
+<section class="section first"><div class="wrap">
+  <div class="hero-card">
+    <div class="hc-text">
       <h1>Same $1,000.<br>Same 3 hours.<br><em>One winner.</em></h1>
-      <p class="lede">The free daily MT5 demo trading battle in the UAE. A fresh account for every trader, the same balance, the same clock. Best profit at <span data-t="trade_end">7:30 PM</span> UAE wins.</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <span class="clock-label" data-clock-label>Trading starts in</span>
-        <div class="clock" data-clock><div><b>00</b><span>hours</span></div><div><b>00</b><span>minutes</span></div><div><b>00</b><span>seconds</span></div></div>
-      </div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap">
-        <a class="btn btn-lg" href="https://t.me/PipClashBot">Claim your free seat</a>
-        <a class="btn btn-lg btn-ghost" href="arena.html">Enter the arena</a>
-      </div>
+      <p class="lede">The free daily MT5 demo trading battle in the UAE. Same balance, same clock. Best profit at <span data-t="trade_end">7:30 PM</span> UAE wins.</p>
+      <div class="hc-clock"><span class="clock-label" data-clock-label>Trading starts in</span>
+        <div class="clock" data-clock><div><b>00</b><span>hours</span></div><div><b>00</b><span>minutes</span></div><div><b>00</b><span>seconds</span></div></div></div>
+      <div class="hc-btns"><a class="btn btn-lg btn-white" href="https://t.me/PipClashBot">Claim free seat</a><a class="btn btn-lg btn-line" href="arena.html">Live Arena</a></div>
     </div>
-    <div class="stage" aria-hidden="true">
-      <div class="coin" data-par2><div class="ring"></div><div class="spin">
-        <div class="face"><span class="display" style="font-size:36px;font-weight:700;line-height:1" data-prize="1">$200</span><span class="display" style="font-size:9px;letter-spacing:.26em;font-weight:700;margin-top:3px">TODAY’S GOLD</span></div>
-        <div class="face back"><span class="display" style="font-size:17px;font-weight:700;letter-spacing:.1em">PIPCLASH</span></div>
-      </div></div>
-      <div class="terminal"><div class="terminal-in">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap">
-          <span><b class="display" style="font-size:18px">XAUUSD</b> <b class="mono" data-px style="font-size:20px">0</b> <span class="mono" data-chg style="font-size:13px"></span></span>
-          <span class="mono" style="display:flex;gap:4px;font-size:12px;color:var(--muted)"><span style="padding:4px 8px">M1</span><span style="padding:4px 8px;border-radius:6px;background:#1E2D4F;color:var(--accent2)">M5</span><span style="padding:4px 8px">M15</span><span style="padding:4px 8px">H1</span></span>
-        </div>
-        <div class="chart" data-chart></div>
-        <div class="vol" data-vol></div>
-        <div class="orders">
-          <div class="sell" style="background:rgba(255,107,122,.08);border:1px solid rgba(255,107,122,.45)"><b class="down" style="font-size:14px">SELL</b><b class="mono" data-bid style="font-size:17px">0</b></div>
-          <div class="buy" style="background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.5)"><b class="up" style="font-size:14px">BUY</b><b class="mono" data-ask style="font-size:17px">0</b></div>
-        </div>
-        <div style="padding:0 18px 12px;font-size:11px;color:var(--dim)">Demo chart · sample prices</div>
-      </div></div>
-      <div class="toasts-l" data-par><div class="toast t-up" data-toast="0">▲ Trader closed XAUUSD +$38.20</div><div class="toast t-acc" data-toast="1" style="animation-delay:2s">⇧ Trader climbs to #2</div></div>
-      <div class="toasts-r" data-par><div class="toast t-gap" data-toast="2" style="animation-delay:4s">◆ Gap to #1: $85.35</div></div>
-    </div>
+    <div class="hc-art"><img class="fb3d" src="assets/3d/trophy.webp" width="960" height="720" fetchpriority="high" alt="Gold PipClash trophy – today’s winner gets $200"><canvas data-3d="trophy" aria-hidden="true"></canvas></div>
   </div>
-</section>
-<div class="ticker"><div class="ticker-in" data-ticker></div></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="card today"><div class="today-h"><span class="tag-free">FREE</span><h2>Today’s battle</h2></div>
+    <div class="chips"><span class="chip">Entry <span data-t="join_open">10:00 AM</span> – <span data-t="join_close">4:00 PM</span></span><span class="chip">MT5 login <span data-t="creds_at">4:25 PM</span></span><span class="chip">Trading <span data-t="trade_start">4:30 PM</span> – <span data-t="trade_end">7:30 PM</span></span><span class="chip">Result <span data-t="result_at">9:30 PM</span></span><span class="chip">UAE time · Mon – Fri</span></div></div>
+</div></section>
 
 <section class="section"><div class="wrap grid-2">
-  <div class="card"><div class="card-h"><b>LIVE STANDINGS</b><span class="live-chip" data-live-chip hidden></span></div>
+  <div class="card"><div class="card-h"><b>Live standings</b><span class="live-chip" data-live-chip hidden></span></div>
     <div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings data-limit="5" data-compact></tbody></table></div>
-    <div style="padding:14px 20px;border-top:1px solid var(--line)"><a href="arena.html">Full standings →</a></div></div>
+    <div class="card-f"><a href="arena.html">Full standings →</a></div></div>
   <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:18px">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="font-size:30px">Title fight</h2><span class="mono muted" style="font-size:12px">#1 vs #2</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="font-size:28px">Title fight</h2><span class="muted" style="font-size:14px">#1 vs #2</span></div>
     <div class="duel" data-duel></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="card purse">
+    <div class="purse-t"><h2>The daily purse</h2><p class="muted2">1st <b data-prize="1">$200</b> · 2nd <b data-prize="2">$100</b> · 3rd <b data-prize="3">$50</b> · 4th–10th <b data-prize="4">$10</b> each. Only traders in profit win. Final winners at <span data-t="result_at">9:30 PM</span> UAE.</p></div>
+    <img class="purse-img" src="assets/3d/podium.webp" width="960" height="620" alt="Podium: 1st $200, 2nd $100, 3rd $50" loading="lazy">
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap" style="display:flex;flex-direction:column;gap:20px">
+  <h2>Enter in three steps</h2>
+  <div class="grid-3">
+    <div class="step3"><img src="assets/3d/icon-telegram.png" width="160" height="140" alt="" loading="lazy"><div><h3>Join on Telegram</h3><p class="muted2">Open @PipClashBot between <span data-t="join_open">10:00 AM</span> and <span data-t="join_close">4:00 PM</span> UAE and share your phone to verify.</p></div></div>
+    <div class="step3"><img src="assets/3d/icon-mt5.png" width="160" height="140" alt="" loading="lazy"><div><h3>Get your MT5 login</h3><p class="muted2">At <span data-t="creds_at">4:25 PM</span> the bot sends your own fresh demo account with $1,000.</p></div></div>
+    <div class="step3"><img src="assets/3d/icon-chart.png" width="160" height="140" alt="" loading="lazy"><div><h3>Trade and climb</h3><p class="muted2">Forex, gold and indices from <span data-t="trade_start">4:30 PM</span> to <span data-t="trade_end">7:30 PM</span>. Ranks update every 30 minutes.</p></div></div>
   </div>
 </div></section>
 
@@ -91,37 +96,8 @@
   <div class="stat"><div class="v acc">30 min</div><div class="k">rank updates</div></div>
 </div></section>
 
-<section class="section"><div class="wrap" style="display:flex;flex-direction:column;gap:26px">
-  <h2>Enter in three steps</h2>
-  <div class="grid-3" style="perspective:1400px">
-    <div class="step" style="transform:rotateY(6deg)"><span class="eyebrow"><span data-t="join_open">10:00 AM</span> – <span data-t="join_close">4:00 PM</span> UAE</span><h3 style="font-size:22px">Join on Telegram</h3><p class="muted2">Open @PipClashBot, tap Join and share your phone number. One phone, one seat.</p></div>
-    <div class="step"><span class="eyebrow"><span data-t="creds_at">4:25 PM</span></span><h3 style="font-size:22px">Get your MT5 key</h3><p class="muted2">The bot sends your own fresh demo account with $1,000. Log in on the MT5 app.</p></div>
-    <div class="step" style="transform:rotateY(-6deg)"><span class="eyebrow"><span data-t="trade_start">4:30 PM</span> – <span data-t="trade_end">7:30 PM</span></span><h3 style="font-size:22px">Trade and climb</h3><p class="muted2">Forex, gold and indices. Standings refresh every 30 minutes. Every trade closes at the end.</p></div>
-  </div>
-</div></section>
-
-<section class="section"><div class="wrap" style="display:flex;flex-direction:column;gap:28px">
-  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><h2>The daily purse</h2><span class="muted2">Ranks 4–10 win <b data-prize="4">$10</b> each · profit only</span></div>
-  <div class="podium">
-    <div style="width:210px"><span class="mono" style="font-size:34px;font-weight:700;color:#D8DEE9" data-prize="2">$100</span><div class="blk" style="height:160px;background:linear-gradient(180deg,#3A4A68,#121B2E);font-size:46px;color:#D8DEE9">2</div></div>
-    <div style="width:240px"><span class="mono gold" style="font-size:44px;font-weight:700" data-prize="1">$200</span><div class="blk" style="height:230px;background:linear-gradient(180deg,#F5D06A,#8A5E14);font-size:60px;color:#1E1503">1</div></div>
-    <div style="width:210px"><span class="mono" style="font-size:30px;font-weight:700;color:#D7B48C" data-prize="3">$50</span><div class="blk" style="height:120px;background:linear-gradient(180deg,#8A6340,#2A1C10);font-size:42px;color:#F0DEC8">3</div></div>
-  </div>
-  <p class="muted2" style="text-align:center">Results are checked for two hours. Final winners at <span data-t="result_at">9:30 PM</span> UAE.</p>
-</div></section>
-
-<section class="section"><div class="wrap"><div class="card table-box"><table>
-<thead><tr><th>Mon – Fri</th><th>UAE time</th></tr></thead>
-<tbody class="mono">
-<tr><td style="font-family:var(--f-body)">Entry opens</td><td data-t="join_open">10:00 AM</td></tr>
-<tr><td style="font-family:var(--f-body)">Entry closes</td><td data-t="join_close">4:00 PM</td></tr>
-<tr><td style="font-family:var(--f-body)">MT5 login sent</td><td data-t="creds_at">4:25 PM</td></tr>
-<tr class="acc"><td style="font-family:var(--f-body)">Trading</td><td><span data-t="trade_start">4:30 PM</span> – <span data-t="trade_end">7:30 PM</span></td></tr>
-<tr><td style="font-family:var(--f-body)">Final result</td><td data-t="result_at">9:30 PM</td></tr>
-</tbody></table></div></div></section>
-
 <section class="section"><div class="wrap">
-  <div class="card cta-card" style="padding:40px 34px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+  <div class="card cta-card">
     <div style="display:flex;flex-direction:column;gap:8px;max-width:640px"><h2 class="cta-h">Today’s seat is free.</h2><p class="muted2">Entry closes at <span data-t="join_close">4:00 PM</span> UAE.</p></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-lg" href="https://t.me/PipClashBot">Join @PipClashBot</a><a class="btn btn-lg btn-ghost" href="https://t.me/pipclash_official">Follow the channel</a></div>
   </div>
@@ -132,5 +108,10 @@
   <span class="brand"><svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#3B82F6"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#3EE6A8" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#3EE6A8"/></svg><b style="font-size:17px">PIP<span>CLASH</span></b></span>
   <span>Demo accounts only – no real money is traded and entry is free. Not financial advice. <a href="legal.html#terms">Terms</a> · <a href="legal.html#privacy">Privacy</a> · <a href="rules.html">Rules</a> · <a href="https://t.me/pipclash_official">Telegram channel</a></span>
 </div></footer>
+</div></div>
+<script>(function(){var b=document.querySelector('[data-menu]'),n=document.getElementById('snav'),s=document.querySelector('[data-scrim]');
+function set(o){document.body.classList.toggle('menu-open',o);b.setAttribute('aria-expanded',o);s.hidden=!o;}
+b.addEventListener('click',function(){set(!document.body.classList.contains('menu-open'))});s.addEventListener('click',function(){set(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});})();</script>
 </body>
 </html>
