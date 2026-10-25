@@ -8,6 +8,8 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var money = function (v) { v = Number(v) || 0; return (v >= 0 ? '+$' : '−$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
   var cls = function (v) { return Number(v) >= 0 ? 'up' : 'down'; };
+  var BAL = 1000;   // har account ka start balance
+  var pctOf = function (pnl) { var v = (Number(pnl) || 0) / BAL * 100; return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
   var pad = function (n) { return String(n).padStart(2, '0'); };
   function uae(iso) { // UTC ISO -> "4:30 PM" UAE
     if (!iso) return '';
@@ -79,7 +81,7 @@
         var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '<span class="muted">–</span>');
         return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">#' + r.rank + '</td><td style="font-weight:600">' + esc(r.name) +
           (compact ? ' <span class="mono" style="font-size:12px">' + mv + '</span>' : ' <span class="mono" style="font-size:12px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
-          (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '</td></tr>';
+          (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
       }).join('');
     });
   }
@@ -103,9 +105,9 @@
     var s = standings(), box = $('[data-duel]'); if (!box) return;
     if (s.length < 2) { box.innerHTML = '<p class="muted">The title fight appears once the battle is running.</p>'; return; }
     var a = s[0], b = s[1], max = Math.max(Math.abs(a.pnl), 1), w = Math.max(5, Math.min(100, (b.pnl / max) * 100));
-    box.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(a.name) + '</span><span class="mono gold" style="font-size:24px;font-weight:700">' + money(a.pnl) + '</span></div><div class="bar"><i style="width:100%;background:var(--gold)"></i></div><span class="muted" style="font-size:13px">' + (a.trades || 0) + ' trades · leading</span></div>' +
+    box.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(a.name) + '</span><span class="mono gold" style="font-size:24px;font-weight:700">' + money(a.pnl) + '</span></div><div class="bar"><i style="width:100%;background:var(--gold)"></i></div><span class="muted" style="font-size:13px">' + (a.trades || 0) + ' trades · ' + pctOf(a.pnl) + ' · leading</span></div>' +
       '<div class="vs">vs</div>' +
-      '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(b.name) + '</span><span class="mono acc" style="font-size:24px;font-weight:700">' + money(b.pnl) + '</span></div><div class="bar"><i style="width:' + w.toFixed(0) + '%;background:var(--accent)"></i></div><span class="muted" style="font-size:13px">gap to the top ' + money(a.pnl - b.pnl).replace('+', '') + '</span></div>';
+      '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(b.name) + '</span><span class="mono acc" style="font-size:24px;font-weight:700">' + money(b.pnl) + '</span></div><div class="bar"><i style="width:' + w.toFixed(0) + '%;background:var(--accent)"></i></div><span class="muted" style="font-size:13px">' + (b.trades || 0) + ' trades · ' + pctOf(b.pnl) + ' · gap ' + money(a.pnl - b.pnl).replace('+', '') + '</span></div>';
   }
   function renderStats() {
     var b = (D && D.battle) || {};
