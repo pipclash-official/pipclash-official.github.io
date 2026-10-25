@@ -49,7 +49,22 @@
     }
     return { live: false, target: new Date(now.getTime() + 864e5) };
   }
+  function ago(iso) {
+    var m = Math.max(0, Math.floor((Date.now() - new Date(iso)) / 60000));
+    return m < 1 ? 'just now' : (m < 60 ? m + ' min ago' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min ago');
+  }
+  function liveChip() {
+    var b = D && D.battle, st = b ? b.status : null;
+    $$('[data-live-chip]').forEach(function (el) {
+      if (!b || !D.updated_utc || (st !== 'live' && st !== 'review')) { el.hidden = true; return; }
+      var n = (D.standings || []).length;
+      el.hidden = false;
+      el.className = 'live-chip' + (st === 'live' ? ' on' : '');
+      el.innerHTML = '<span class="dot' + (st === 'live' ? ' live' : '') + '"></span><b>' + (st === 'live' ? 'LIVE' : 'CHECKING') + '</b> · ' + n + ' traders · ' + ago(D.updated_utc);
+    });
+  }
   function tickClock() {
+    liveChip();
     var now = new Date(), w = nextWindow(now), left = Math.max(0, Math.floor((w.target - now) / 1000));
     $$('[data-clock]').forEach(function (el) {
       var h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), s = left % 60;
