@@ -71,16 +71,16 @@ function liveTrophy(cv) {
     const co = coin(); co.position.set(x, y, z); co.rotation.set(rx, .3, .5); s.add(co); return co;
   });
   if (sq) { c.position.set(0, .7, 7.6); c.lookAt(0, .45, 0); } else { c.position.set(0, .6, 7.4); c.lookAt(0, .35, 0); }
-  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let on = true, t0 = performance.now(), last = t0, rotY = -.3, vel = .55, drag = null;
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches, still = false, SP = calm ? .25 : .55;
+  let on = true, t0 = performance.now(), last = t0, rotY = -.3, vel = SP, drag = null;
   cv.style.pointerEvents = 'auto'; cv.style.touchAction = 'pan-y'; cv.style.cursor = 'grab';
   cv.addEventListener('pointerdown', e => { e.preventDefault(); drag = { x: e.clientX }; vel = 0; });
   window.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; drag.x = e.clientX; rotY += dx * .012; vel = dx * .6; });
-  window.addEventListener('pointerup', () => { if (drag) { drag = null; if (Math.abs(vel) < .55) vel = .55 * Math.sign(vel || 1); } });
+  window.addEventListener('pointerup', () => { if (drag) { drag = null; if (Math.abs(vel) < SP) vel = SP * Math.sign(vel || 1); } });
   const frame = (now) => {
     const k = (now - t0) / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
-    if (!still && !drag) { rotY += vel * dt; vel += (.55 * Math.sign(vel || 1) - vel) * Math.min(1, dt * 1.5); }
-    t.rotation.y = rotY; t.position.y = -.95 + (still ? 0 : Math.sin(k * 1.2) * .05);
+    if (!still && !drag) { rotY += vel * dt; vel += (SP * Math.sign(vel || 1) - vel) * Math.min(1, dt * 1.5); }
+    t.rotation.y = rotY; t.position.y = -.95 + (calm ? 0 : Math.sin(k * 1.2) * .05);
     coins.forEach((co, i) => { co.rotation.y = still ? .3 : k * (.8 + i * .2); co.position.y += still ? 0 : Math.sin(k * 1.4 + i) * .0015; });
     r.render(s, c);
   };
