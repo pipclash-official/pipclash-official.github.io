@@ -1,0 +1,236 @@
+/* PipClash site – reads data/live.js (window.PC_DATA, written by the engine) and fills the page.
+   Refreshes the data every 60 s. Works when opened as a file and on hosting. */
+(function () {
+  'use strict';
+  var D = null;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var money = function (v) { v = Number(v) || 0; return (v >= 0 ? '+$' : '−$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  var cls = function (v) { return Number(v) >= 0 ? 'up' : 'down'; };
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  function uae(iso) { // UTC ISO -> "4:30 PM" UAE
+    if (!iso) return '';
+    var d = new Date(new Date(iso).getTime() + 4 * 3600e3);
+    var h = d.getUTCHours(), m = d.getUTCMinutes();
+    return ((h + 11) % 12 + 1) + ':' + pad(m) + ' ' + (h < 12 ? 'AM' : 'PM');
+  }
+  function uaeHM(hm, add) { // "16:30" UAE (+ minutes offset for other countries) -> "4:30 PM"
+    var p = hm.split(':'), t = (+p[0]) * 60 + (+p[1]) + (add || 0);
+    var h = Math.floor(t / 60) % 24, m = t % 60;
+    return ((h + 11) % 12 + 1) + ':' + pad(m) + ' ' + (h < 12 ? 'AM' : 'PM');
+  }
+
+  /* ---------- schedule / countdown ---------- */
+  function sched() { return (D && D.schedule) || { join_open: '10:00', join_close: '16:00', creds_at: '16:25', trade_start: '16:30', trade_end: '19:30', result_at: '21:30', days: [1, 2, 3, 4, 5] }; }
+  function nextWindow(now) {
+    var s = sched(), toUTC = function (hm) { var p = hm.split(':'); return (+p[0] - 4) * 60 + (+p[1]); };
+    var b = D && D.battle;
+    var mins = function (hm) { var p = hm.split(':'); return (+p[0]) * 60 + (+p[1]); };
+    if (b && b.status === 'live' && b.end_utc) {
+      if (new Date(b.end_utc) > now) return { live: true, target: new Date(b.end_utc) };
+      return { live: false, closing: true, target: now };            // time khatam, engine trades band kar raha hai
+    }
+    if (b && b.status === 'review' && b.end_utc) {                   // result ka countdown
+      var r = new Date(new Date(b.end_utc).getTime() + (mins(s.result_at) - mins(s.trade_end)) * 60e3);
+      if (r > now) return { live: false, review: true, target: r };
+    }
+    if (b && b.status === 'upcoming' && b.start_utc && new Date(b.start_utc) > now) return { live: false, target: new Date(b.start_utc) };
+    var st = toUTC(s.trade_start), en = toUTC(s.trade_end);
+    var canLive = !!(b && (b.status === 'upcoming' || b.status === 'live'));   // aaj ka battle bana ho tabhi LIVE
+    for (var i = 0; i < 8; i++) {
+      var d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i));
+      var dow = d.getUTCDay(); if ((s.days || [1, 2, 3, 4, 5]).indexOf(dow) < 0) continue;
+      var a = new Date(d.getTime() + st * 60e3), z = new Date(d.getTime() + en * 60e3);
+      if (now >= a && now < z) { if (canLive) return { live: true, target: z }; continue; }
+      if (now < a) return { live: false, target: a };
+    }
+    return { live: false, target: new Date(now.getTime() + 864e5) };
+  }
+  function tickClock() {
+    var now = new Date(), w = nextWindow(now), left = Math.max(0, Math.floor((w.target - now) / 1000));
+    $$('[data-clock]').forEach(function (el) {
+      var h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), s = left % 60;
+      var b = el.querySelectorAll('b'); if (b.length === 3) { b[0].textContent = pad(h); b[1].textContent = pad(m); b[2].textContent = pad(s); }
+      else el.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+    });
+    $$('[data-clock-label]').forEach(function (el) { el.textContent = w.live ? 'Battle ends in' : (w.review ? 'Final result in' : (w.closing ? 'Battle over' : 'Trading starts in')); });
+    $$('[data-status]').forEach(function (el) {
+      var b = D && D.battle, st = b ? b.status : null;
+      var txt = w.live ? 'LIVE' : (w.closing ? 'CLOSING' : (st === 'review' ? 'CHECKING' : 'NEXT'));
+      var desc = w.live ? (' Battle #' + (b ? b.id : '') + ' in progress · ends ' + uaeHM(sched().trade_end) + ' UAE')
+        : w.closing ? ' Time is up · closing all trades'
+        : (st === 'review' ? ' Results are being checked · final ' + uaeHM(sched().result_at) + ' UAE'
+          : ' Daily battle · ' + uaeHM(sched().trade_start) + ' UAE');
+      el.innerHTML = '<span class="dot' + (w.live ? ' live' : '') + '"></span><span class="mono" style="color:var(--text)">' + txt + '</span>' + esc(desc);
+    });
+  }
+
+  /* ---------- renderers ---------- */
+  function standings() { return (D && D.standings) || []; }
+  function renderStandings() {
+    $$('[data-standings]').forEach(function (box) {
+      var lim = +box.getAttribute('data-limit') || 999, compact = box.hasAttribute('data-compact');
+      var q = (($('#find') || {}).value || '').trim().toLowerCase();
+      var rows = standings().filter(function (r) { return !q || r.name.toLowerCase().indexOf(q) >= 0; }).slice(0, lim);
+      if (!rows.length) { box.innerHTML = '<tr><td colspan="5" class="empty">' + (q ? 'No trader with that name.' : 'Standings appear when the battle starts at ' + uaeHM(sched().trade_start) + ' UAE.') + '</td></tr>'; return; }
+      box.innerHTML = rows.map(function (r) {
+        var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
+        var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '<span class="muted">–</span>');
+        return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">#' + r.rank + '</td><td style="font-weight:600">' + esc(r.name) +
+          (compact ? ' <span class="mono" style="font-size:12px">' + mv + '</span>' : ' <span class="mono" style="font-size:12px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
+          (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '</td></tr>';
+      }).join('');
+    });
+  }
+  function feedItems() { return (D && D.feed) || []; }
+  function renderFeed() {
+    $$('[data-feed]').forEach(function (box) {
+      var items = feedItems().slice(0, +box.getAttribute('data-limit') || 12);
+      box.innerHTML = items.length ? items.map(function (f) {
+        var c = f.kind === 'profit' ? 'var(--up2)' : (f.kind === 'loss' ? 'var(--down)' : (f.kind === 'start' ? 'var(--gold)' : 'var(--accent2)'));
+        return '<div style="display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:12px 20px;border-bottom:1px solid #18223A;font-size:14px"><span class="mono" style="font-size:12px;color:var(--dim)">' + uae(f.t_utc) + '</span><span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span></div>';
+      }).join('') : '<div class="empty">The feed starts when the battle begins.</div>';
+    });
+    $$('[data-ticker]').forEach(function (box) {
+      var items = feedItems().slice(0, 8);
+      if (!items.length) items = [{ text: 'Free daily battle · ' + uaeHM(sched().trade_start) + ' – ' + uaeHM(sched().trade_end) + ' UAE', kind: 'start' }, { text: 'Same $1,000 for everyone · one winner', kind: 'info' }, { text: 'Join on Telegram: @PipClashBot', kind: 'info' }];
+      var html = items.map(function (f) { var c = f.kind === 'profit' ? 'var(--up2)' : (f.kind === 'loss' ? 'var(--down)' : 'var(--accent2)'); return '<span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span>'; }).join('');
+      box.innerHTML = html + html;
+    });
+  }
+  function renderDuel() {
+    var s = standings(), box = $('[data-duel]'); if (!box) return;
+    if (s.length < 2) { box.innerHTML = '<p class="muted">The title fight appears once the battle is running.</p>'; return; }
+    var a = s[0], b = s[1], max = Math.max(Math.abs(a.pnl), 1), w = Math.max(5, Math.min(100, (b.pnl / max) * 100));
+    box.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(a.name) + '</span><span class="mono gold" style="font-size:24px;font-weight:700">' + money(a.pnl) + '</span></div><div class="bar"><i style="width:100%;background:var(--gold)"></i></div><span class="muted" style="font-size:13px">' + (a.trades || 0) + ' trades · leading</span></div>' +
+      '<div class="vs">vs</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(b.name) + '</span><span class="mono acc" style="font-size:24px;font-weight:700">' + money(b.pnl) + '</span></div><div class="bar"><i style="width:' + w.toFixed(0) + '%;background:var(--accent)"></i></div><span class="muted" style="font-size:13px">gap to the top ' + money(a.pnl - b.pnl).replace('+', '') + '</span></div>';
+  }
+  function renderStats() {
+    var b = (D && D.battle) || {};
+    var set = function (k, v) { $$('[data-stat="' + k + '"]').forEach(function (el) { el.textContent = v; }); };
+    set('players', b.players != null ? b.players : '–');
+    set('inprofit', b.in_profit != null ? b.in_profit : '–');
+    set('update', b.update_no ? b.update_no + ' of ' + (b.updates_total || 7) : '–');
+    set('next', b.status === 'live' && b.next_update_utc && new Date(b.next_update_utc) > Date.now() - 5 * 60e3 ? uae(b.next_update_utc) : (b.status === 'review' ? 'Final ' + uaeHM(sched().result_at) : '–'));
+    set('battle', b.id ? '#' + b.id : '');
+    var late = D && D.updated_utc && b.status === 'live' && (Date.now() - new Date(D.updated_utc)) > 45 * 60e3;
+    set('updated', D && D.updated_utc ? (late ? 'Last update ' + uae(D.updated_utc) + ' UAE · next one is late' : 'Updated ' + uae(D.updated_utc) + ' UAE') : 'Waiting for data');
+  }
+  function renderResult() {
+    var r = D && D.last_result, pod = $('[data-podium]'), body = $('[data-result]');
+    if (!r || !r.rows || !r.rows.length) {
+      if (pod) pod.innerHTML = '<p class="muted" style="grid-column:1/-1">The first final result will appear here after the first battle.</p>';
+      if (body) body.innerHTML = '<tr><td colspan="5" class="empty">No final result yet.</td></tr>';
+      return;
+    }
+    $$('[data-result-title]').forEach(function (el) { el.textContent = 'FINAL · BATTLE #' + r.id + ' · ' + r.date; });
+    if (pod) {
+      var p = r.rows.filter(function (x) { return x.pnl > 0; }).slice(0, 3), card = function (x, i) {
+        var styles = [
+          'border-color:var(--gold);background:linear-gradient(170deg,rgba(245,197,66,.14),var(--surface) 55%);transform:scale(1.03)',
+          'background:linear-gradient(170deg,#182440,var(--surface));transform:rotateY(8deg) translateY(20px)',
+          'background:linear-gradient(170deg,#1E1A16,var(--surface));transform:rotateY(-8deg) translateY(34px)'][i];
+        var col = ['var(--gold)', '#D8DEE9', '#D7B48C'][i];
+        return '<div class="card" style="padding:26px;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 60px rgba(0,0,0,.45);order:' + [2, 1, 3][i] + ';' + styles + '"><span class="display" style="font-size:44px;font-weight:700;color:' + col + '">' + x.rank + '</span><span style="font-size:21px;font-weight:700">' + esc(x.name) + '</span><span class="mono up" style="font-size:26px;font-weight:700">' + money(x.pnl) + '</span><span class="muted" style="font-size:14px">' + (x.trades || 0) + ' trades' + (x.prize ? ' · prize <b style="color:' + (i ? 'var(--text)' : 'var(--gold)') + '">$' + x.prize + '</b>' : '') + '</span></div>';
+      };
+      pod.innerHTML = p.length ? p.map(card).join('') : '<p class="muted" style="grid-column:1/-1">No winner in this battle – nobody finished in profit.</p>';
+    }
+    if (body) body.innerHTML = r.rows.map(function (x) {
+      return '<tr><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">#' + x.rank + '</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '</td><td class="mono r" style="font-weight:700;color:' + (x.rank === 1 ? 'var(--gold)' : 'var(--text)') + '">' + (x.prize ? '$' + x.prize : '–') + '</td></tr>';
+    }).join('');
+  }
+  function renderPast() {
+    $$('[data-past]').forEach(function (box) {
+      var past = (D && D.past) || [];
+      box.innerHTML = past.length ? past.map(function (p) {
+        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:13px 20px;border-bottom:1px solid #18223A"><div style="display:flex;flex-direction:column"><span style="font-weight:700' + (p.winner ? '' : ';color:var(--muted)') + '">' + (p.winner ? esc(p.winner) : 'No winner') + '</span><span style="font-size:12px;color:var(--dim)">' + esc(p.date) + ' · Battle #' + p.id + '</span></div><span class="mono ' + (p.winner ? 'up' : 'muted') + '" style="font-weight:700;align-self:center">' + (p.winner ? money(p.pnl) : '–') + '</span></div>';
+      }).join('') : '<div class="empty">Past champions appear here.</div>';
+    });
+  }
+  function renderSchedule() {
+    var s = sched();
+    $$('[data-t]').forEach(function (el) { // data-t="trade_start" data-add="60"
+      var k = el.getAttribute('data-t'), add = +(el.getAttribute('data-add') || 0);
+      if (s[k]) el.textContent = uaeHM(s[k], add);
+    });
+    if (D && D.prizes) $$('[data-prize]').forEach(function (el) { var v = D.prizes[el.getAttribute('data-prize')]; if (v != null) el.textContent = '$' + v; });
+  }
+  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); tickClock(); }
+
+  /* ---------- decorative live chart (home) ---------- */
+  function chart() {
+    var box = $('[data-chart]'); if (!box) return;
+    var seed = 11, rnd = function () { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    var p = 4128.4, ks = [];
+    for (var i = 0; i < 30; i++) { var o = p, c = +(o + (rnd() - 0.42) * 7.5).toFixed(2); ks.push({ o: o, c: c, h: Math.max(o, c) + rnd() * 3.4, l: Math.min(o, c) - rnd() * 3.4, v: 8 + rnd() * 30 }); p = c; }
+    var price = ks[29].c;
+    function draw() {
+      var last = ks[29]; last.c = price; last.h = Math.max(last.h, price); last.l = Math.min(last.l, price);
+      var hi = Math.max.apply(null, ks.map(function (k) { return k.h; })), lo = Math.min.apply(null, ks.map(function (k) { return k.l; }));
+      var H = 290, y = function (v) { return 14 + (hi - v) / (hi - lo) * (H - 28); }, slot = 100 / 30, html = '', vol = '';
+      ks.forEach(function (k, i) {
+        var up = k.c >= k.o, col = up ? '#3EE6A8' : '#FF6B7A', dk = up ? '#13805A' : '#8C2433', t = y(Math.max(k.o, k.c)), b = y(Math.min(k.o, k.c));
+        html += '<div class="k" style="left:' + (i * slot + slot * .2).toFixed(2) + '%;width:' + (slot * .6).toFixed(2) + '%"><div class="w" style="top:' + y(k.h).toFixed(1) + 'px;height:' + Math.max(2, y(k.l) - y(k.h)).toFixed(1) + 'px;background:' + col + '"></div><div class="b" style="top:' + t.toFixed(1) + 'px;height:' + Math.max(2, b - t).toFixed(1) + 'px;background:linear-gradient(90deg,' + col + ' 62%,' + dk + ');box-shadow:4px -3px 0 ' + dk + (i === 29 ? ',0 0 18px ' + col : '') + '"></div></div>';
+        vol += '<i style="left:' + (i * slot + slot * .2).toFixed(2) + '%;width:' + (slot * .6).toFixed(2) + '%;height:' + Math.round(k.v) + 'px;background:' + col + '"></i>';
+      });
+      var ma = ks.map(function (k, i) { var w = ks.slice(Math.max(0, i - 4), i + 1); return w.reduce(function (a, b) { return a + b.c; }, 0) / w.length; });
+      var path = 'M' + ma.map(function (v, i) { return ((i + .5) * 10).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' L');
+      var diff = price - ks[0].o, col = diff >= 0 ? '#3EE6A8' : '#FF6B7A', py = y(price);
+      box.innerHTML = html + '<svg viewBox="0 0 300 290" preserveAspectRatio="none" aria-hidden="true"><path d="' + path + '" fill="none" stroke="#60A5FA" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>' +
+        '<div class="pline" style="top:' + py.toFixed(1) + 'px;border-color:' + col + '"></div><span class="ptag" style="top:' + (py - 9).toFixed(1) + 'px;background:' + col + '">' + price.toFixed(2) + '</span>' +
+        '<span class="hilo" style="top:2px">' + hi.toFixed(1) + '</span><span class="hilo" style="bottom:2px">' + lo.toFixed(1) + '</span>';
+      var v = $('[data-vol]'); if (v) v.innerHTML = vol;
+      $$('[data-px]').forEach(function (el) { el.textContent = price.toFixed(2); el.style.color = col; });
+      $$('[data-chg]').forEach(function (el) { el.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' (' + (diff / ks[0].o * 100).toFixed(2) + '%)'; el.style.color = col; });
+      $$('[data-bid]').forEach(function (el) { el.textContent = price.toFixed(2); });
+      $$('[data-ask]').forEach(function (el) { el.textContent = (price + .25).toFixed(2); });
+    }
+    draw();
+    setInterval(function () { price = +(price + (Math.random() - .47) * .55).toFixed(2); draw(); }, 1000);
+    var term = $('.terminal-in'), hero = $('.hero');
+    if (term && hero && window.matchMedia('(hover:hover)').matches) {
+      hero.addEventListener('mousemove', function (e) {
+        var r = hero.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, yy = (e.clientY - r.top) / r.height - .5;
+        term.style.transform = 'rotateY(' + (-14 + x * 10).toFixed(1) + 'deg) rotateX(' + (7 - yy * 8).toFixed(1) + 'deg)';
+        $$('[data-par]').forEach(function (el) { el.style.transform = 'translate(' + (x * 18).toFixed(1) + 'px,' + (yy * 12).toFixed(1) + 'px)'; });
+        $$('[data-par2]').forEach(function (el) { el.style.transform = 'translate(' + (-x * 26).toFixed(1) + 'px,' + (-yy * 16).toFixed(1) + 'px)'; });
+      });
+    }
+  }
+
+  /* ---------- background skyline candles ---------- */
+  function sky() {
+    var seed = 7, r = function () { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    $$('[data-sky]').forEach(function (box) {
+      var html = '', lvl = 60;
+      for (var i = 0; i < 40; i++) { lvl = Math.max(30, Math.min(190, lvl + (r() - 0.42) * 30)); var col = r() > 0.38 ? '#3EE6A8' : '#FF6B7A'; html += '<div><i style="height:' + Math.round(8 + r() * 22) + 'px;background:' + col + '"></i><b style="height:' + Math.round(lvl) + 'px;background:' + col + '"></b></div>'; }
+      box.innerHTML = html;
+    });
+  }
+  /* ---------- floating toasts: real battle events when live, samples otherwise ---------- */
+  function renderToasts() {
+    var f = feedItems(), s = standings();
+    var p = f.filter(function (x) { return x.kind === 'profit'; })[0], m = f.filter(function (x) { return x.kind === 'move'; })[0];
+    var set = function (i, t) { $$('[data-toast="' + i + '"]').forEach(function (el) { el.textContent = t; }); };
+    if (p) set(0, '▲ ' + p.text);
+    if (m) set(1, '⇧ ' + m.text);
+    if (s.length >= 2) set(2, '◆ Gap to #1: $' + Math.abs(s[0].pnl - s[1].pnl).toFixed(2));
+  }
+
+  /* ---------- data loading ---------- */
+  function load() {
+    var s = document.createElement('script');
+    s.src = 'data/live.js?t=' + Date.now();
+    s.onload = function () { D = window.PC_DATA || D; renderAll(); s.remove(); };
+    s.onerror = function () { s.remove(); renderAll(); };
+    document.head.appendChild(s);
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    var f = $('#find'); if (f) f.addEventListener('input', renderStandings);
+    chart(); sky(); renderAll(); load();
+    setInterval(tickClock, 1000);
+    setInterval(load, 60000);
+  });
+})();
