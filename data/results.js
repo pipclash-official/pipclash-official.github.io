@@ -1,0 +1,1 @@
+window.PC_RESULTS = {"list": [], "detail": {}};
