@@ -417,3 +417,5 @@ th{font-size:13px}
 .hb-art canvas{pointer-events:auto}
 .hb-art canvas{user-select:none;-webkit-user-select:none}
 .qnav{display:none!important}
+
+.cert-link{display:block;font-family:var(--f-body);font-size:13px;font-weight:700;margin-top:4px}
