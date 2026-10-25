@@ -64,17 +64,18 @@ function liveTrophy(cv) {
   const wrap = cv.parentElement;
   let W = wrap.clientWidth, H = wrap.clientHeight;
   if (!W || !H) return;
-  const { r, s, c } = setup(cv, W, H, 28);
+  const sq = W / H < 1.2;
+  const { r, s, c } = setup(cv, W, H, sq ? 32 : 28);
   const t = trophy(prizeText()); t.position.set(0, -.95, 0); s.add(t);
-  const coins = [[-1.9, 1.1, -.5, .9], [-1.5, -.2, .4, .4], [1.9, 1.5, -1, 1.2], [1.7, .1, .3, .6]].map(([x, y, z, rx]) => {
+  const coins = (cv.hasAttribute('data-coins') ? [[-1.9, 1.1, -.5, .9], [-1.5, -.2, .4, .4], [1.9, 1.5, -1, 1.2], [1.7, .1, .3, .6]] : []).map(([x, y, z, rx]) => {
     const co = coin(); co.position.set(x, y, z); co.rotation.set(rx, .3, .5); s.add(co); return co;
   });
-  c.position.set(0, .6, 7.4); c.lookAt(0, .35, 0);
+  if (sq) { c.position.set(0, .7, 7.6); c.lookAt(0, .45, 0); } else { c.position.set(0, .6, 7.4); c.lookAt(0, .35, 0); }
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let on = true, t0 = performance.now();
   const frame = (now) => {
     const k = (now - t0) / 1000;
-    t.rotation.y = still ? -.3 : Math.sin(k * .5) * .7;
+    t.rotation.y = still ? -.3 : Math.sin(k * .45) * .55;
     coins.forEach((co, i) => { co.rotation.y = still ? .3 : k * (.8 + i * .2); co.position.y += still ? 0 : Math.sin(k * 1.4 + i) * .0015; });
     r.render(s, c);
   };
