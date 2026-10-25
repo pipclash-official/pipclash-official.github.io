@@ -412,3 +412,8 @@ th{font-size:13px}
 @media (max-width:759px){.hero-b h1{font-size:42px}.hb-text{max-width:64%}.hb-lab{font-size:13px}.hb-art{width:min(44%,190px);top:6px}}
 @media (max-width:759px){.hb-text{max-width:none}.hero-b h1{font-size:38px}.hb-art{width:112px;right:12px;top:52px}.hb-sub{max-width:62%}.hb-lab{font-size:13px}}
 @media (max-width:359px){.hero-b h1{font-size:33px}.hb-art{width:96px}}
+.hb-sub{text-wrap:pretty}
+@media (max-width:759px){.hb-sub{max-width:none}}
+.hb-art canvas{pointer-events:auto}
+.hb-art canvas{user-select:none;-webkit-user-select:none}
+.qnav{display:none!important}
