@@ -390,3 +390,25 @@ th{font-size:13px}
   .qnav a[aria-current="page"]{background:#1D4ED8;border-color:#1D4ED8;color:#fff}
 }
 @media (max-width:600px){.qnav{padding:2px 16px 10px;top:64px}}
+/* v19 hero B – prize first, calm */
+.hero-b{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(160deg,#16244A,#111A2E 70%);border:1px solid #24345C;padding:26px 24px;display:flex;flex-direction:column;gap:16px}
+.hb-art{position:absolute;right:-10px;top:-2px;width:min(46%,210px);aspect-ratio:1;pointer-events:none}
+.hb-art img,.hb-art canvas{position:absolute;inset:0;width:100%;height:100%}
+.hb-art canvas{opacity:0;transition:opacity .4s}.hb-art.live3d canvas{opacity:1}.hb-art.live3d img{opacity:0;transition:opacity .4s}
+.hb-text{position:relative;display:flex;flex-direction:column;gap:10px;max-width:62%}
+.hb-lab{font-size:14px;color:#C7D7FF;font-weight:600}
+.hero-b h1{font-family:var(--f-display);font-size:clamp(44px,12vw,72px);line-height:1.02;color:#fff}
+.hero-b h1 b{color:#F5C451}
+.hb-sub{color:var(--muted);font-size:16px;line-height:1.55}
+.hb-clock{display:flex;flex-direction:column;gap:8px}
+.hero-b .clock{gap:8px}.hero-b .clock div{flex:1;min-width:0}
+.hb-btns{display:flex;gap:10px}.hb-btns .btn{flex:1;justify-content:center;white-space:nowrap;padding:15px 10px}
+@media (min-width:760px){
+  .hero-b{padding:44px 48px;display:grid;grid-template-columns:minmax(0,1fr) 320px;grid-template-areas:"t a" "c a" "b a";column-gap:30px;row-gap:22px;align-items:start}
+  .hb-art{position:relative;right:auto;top:auto;width:100%;grid-area:a;align-self:center}
+  .hb-text{grid-area:t;max-width:none}.hb-clock{grid-area:c;max-width:420px}.hb-btns{grid-area:b;max-width:420px}
+  .hb-sub{font-size:18px}
+}
+@media (max-width:759px){.hero-b h1{font-size:42px}.hb-text{max-width:64%}.hb-lab{font-size:13px}.hb-art{width:min(44%,190px);top:6px}}
+@media (max-width:759px){.hb-text{max-width:none}.hero-b h1{font-size:38px}.hb-art{width:112px;right:12px;top:52px}.hb-sub{max-width:62%}.hb-lab{font-size:13px}}
+@media (max-width:359px){.hero-b h1{font-size:33px}.hb-art{width:96px}}
