@@ -220,6 +220,57 @@
     if (s.length >= 2) set(2, '◆ Gap to #1: $' + Math.abs(s[0].pnl - s[1].pnl).toFixed(2));
   }
 
+  /* ---------- results archive (winners.html) ---------- */
+  var pct = function (v) { v = Number(v) || 0; return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
+  function renderArchive() {
+    var main = $('[data-res-main]'); if (!main) return;
+    var R = window.PC_RESULTS || { list: [], detail: {} };
+    var id = (location.search.match(/[?&]id=(\d+)/) || [])[1];
+    var pod = $('[data-res-podium]'), back = $('[data-res-back]');
+    var setT = function (sel, t) { $$(sel).forEach(function (el) { el.textContent = t; }); };
+    if (id && R.detail[id]) {
+      var d = R.detail[id], ranked = d.rows.filter(function (x) { return !x.dq; });
+      document.title = 'Battle #' + d.id + ' result – PipClash';
+      setT('[data-res-eyebrow]', 'FINAL RESULT · BATTLE #' + d.id);
+      setT('[data-res-title]', d.date);
+      setT('[data-res-sub]', d.traders + ' traders · final standings');
+      if (back) back.hidden = false;
+      var winners = ranked.filter(function (x) { return x.pnl > 0; }).slice(0, 3);
+      pod.innerHTML = winners.length ? [1, 0, 2].map(function (i) {
+        var x = winners[i]; if (!x) return '<div></div>';
+        var lab = ['WINNER', '2ND', '3RD'][i];
+        return '<div class="res-card' + (i === 0 ? ' win' : '') + '"><span class="res-lab">' + lab + '</span><b class="res-name">' + esc(x.name) +
+          '</b><span class="mono res-pnl">' + money(x.pnl) + '</span><span class="mono res-pct">' + pct(x.pct) + '</span>' +
+          (x.prize ? '<span class="res-prize">Prize <b>$' + x.prize + '</b></span>' : '') + '</div>';
+      }).join('') : '<p class="muted" style="grid-column:1/-1">No winner in this battle – nobody finished in profit.</p>';
+      main.innerHTML = '<div class="card"><div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="r">P&amp;L</th><th class="r c-pct">%</th><th class="r">Prize</th></tr></thead><tbody>' +
+        d.rows.map(function (x) {
+          if (x.dq) return '<tr class="dq-row"><td class="mono muted">–</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td colspan="3" class="r"><span class="dq-badge">DISQUALIFIED</span></td></tr>';
+          return '<tr' + (x.rank === 1 && x.pnl > 0 ? ' class="lb-row first"' : '') + '><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">#' + x.rank + '</td><td style="font-weight:600">' + esc(x.name) +
+            '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '<span class="pct-sm">' + pct(x.pct) + '</span></td><td class="mono r c-pct ' + cls(x.pnl) + '">' + pct(x.pct) +
+            '</td><td class="mono r" style="font-weight:700;color:' + (x.prize ? (x.rank === 1 ? 'var(--gold)' : 'var(--text)') : 'var(--dim)') + '">' + (x.prize ? '$' + x.prize : '–') + '</td></tr>';
+        }).join('') + '</tbody></table></div><div class="sample">P&amp;L counts only trades opened in the battle window. % is profit on the $1,000 starting balance.</div></div>';
+      return;
+    }
+    if (back) back.hidden = true;
+    pod.innerHTML = '';
+    if (!R.list.length) { main.innerHTML = '<div class="card"><div class="empty">The first result will appear here after the first battle.</div></div>'; return; }
+    main.innerHTML = '<div class="res-list">' + R.list.map(function (b) {
+      var top = b.top.map(function (t) {
+        return '<div class="res-top"><span class="res-rk r' + t.rank + '">' + t.rank + '</span><span class="res-tn">' + esc(t.name) + '</span><span class="mono ' + cls(t.pnl) + '">' + money(t.pnl) + '</span></div>';
+      }).join('') || '<div class="muted">No ranked traders</div>';
+      return '<a class="card res-item" href="winners.html?id=' + b.id + '"><div class="res-head"><div><b class="display" style="font-size:19px">' + esc(b.date) + '</b><div class="muted" style="font-size:13px">Battle #' + b.id + ' · ' + b.traders + ' traders</div></div>' +
+        (b.winner ? '' : '<span class="pill" style="font-size:12px;padding:4px 10px">No winner</span>') + '</div>' + top + '<span class="res-view">View full result →</span></a>';
+    }).join('') + '</div>';
+  }
+  function loadArchive() {
+    if (!$('[data-res-main]')) return;
+    var s = document.createElement('script');
+    s.src = 'data/results.js?t=' + Date.now();
+    s.onload = s.onerror = function () { s.remove(); renderArchive(); };
+    document.head.appendChild(s);
+  }
+
   /* ---------- data loading ---------- */
   function load() {
     var s = document.createElement('script');
@@ -230,7 +281,7 @@
   }
   document.addEventListener('DOMContentLoaded', function () {
     var f = $('#find'); if (f) f.addEventListener('input', renderStandings);
-    chart(); sky(); renderAll(); load();
+    chart(); sky(); renderAll(); load(); loadArchive();
     setInterval(tickClock, 1000);
     setInterval(load, 60000);
   });
