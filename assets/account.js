@@ -27,22 +27,51 @@
   }
   function msg(sel, text, bad) { var el = $(sel); if (el) { el.textContent = text || ''; el.className = 'acc-msg' + (bad ? ' bad' : ''); } }
 
-  /* ---------- login ---------- */
+  /* ---------- create account / log in ---------- */
+  var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  var redirect = location.origin + location.pathname;
+  function tab(name) {
+    root.querySelectorAll('[data-tab]').forEach(function (t) { t.setAttribute('aria-selected', String(t.getAttribute('data-tab') === name)); });
+    root.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== name; });
+  }
+  root.querySelectorAll('[data-tab]').forEach(function (t) { t.addEventListener('click', function () { tab(t.getAttribute('data-tab')); }); });
+  tab(location.hash === '#login' ? 'login' : 'signup');
+  function errText(m) {
+    m = String(m || '');
+    if (/rate|too many|security purposes/i.test(m)) return 'Too many emails right now. Please wait a few minutes and try again, or join with Telegram.';
+    if (/signups? not allowed|user not found/i.test(m)) return 'No PipClash account with this email yet. Tap “Create account”.';
+    return m;
+  }
+  function sent(email) { $('[data-sent-to]').textContent = email; $('[data-login-step]').hidden = true; $('[data-sent-step]').hidden = false; }
+  function cleanName(v) { return v.trim().replace(/[^\p{L}\p{N} ]/gu, '').slice(0, 14); }
+  function fullPhone(cc, v) { return cc + v.replace(/\D/g, '').replace(/^0+/, ''); }
+
+  $('[data-signup-form]').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = cleanName($('#su-name').value), email = $('#su-email').value.trim(), phone = fullPhone($('#su-cc').value, $('#su-phone').value);
+    if (name.length < 2) { msg('[data-signup-msg]', 'Please enter your first name (at least 2 letters).', true); return; }
+    if (!EMAIL_RE.test(email)) { msg('[data-signup-msg]', 'Please enter a valid email address.', true); return; }
+    if (!/^\+\d{8,15}$/.test(phone)) { msg('[data-signup-msg]', 'Please enter your mobile number (without the country code).', true); return; }
+    if (!$('#su-agree').checked) { msg('[data-signup-msg]', 'Please confirm you are 18+ and accept the Rules and Terms.', true); return; }
+    var btn = $('[data-signup-btn]'); btn.disabled = true; msg('[data-signup-msg]', 'Creating your account…');
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: redirect, data: { name: name, phone: phone } } }).then(function (r) {
+      btn.disabled = false;
+      if (r.error) { msg('[data-signup-msg]', errText(r.error.message), true); return; }
+      msg('[data-signup-msg]', ''); sent(email);
+    });
+  });
   $('[data-login-form]').addEventListener('submit', function (e) {
     e.preventDefault();
     var email = $('#acc-email').value.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg('[data-login-msg]', 'Please enter a valid email address.', true); return; }
+    if (!EMAIL_RE.test(email)) { msg('[data-login-msg]', 'Please enter a valid email address.', true); return; }
     var btn = $('[data-login-btn]'); btn.disabled = true; msg('[data-login-msg]', 'Sending…');
-    sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.origin + location.pathname } }).then(function (r) {
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: false, emailRedirectTo: redirect } }).then(function (r) {
       btn.disabled = false;
-      if (r.error) { msg('[data-login-msg]', r.error.message.indexOf('rate') >= 0 ? 'Too many emails right now. Please wait a few minutes and try again, or use Telegram.' : r.error.message, true); return; }
-      msg('[data-login-msg]', 'Check your inbox (and spam). Tap the link in the email from PipClash to log in.');
+      if (r.error) { msg('[data-login-msg]', errText(r.error.message), true); return; }
+      msg('[data-login-msg]', ''); sent(email);
     });
   });
-  var GOOGLE_ON = false;   // Google login Supabase mein chalu karne ke baad true
-  var g = $('[data-google]');
-  if (g && !GOOGLE_ON) { g.hidden = true; var or = $('.acc-or'); if (or) or.hidden = true; }
-  if (g) g.addEventListener('click', function () { sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); });
+  $('[data-change-email]').addEventListener('click', function () { $('[data-sent-step]').hidden = true; $('[data-login-step]').hidden = false; });
 
   /* ---------- profile ---------- */
   $('[data-profile-form]').addEventListener('submit', function (e) {
@@ -114,7 +143,18 @@
       if (!user) { show('login'); return; }
       sb.from('profiles').select('name,phone').eq('id', user.id).maybeSingle().then(function (p) {
         profile = p.data;
-        if (!profile) { show('profile'); var gn = (user.user_metadata && (user.user_metadata.given_name || user.user_metadata.name)) || ''; $('#acc-name').value = gn.split(' ')[0] || ''; return; }
+        if (!profile) {
+          var md = user.user_metadata || {};
+          if (md.name && md.phone && !load.tried) {
+            load.tried = true;
+            sb.from('profiles').insert({ id: user.id, name: cleanName(md.name), phone: md.phone }).then(function (x) {
+              if (x.error) { show('profile'); $('#acc-name').value = md.name; msg('[data-profile-msg]', x.error.code === '23505' ? 'This phone number already has a PipClash account. One person = one account.' : 'Please check your details.', true); return; }
+              load();
+            });
+            return;
+          }
+          show('profile'); $('#acc-name').value = (md.name || md.given_name || '').split(' ')[0]; return;
+        }
         $('[data-hello]').textContent = profile.name;
         $('[data-who]').textContent = (user.email || '') + ' · phone ending ' + profile.phone.slice(-3);
         show('home');
