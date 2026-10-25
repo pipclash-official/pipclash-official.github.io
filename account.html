@@ -16,18 +16,18 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0B1120">
-<link rel="icon" href="assets/favicon.svg?v=24" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=24" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=24" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=24">
+<link rel="icon" href="assets/favicon.svg?v=26" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=26" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=26" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=26">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=24">
-<script src="assets/site.js?v=24" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=26">
+<script src="assets/site.js?v=26" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/account.js?v=24" defer></script>
+<script src="assets/account.js?v=26" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -47,27 +47,76 @@
 </header>
 <main>
 
-<section class="section first"><div class="wrap narrow acc" data-acc>
+<section class="section first"><div class="wrap acc" data-acc>
   <div data-view="loading"><p class="muted2">Loading…</p></div>
 
   <div data-view="login" hidden>
-    <div class="card acc-card">
-      <h1>Join PipClash</h1>
-      <p class="muted2">Log in to join the free daily battle and get your MT5 login right here. No password needed.</p>
-      <button class="btn btn-lg btn-white acc-google" type="button" data-google><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.2-2.1 3.5-5.1 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8l4-3.1z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9z"/></svg>Continue with Google</button>
-      <div class="acc-or"><span>or use your email</span></div>
-      <form data-login-form novalidate>
-        <label for="acc-email">Email</label>
-        <input id="acc-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
-        <button class="btn btn-lg" type="submit" data-login-btn>Email me a login link</button>
-        <p class="acc-msg" data-login-msg role="status"></p>
-      </form>
-      <p class="muted2 acc-alt">Prefer Telegram? <a href="https://t.me/PipClashBot">Join with @PipClashBot</a> – same battle, same prizes.</p>
+    <div class="auth">
+    <aside class="auth-art" aria-hidden="true">
+      <img src="assets/3d/trophy-only.webp" width="720" height="720" alt="">
+      <span class="auth-kick">Mon – Fri · <span data-t="trade_start">4:30 PM</span> – <span data-t="trade_end">7:30 PM</span> UAE</span>
+      <p class="auth-big">Win <b data-prize="1">$200</b> today</p>
+      <ul class="auth-pts">
+        <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Free entry, no deposit</li>
+        <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Fresh $1,000 MT5 demo account</li>
+        <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Top 10 win prizes every battle</li>
+      </ul>
+    </aside>
+    <div class="auth-form">
+      <div data-login-step>
+        <div class="auth-tabs" role="tablist"><button type="button" role="tab" data-tab="signup" aria-selected="true">Create account</button><button type="button" role="tab" data-tab="login" aria-selected="false">Log in</button></div>
+        <div data-pane="signup">
+          <h1>Create your free account</h1>
+          <p class="auth-sub">One account for every daily battle. No password needed – we email you a link.</p>
+          <form data-signup-form novalidate>
+            <label for="su-name">First name</label>
+            <input id="su-name" type="text" autocomplete="given-name" maxlength="14" placeholder="e.g. Ali" required>
+            <label for="su-email">Email address</label>
+            <div class="auth-field"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><input id="su-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required></div>
+            <label for="su-phone">Mobile number</label>
+            <div class="acc-phone"><select id="su-cc" aria-label="Country code"><option value="+971">🇦🇪 +971</option><option value="+91">🇮🇳 +91</option><option value="+92">🇵🇰 +92</option><option value="+966">🇸🇦 +966</option><option value="+974">🇶🇦 +974</option><option value="+968">🇴🇲 +968</option><option value="+973">🇧🇭 +973</option><option value="+965">🇰🇼 +965</option></select><input id="su-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="50 123 4567" required></div>
+            <div class="acc-check"><input id="su-agree" type="checkbox"><label for="su-agree">I am 18 or older and I accept the <a href="rules.html">Rules</a> and <a href="legal.html">Terms</a>.</label></div>
+            <button class="btn btn-lg auth-main" type="submit" data-signup-btn>Create free account</button>
+            <p class="acc-msg" data-signup-msg role="status"></p>
+          </form>
+          <p class="auth-fine">Your battle name will be your first name and the last 3 digits of your phone, for example “Ali-210”. One person, one account.</p>
+        </div>
+        <div data-pane="login" hidden>
+          <h1>Welcome back</h1>
+          <p class="auth-sub">Enter the email you signed up with. We email you a login link.</p>
+          <form data-login-form novalidate>
+            <label for="acc-email">Email address</label>
+            <div class="auth-field"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><input id="acc-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required></div>
+            <button class="btn btn-lg auth-main" type="submit" data-login-btn>Email me a login link</button>
+            <p class="acc-msg" data-login-msg role="status"></p>
+          </form>
+        </div>
+        <div class="acc-or"><span>or</span></div>
+        <a class="btn btn-lg btn-ghost auth-tg" href="https://t.me/PipClashBot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/></svg>Use Telegram instead</a>
+      </div>
+      <div data-sent-step hidden class="auth-sent">
+        <div class="auth-mail"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+        <h1>Check your email</h1>
+        <p class="auth-sub">We sent a login link to <b data-sent-to></b>. Open it on this device to log in. Check spam if you don’t see it.</p>
+        <button class="btn btn-lg btn-ghost" type="button" data-change-email>Use a different email</button>
+      </div>
+    </div>
     </div>
   </div>
 
   <div data-view="profile" hidden>
-    <div class="card acc-card">
+    <div class="auth">
+    <aside class="auth-art auth-art-sm" aria-hidden="true">
+      <img src="assets/3d/trophy-only.webp" width="720" height="720" alt="">
+      <span class="auth-kick">Mon – Fri · <span data-t="trade_start">4:30 PM</span> – <span data-t="trade_end">7:30 PM</span> UAE</span>
+      <p class="auth-big">Win <b data-prize="1">$200</b> today</p>
+      <ul class="auth-pts">
+        <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Free entry, no deposit</li>
+        <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Fresh $1,000 MT5 demo account</li>
+        <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Top 10 win prizes every battle</li>
+      </ul>
+    </aside>
+    <div class="auth-form">
       <h1>Your details</h1>
       <p class="muted2">One person, one account. Your first name and the last 3 digits of your phone become your battle name, for example “Ali-210”.</p>
       <form data-profile-form novalidate>
@@ -80,6 +129,7 @@
         <button class="btn btn-lg" type="submit">Save and continue</button>
         <p class="acc-msg" data-profile-msg role="status"></p>
       </form>
+    </div>
     </div>
   </div>
 
