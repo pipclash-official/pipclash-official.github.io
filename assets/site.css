@@ -286,3 +286,107 @@ th{font-size:13px}
 .terminal-in{box-shadow:none}
 @media (max-width:960px) and (min-width:601px){.coin{top:-48px;right:12px}}
 @media (max-width:600px){.res-lab,.res-pct,.res-prize,.pct-sm{font-size:13px}.toasts-l .toast{font-size:12px}}
+
+/* ================= v16: app shell (side menu) + 3D ================= */
+.shell{min-height:100vh}
+.snav{position:fixed;top:0;bottom:0;left:0;width:264px;z-index:40;background:#0E1630;padding:20px 14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;border-right:1px solid #1A2645}
+.sn-logo{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;background:#17223A;text-decoration:none;margin-bottom:10px}
+.sn-logo b{font-family:var(--f-display);font-size:21px;letter-spacing:.08em;color:var(--text)}.sn-logo b span{color:#60A5FA}
+.sn-list{display:flex;flex-direction:column;gap:2px}
+.sn-sec{font-size:12px;letter-spacing:.14em;color:#7C89A6;margin:16px 12px 6px;font-weight:700}
+.sn-it{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;font-size:15px;color:#C9D2E3;font-weight:600;text-decoration:none;min-height:46px}
+.sn-it svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sn-it:hover{background:#17223A;color:#fff}
+.sn-it[aria-current="page"]{background:linear-gradient(100deg,#1D4ED8,#3730A3);color:#fff}
+.sn-tag{margin-left:auto;font-size:11px;background:#B91C1C;color:#fff;padding:2px 8px;border-radius:999px;font-weight:800;letter-spacing:.04em}
+.sn-foot{margin-top:auto;padding:18px 14px 6px;font-size:13px;color:#7C89A6;line-height:1.6}.sn-foot a{color:#A3AEC4}
+.mcol{margin-left:264px;min-width:0}
+.tbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;padding:12px max(24px,env(safe-area-inset-right)) 12px max(24px,env(safe-area-inset-left));background:rgba(11,17,32,.92);backdrop-filter:blur(10px)}
+.mbtn{display:none;width:44px;height:44px;border-radius:14px;background:#111A2E;border:1px solid #22304D;place-items:center;cursor:pointer;flex:none}
+.mbtn svg,.tjoin svg{width:20px;height:20px;stroke:#EEF2F8;fill:none;stroke-width:2;stroke-linecap:round}
+.tlogo{display:none;flex:none}
+.tpill{flex:1;min-width:0;height:44px;border-radius:999px;background:#111A2E;border:1px solid #22304D;display:flex;align-items:center;gap:8px;padding:0 16px;font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tpill .mono{font-size:13px}
+.tjoin{flex:none;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:999px;background:var(--btn);color:#fff;font-weight:700;text-decoration:none;font-size:15px}
+.tjoin svg{fill:#fff;stroke:none}
+.tjoin:hover{background:var(--btn-h)}
+.scrim{position:fixed;inset:0;z-index:35;background:rgba(5,8,15,.6)}
+.top{display:none}
+.section.first{padding-top:20px}
+@media (max-width:1023px){
+  .snav{transform:translateX(-102%);transition:transform .22s ease;width:min(300px,84vw);box-shadow:none}
+  body.menu-open .snav{transform:none}
+  body.menu-open{overflow:hidden}
+  .mcol{margin-left:0}
+  .mbtn{display:grid}
+  .tjoin{width:44px;padding:0;justify-content:center}.tjoin span{display:none}
+}
+@media (max-width:600px){.tbar{padding:10px 16px;gap:8px}.tpill{padding:0 12px;font-size:13px}}
+@media (min-width:1024px){.scrim{display:none!important}}
+
+/* hero card with 3D trophy */
+.hero-card{position:relative;overflow:hidden;border-radius:26px;background:linear-gradient(140deg,#1E3A8A,#1D4ED8 50%,#3730A3);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center;gap:10px;padding:44px 44px 44px 48px}
+.hero-card h1{font-family:var(--f-display);font-size:clamp(40px,5.2vw,66px);line-height:1.02;color:#fff;letter-spacing:-.005em}
+.hero-card h1 em{font-style:normal;color:#FDE68A}
+.hero-card .lede{color:#DCE6FF;font-size:18px;line-height:1.55;max-width:520px;margin-top:16px}
+.hc-text{position:relative;z-index:2;display:flex;flex-direction:column}
+.hc-clock{display:flex;flex-direction:column;gap:8px;margin-top:22px}
+.hero-card .clock-label{color:#DCE6FF}
+.hero-card .clock{gap:10px}
+.hero-card .clock div{background:rgba(5,10,30,.32);border:0;border-radius:16px;min-width:96px}
+.hero-card .clock span{color:#D6DEFF}
+.hc-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.btn-white{background:#fff;color:#1A2A6C}.btn-white:hover{background:#E8EEFF;color:#1A2A6C}
+.btn-line{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.65)}.btn-line:hover{background:rgba(255,255,255,.1)}
+.hc-art{position:relative;aspect-ratio:4/3;width:100%}
+.hc-art img,.hc-art canvas{position:absolute;inset:0;width:100%;height:100%}
+.hc-art canvas{opacity:0;transition:opacity .4s}
+.hc-art.live3d canvas{opacity:1}.hc-art.live3d img{opacity:0;transition:opacity .4s}
+@media (max-width:900px){
+  .hero-card{grid-template-columns:minmax(0,1fr);padding:8px 20px 24px;gap:0;border-radius:24px}
+  .hc-art{order:-1;margin:0 -10px;aspect-ratio:16/10}
+  .hero-card h1{font-size:clamp(36px,10.4vw,46px)}
+  .hero-card .lede{font-size:16px;margin-top:12px}
+  .hero-card .clock div{min-width:0;flex:1}
+  .hc-btns .btn{flex:1;justify-content:center}
+}
+
+/* today chips */
+.today{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.today-h{display:flex;align-items:center;gap:10px}.today-h h2{font-size:20px;font-family:var(--f-body);font-weight:800}
+.tag-free{background:#C2410C;color:#fff;font-weight:800;font-size:12px;padding:4px 10px;border-radius:8px;letter-spacing:.04em}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:#1E2A47;color:#C7D7FF;padding:8px 13px;border-radius:999px;font-size:14px;font-weight:600}
+.card-f{padding:14px 20px}
+
+/* medals (3D renders) */
+.medal{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A6,#D9A531 60%,#8A5E14);color:transparent;font-size:0;vertical-align:middle;background-size:cover}
+.medal.m1{background-image:url(3d/medal-1.png)}
+.medal.m2{background-image:url(3d/medal-2.png),radial-gradient(circle at 35% 30%,#fff,#AEB7C6)}
+.medal.m3{background-image:url(3d/medal-3.png),radial-gradient(circle at 35% 30%,#F3C8A0,#9A5F33)}
+.res-top .medal{width:26px;height:26px;flex:none}
+
+/* purse */
+.purse{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:10px;padding:28px 30px;background:linear-gradient(140deg,#2B2007,#141008 60%,#111A2E);border-color:#4A3A12}
+.purse h2{color:#F5C451}.purse-t{display:flex;flex-direction:column;gap:10px}.purse-t p{line-height:1.6}.purse-t b{color:var(--text)}
+.purse-img{width:100%;height:auto}
+@media (max-width:900px){.purse{grid-template-columns:minmax(0,1fr);padding:22px 18px}}
+
+/* 3 steps with 3D icons */
+.step3{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.step3 img{width:96px;height:auto}
+.step3 h3{font-size:20px;margin-bottom:6px}
+.step3 p{line-height:1.55}
+@media (max-width:600px){.step3{flex-direction:row;align-items:center;padding:14px 16px;gap:12px}.step3 img{width:72px;flex:none}.step3 h3{font-size:18px}}
+@media (max-width:600px){.cta-card{padding:26px 20px!important}.cta-card .btn{flex:1;justify-content:center}}
+@media (max-width:600px){.hc-btns{gap:10px}.hc-btns .btn{padding:15px 10px;font-size:16px;white-space:nowrap}}
+/* v17 fixes */
+.sn-it[aria-current="page"]{background:#1D4ED8}
+.qnav{display:none}
+@media (max-width:1023px){
+  .qnav{display:flex;gap:8px;overflow-x:auto;padding:2px max(24px,env(safe-area-inset-right)) 10px max(24px,env(safe-area-inset-left));scrollbar-width:none;position:sticky;top:68px;z-index:29;background:rgba(11,17,32,.92);backdrop-filter:blur(10px)}
+  .qnav::-webkit-scrollbar{display:none}
+  .qnav a{flex:none;padding:9px 14px;border-radius:999px;background:#111A2E;border:1px solid #22304D;color:#C9D2E3;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap}
+  .qnav a[aria-current="page"]{background:#1D4ED8;border-color:#1D4ED8;color:#fff}
+}
+@media (max-width:600px){.qnav{padding:2px 16px 10px;top:64px}}
