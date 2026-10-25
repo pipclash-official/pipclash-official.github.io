@@ -196,3 +196,22 @@ details p{padding:0 20px 18px;color:var(--muted2);line-height:1.6}
   main [style*="height:440px"]{height:auto!important;min-height:200px;width:100%!important;max-width:260px}
   .sky{display:none}.beam{display:none}
 }
+/* ---------- phone polish 2: header, spacing, taps ---------- */
+@media (max-width:600px){
+  .top{position:sticky;top:0}
+  .top .wrap{padding-top:10px;padding-bottom:0;gap:10px}
+  .nav{gap:6px;padding-bottom:12px;overflow:visible}
+  .nav a{flex:1 1 auto;text-align:center;padding:8px 4px;border:1px solid var(--line2);border-radius:999px;white-space:nowrap;font-size:13px;background:rgba(18,26,44,.7)}
+  .nav a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .section{padding-top:34px}
+  .hero{padding-bottom:24px}
+  .card .btn,.stat~.btn{width:100%;justify-content:center}
+  .card [style*="flex-wrap:wrap"]>.btn{flex:1 1 100%}
+  .foot{margin-top:40px}
+  .foot .wrap span a{display:inline-block;padding:8px 2px}
+  #find{width:100%!important}
+  .card-h label{flex:1 1 100%}
+  h1{font-size:40px}
+  .stat .v{font-size:26px;white-space:nowrap}
+  .stat{padding:16px}
+}
