@@ -110,10 +110,11 @@
   function renderStats() {
     var b = (D && D.battle) || {};
     var set = function (k, v) { $$('[data-stat="' + k + '"]').forEach(function (el) { el.textContent = v; }); };
-    set('players', b.players != null ? b.players : '–');
-    set('inprofit', b.in_profit != null ? b.in_profit : '–');
-    set('update', b.update_no ? b.update_no + ' of ' + (b.updates_total || 7) : '–');
-    set('next', b.status === 'live' && b.next_update_utc && new Date(b.next_update_utc) > Date.now() - 5 * 60e3 ? uae(b.next_update_utc) : (b.status === 'review' ? 'Final ' + uaeHM(sched().result_at) : '–'));
+    var on = b.status === 'live' || b.status === 'review';
+    set('players', b.players != null && b.status !== 'ended' ? b.players : 0);
+    set('inprofit', on && b.in_profit != null ? b.in_profit : 0);
+    set('update', on && b.update_no ? b.update_no + ' of ' + (b.updates_total || 7) : '0 of 7');
+    set('next', b.status === 'live' && b.next_update_utc && new Date(b.next_update_utc) > Date.now() - 5 * 60e3 ? uae(b.next_update_utc) : (b.status === 'review' ? 'Final ' + uaeHM(sched().result_at) : uaeHM(sched().trade_start)));
     set('battle', b.id ? '#' + b.id : '');
     var late = D && D.updated_utc && b.status === 'live' && (Date.now() - new Date(D.updated_utc)) > 45 * 60e3;
     set('updated', D && D.updated_utc ? (late ? 'Last update ' + uae(D.updated_utc) + ' UAE · next one is late' : 'Updated ' + uae(D.updated_utc) + ' UAE') : 'Waiting for data');
