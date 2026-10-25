@@ -95,7 +95,7 @@
         var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
         var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '<span class="muted">–</span>');
         return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">#' + r.rank + '</td><td style="font-weight:600">' + esc(r.name) +
-          (compact ? ' <span class="mono" style="font-size:12px">' + mv + '</span>' : ' <span class="mono" style="font-size:12px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
+          (compact ? ' <span class="mono" style="font-size:13px">' + mv + '</span>' : ' <span class="mono" style="font-size:13px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
           (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
       }).join('');
     });
@@ -106,7 +106,7 @@
       var items = feedItems().slice(0, +box.getAttribute('data-limit') || 12);
       box.innerHTML = items.length ? items.map(function (f) {
         var c = f.kind === 'profit' ? 'var(--up2)' : (f.kind === 'loss' ? 'var(--down)' : (f.kind === 'start' ? 'var(--gold)' : 'var(--accent2)'));
-        return '<div style="display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:12px 20px;border-bottom:1px solid #18223A;font-size:14px"><span class="mono" style="font-size:12px;color:var(--dim)">' + uae(f.t_utc) + '</span><span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span></div>';
+        return '<div style="display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:12px 20px;border-bottom:1px solid #18223A;font-size:14px"><span class="mono" style="font-size:13px;color:var(--dim)">' + uae(f.t_utc) + '</span><span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span></div>';
       }).join('') : '<div class="empty">The feed starts when the battle begins.</div>';
     });
     $$('[data-ticker]').forEach(function (box) {
@@ -165,7 +165,7 @@
     $$('[data-past]').forEach(function (box) {
       var past = (D && D.past) || [];
       box.innerHTML = past.length ? past.map(function (p) {
-        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:13px 20px;border-bottom:1px solid #18223A"><div style="display:flex;flex-direction:column"><span style="font-weight:700' + (p.winner ? '' : ';color:var(--muted)') + '">' + (p.winner ? esc(p.winner) : 'No winner') + '</span><span style="font-size:12px;color:var(--dim)">' + esc(p.date) + ' · Battle #' + p.id + '</span></div><span class="mono ' + (p.winner ? 'up' : 'muted') + '" style="font-weight:700;align-self:center">' + (p.winner ? money(p.pnl) : '–') + '</span></div>';
+        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:13px 20px;border-bottom:1px solid #18223A"><div style="display:flex;flex-direction:column"><span style="font-weight:700' + (p.winner ? '' : ';color:var(--muted)') + '">' + (p.winner ? esc(p.winner) : 'No winner') + '</span><span style="font-size:13px;color:var(--dim)">' + esc(p.date) + ' · Battle #' + p.id + '</span></div><span class="mono ' + (p.winner ? 'up' : 'muted') + '" style="font-weight:700;align-self:center">' + (p.winner ? money(p.pnl) : '–') + '</span></div>';
       }).join('') : '<div class="empty">Past champions appear here.</div>';
     });
   }
@@ -279,7 +279,7 @@
         return '<div class="res-top"><span class="res-rk r' + t.rank + '">' + t.rank + '</span><span class="res-tn">' + esc(t.name) + '</span><span class="mono ' + cls(t.pnl) + '">' + money(t.pnl) + '</span></div>';
       }).join('') || '<div class="muted">No ranked traders</div>';
       return '<a class="card res-item" href="winners.html?id=' + b.id + '"><div class="res-head"><div><b class="display" style="font-size:19px">' + esc(b.date) + '</b><div class="muted" style="font-size:13px">Battle #' + b.id + ' · ' + b.traders + ' traders</div></div>' +
-        (b.winner ? '' : '<span class="pill" style="font-size:12px;padding:4px 10px">No winner</span>') + '</div>' + top + '<span class="res-view">View full result →</span></a>';
+        (b.winner ? '' : '<span class="pill" style="font-size:13px;padding:4px 10px">No winner</span>') + '</div>' + top + '<span class="res-view">View full result →</span></a>';
     }).join('') + '</div>';
   }
   function loadArchive() {
