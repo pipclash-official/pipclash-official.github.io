@@ -111,7 +111,9 @@
     });
     $$('[data-ticker]').forEach(function (box) {
       var items = feedItems().slice(0, 8);
-      if (!items.length) items = [{ text: 'Free daily battle · ' + uaeHM(sched().trade_start) + ' – ' + uaeHM(sched().trade_end) + ' UAE', kind: 'start' }, { text: 'Same $1,000 for everyone · one winner', kind: 'info' }, { text: 'Join on Telegram: @PipClashBot', kind: 'info' }];
+      var st = D && D.battle && D.battle.status;
+      var bar = box.parentElement; if (bar) bar.hidden = !(items.length && (st === 'live' || st === 'review'));   // patti sirf battle ke time
+      if (!items.length) { box.innerHTML = ''; return; }
       var html = items.map(function (f) { var c = f.kind === 'profit' ? 'var(--up2)' : (f.kind === 'loss' ? 'var(--down)' : 'var(--accent2)'); return '<span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span>'; }).join('');
       box.innerHTML = html + html;
     });
