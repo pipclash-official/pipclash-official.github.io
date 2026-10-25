@@ -14,16 +14,16 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0B1120">
-<link rel="icon" href="assets/favicon.svg?v=14" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=14" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=14" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=14">
+<link rel="icon" href="assets/favicon.svg?v=15" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=15" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=15" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=15">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Bodoni+Moda:ital,opsz,wght@1,6..96,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=14">
-<script src="assets/site.js?v=14" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=15">
+<script src="assets/site.js?v=15" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -41,8 +41,8 @@
       <h1>Same $1,000.<br>Same 3 hours.<br><em>One winner.</em></h1>
       <p class="lede">The free daily MT5 demo trading battle in the UAE. A fresh account for every trader, the same balance, the same clock. Best profit at <span data-t="trade_end">7:30 PM</span> UAE wins.</p>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <span class="eyebrow" data-clock-label style="letter-spacing:.16em;text-transform:uppercase">Trading starts in</span>
-        <div class="clock" data-clock><div><b>00</b><span>HRS</span></div><div><b>00</b><span>MIN</span></div><div><b>00</b><span>SEC</span></div></div>
+        <span class="clock-label" data-clock-label>Trading starts in</span>
+        <div class="clock" data-clock><div><b>00</b><span>hours</span></div><div><b>00</b><span>minutes</span></div><div><b>00</b><span>seconds</span></div></div>
       </div>
       <div style="display:flex;gap:14px;flex-wrap:wrap">
         <a class="btn btn-lg" href="https://t.me/PipClashBot">Claim your free seat</a>
@@ -78,7 +78,7 @@
   <div class="card"><div class="card-h"><b>LIVE STANDINGS</b><span class="live-chip" data-live-chip hidden></span></div>
     <div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings data-limit="5" data-compact></tbody></table></div>
     <div style="padding:14px 20px;border-top:1px solid var(--line)"><a href="arena.html">Full standings →</a></div></div>
-  <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:18px;background:linear-gradient(120deg,rgba(59,130,246,.10),var(--surface) 55%)">
+  <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:18px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="font-size:30px">Title fight</h2><span class="mono muted" style="font-size:12px">#1 vs #2</span></div>
     <div class="duel" data-duel></div>
   </div>
@@ -121,8 +121,8 @@
 </tbody></table></div></div></section>
 
 <section class="section"><div class="wrap">
-  <div class="card" style="padding:40px 34px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;background:linear-gradient(110deg,#0F1A33,var(--surface) 50%,#13254A)">
-    <div style="display:flex;flex-direction:column;gap:8px;max-width:640px"><h2 style="font-size:34px">Your seat for today’s battle is free.</h2><p class="muted2">Entry closes at <span data-t="join_close">4:00 PM</span> UAE.</p></div>
+  <div class="card cta-card" style="padding:40px 34px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:8px;max-width:640px"><h2 class="cta-h">Today’s seat is free.</h2><p class="muted2">Entry closes at <span data-t="join_close">4:00 PM</span> UAE.</p></div>
     <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn btn-lg" href="https://t.me/PipClashBot">Join @PipClashBot</a><a class="btn btn-lg btn-ghost" href="https://t.me/pipclash_official">Follow the channel</a></div>
   </div>
 </div></section>
