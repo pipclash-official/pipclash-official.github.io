@@ -9,8 +9,8 @@ export const M = {
   dark: () => new THREE.MeshStandardMaterial({ color: 0x1A2340, metalness: .4, roughness: .5 }),
 };
 
-export function setup(cv, w, h, fov = 30) {
-  const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
+export function setup(cv, w, h, fov = 30, keep = false) {
+  const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: keep });
   r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); r.setSize(w, h, false);
   r.toneMapping = THREE.ACESFilmicToneMapping; r.outputColorSpace = THREE.SRGBColorSpace;
   const s = new THREE.Scene(); const pm = new THREE.PMREMGenerator(r);
@@ -52,7 +52,7 @@ export function trophy(prize = '$200') {
 }
 
 export function coin(r = .34) {
-  return new THREE.Mesh(new THREE.CylinderGeometry(r, r, .07, 48), M.gold());
+  return new THREE.Mesh(new THREE.CylinderGeometry(r, r, .07, 48), new THREE.MeshStandardMaterial({ color: 0xE9B53F, metalness: 1, roughness: .32 }));
 }
 
 function prizeText() {
