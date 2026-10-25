@@ -169,3 +169,30 @@ details p{padding:0 20px 18px;color:var(--muted2);line-height:1.6}
 @media (max-width:960px){.arena-stage{height:500px}}
 @media (max-width:600px){.arena-stage{height:550px}}
 .arena-hero .sky{bottom:60px;height:180px}.arena-hero .beam{bottom:58px}
+/* ---------- phone polish ---------- */
+@media (max-width:600px){
+  .stage,.arena-stage{height:auto!important;perspective:none;padding-top:72px}
+  .arena-stage{padding-top:20px}
+  .terminal{position:relative;top:0;right:0;left:0;animation:none}
+  .terminal-in{transform:none!important;box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 1px rgba(59,130,246,.12)}
+  .coin{width:86px;height:86px;top:-6px;right:8px;z-index:4;transform:none!important}
+  .coin .ring{display:none}
+  .coin .face span:first-child{font-size:22px!important}.coin .face span:last-child{font-size:6px!important;letter-spacing:.18em!important}
+  .coin .back span{font-size:10px!important}
+  .toasts-l{left:22px;top:226px;bottom:auto;transform:none!important}
+  .arena-stage .toasts-l{top:174px}
+  .hilo{right:-54px;font-size:9px}
+  .toasts-l .toast{font-size:11px;padding:6px 9px;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+  .toasts-l .toast+.toast,.toasts-r{display:none}
+  .chart{margin:0 58px 0 10px}.vol{margin:6px 58px 0 10px}
+  .hero{padding-top:36px}
+  .hero .btn-lg{width:100%;justify-content:center}
+  .clock div{min-width:0;flex:1}
+  .step{transform:none!important}
+  .podium{flex-wrap:nowrap;gap:8px}
+  .podium>div{width:31%!important}
+  .podium span{font-size:22px!important}
+  .podium .blk{font-size:34px!important}
+  main [style*="height:440px"]{height:auto!important;min-height:200px;width:100%!important;max-width:260px}
+  .sky{display:none}.beam{display:none}
+}
