@@ -275,3 +275,14 @@ details p{padding:0 20px 18px;color:var(--muted2);line-height:1.6}
 
 .hero .sky{bottom:0;height:170px;opacity:.16}
 .arena-hero .sky{bottom:0;height:150px}
+
+/* ---- taste pass: readable text, calm surfaces ---- */
+th{font-size:13px}
+.sample,.res-lab,.live-chip,.live-chip b,.card-h .live-chip b,.res-rk{font-size:13px}
+.clock span{font-size:13px;letter-spacing:.02em}
+.clock-label{font-size:14px;color:var(--muted);font-weight:500}
+.cta-card{background:var(--surface)}
+.cta-h{font-size:clamp(26px,4.6vw,34px)}
+.terminal-in{box-shadow:none}
+@media (max-width:960px) and (min-width:601px){.coin{top:-48px;right:12px}}
+@media (max-width:600px){.res-lab,.res-pct,.res-prize,.pct-sm{font-size:13px}.toasts-l .toast{font-size:12px}}
