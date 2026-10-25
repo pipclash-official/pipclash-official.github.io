@@ -132,9 +132,14 @@
     var b = (D && D.battle) || {};
     var set = function (k, v) { $$('[data-stat="' + k + '"]').forEach(function (el) { el.textContent = v; }); };
     var on = b.status === 'live' || b.status === 'review';
-    set('players', b.players != null && b.status !== 'ended' ? b.players : 0);
-    set('inprofit', on && b.in_profit != null ? b.in_profit : 0);
-    set('update', on && b.update_no ? b.update_no + ' of ' + (b.updates_total || 7) : '0 of 7');
+    var done = b.status === 'ended', st = standings();
+    set('players', b.players != null && (on || done) ? b.players : 0);
+    set('inprofit', on && b.in_profit != null ? b.in_profit : (done ? st.filter(function (r) { return r.pnl > 0; }).length : 0));
+    set('update', on && b.update_no ? b.update_no + ' of ' + (b.updates_total || 7) : (done ? 'Final' : '0 of 7'));
+    $$('[data-stand-title]').forEach(function (el) {
+      if (!el.hasAttribute('data-base')) el.setAttribute('data-base', el.textContent);
+      el.textContent = done && st.length ? 'Last battle' + (b.end_utc ? ' · ' + new Date(b.end_utc).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Dubai' }) : '') : el.getAttribute('data-base');
+    });
     set('next', b.status === 'live' && b.next_update_utc && new Date(b.next_update_utc) > Date.now() - 5 * 60e3 ? uae(b.next_update_utc) : (b.status === 'review' ? 'Final ' + uaeHM(sched().result_at) : uaeHM(sched().trade_start)));
     set('battle', b.id ? '#' + b.id : '');
     var late = D && D.updated_utc && b.status === 'live' && (Date.now() - new Date(D.updated_utc)) > 45 * 60e3;
