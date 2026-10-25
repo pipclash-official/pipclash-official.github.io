@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Live Arena – PipClash</title>
+<meta name="description" content="Live standings, title fight and battle feed for today's PipClash battle.">
+<meta property="og:title" content="Live Arena – PipClash">
+<meta property="og:description" content="Live standings, title fight and battle feed for today's PipClash battle.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PipClash">
+<meta property="og:image" content="assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0B1120">
+<link rel="icon" href="assets/favicon.svg?v=5" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=5" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=5" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=5">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Bodoni+Moda:ital,opsz,wght@1,6..96,700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="assets/site.css?v=5">
+<script src="assets/site.js?v=5" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html"><svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#3B82F6"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#3EE6A8" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#3EE6A8"/></svg><b>PIP<span>CLASH</span></b></a>
+  <nav class="nav" aria-label="Main"><a href="arena.html" aria-current="page">Live Arena</a><a href="winners.html">Winners</a><a href="rules.html">Rules</a><a href="guide.html">MT5 Guide</a></nav>
+  <a class="btn" href="https://t.me/PipClashBot">Join on Telegram</a>
+</div></header>
+<main>
+
+<section class="hero arena-hero">
+  <div class="floor" aria-hidden="true"></div>
+  <div class="sky" data-sky aria-hidden="true"></div><div class="beam" aria-hidden="true"></div>
+  <div class="wrap hero-grid">
+    <div style="display:flex;flex-direction:column;gap:20px;position:relative;z-index:3">
+      <span class="pill" data-status style="align-self:flex-start"><span class="dot"></span>Daily battle</span>
+      <h1>Live Arena</h1>
+      <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;border-radius:14px;align-self:flex-start;min-width:300px"><span class="muted" data-clock-label style="font-size:13px">Trading starts in</span><span class="mono" data-clock style="font-size:30px;font-weight:700">00:00:00</span></div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+        <div class="stat"><div class="k">Traders</div><div class="v" data-stat="players">–</div></div>
+        <div class="stat"><div class="k">In profit</div><div class="v up" data-stat="inprofit">–</div></div>
+        <div class="stat"><div class="k">Rank update</div><div class="v" data-stat="update">–</div></div>
+        <div class="stat" style="border-color:var(--accent);background:var(--surface2)"><div class="k">Next update</div><div class="v acc" data-stat="next">–</div></div>
+      </div>
+    </div>
+    <div class="stage arena-stage" aria-hidden="true">
+      <div class="terminal"><div class="terminal-in">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap">
+          <span><b class="display" style="font-size:18px">XAUUSD</b> <b class="mono" data-px style="font-size:20px">0</b> <span class="mono" data-chg style="font-size:13px"></span></span>
+          <span class="mono" style="display:flex;gap:4px;font-size:12px;color:var(--muted)"><span style="padding:4px 8px">M1</span><span style="padding:4px 8px;border-radius:6px;background:#1E2D4F;color:var(--accent2)">M5</span><span style="padding:4px 8px">M15</span><span style="padding:4px 8px">H1</span></span>
+        </div>
+        <div class="chart" data-chart></div>
+        <div class="vol" data-vol></div>
+        <div class="orders">
+          <div class="sell" style="background:rgba(255,107,122,.08);border:1px solid rgba(255,107,122,.45)"><b class="down" style="font-size:14px">SELL</b><b class="mono" data-bid style="font-size:17px">0</b></div>
+          <div class="buy" style="background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.5)"><b class="up" style="font-size:14px">BUY</b><b class="mono" data-ask style="font-size:17px">0</b></div>
+        </div>
+        <div style="padding:0 18px 12px;font-size:11px;color:var(--dim)">Demo chart · sample prices</div>
+      </div></div>
+      <div class="toasts-l" data-par><div class="toast t-up" data-toast="0">▲ Trader closed XAUUSD +$38.20</div><div class="toast t-acc" data-toast="1" style="animation-delay:2s">⇧ Trader climbs to #2</div></div>
+      <div class="toasts-r" data-par><div class="toast t-gap" data-toast="2" style="animation-delay:4s">◆ Gap to #1: $85.35</div></div>
+    </div>
+  </div>
+</section>
+<section class="section" style="padding-top:24px"><div class="wrap side">
+  <div class="card">
+    <div class="card-h"><b>Standings</b>
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);font-size:14px">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="#94A0B8" stroke-width="2"/><path d="m20 20-4-4" stroke="#94A0B8" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="muted" style="position:absolute;left:-9999px">Find your name</span><input id="find" type="search" placeholder="Find your name" style="background:transparent;border:0;outline:none;color:var(--text);font:inherit;width:160px"></label></div>
+    <div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="c-move">Move</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings></tbody></table></div>
+    <div class="sample">P&amp;L counts only trades opened after <span data-t="trade_start">4:30 PM</span> UAE. Disqualified players are not ranked. <span data-stat="updated"></span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--surface2),var(--surface))"><b class="display" style="font-size:18px">Title fight</b><div class="duel" data-duel style="grid-template-columns:minmax(0,1fr)"></div></div>
+    <div class="card"><div class="card-h"><b>Battle feed</b></div><div data-feed data-limit="12"></div></div>
+    <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:10px"><b class="display" style="font-size:18px">Not in today’s battle?</b><p class="muted2" style="font-size:14px">Entry for the next battle opens at <span data-t="join_open">10:00 AM</span> UAE on Telegram.</p><a class="btn" href="https://t.me/PipClashBot" style="align-self:flex-start">Join @PipClashBot</a></div>
+  </div>
+</div></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+  <span class="brand"><svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#60A5FA" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#3B82F6"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#3EE6A8" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#3EE6A8"/></svg><b style="font-size:17px">PIP<span>CLASH</span></b></span>
+  <span>Demo accounts only – no real money is traded and entry is free. Not financial advice. <a href="legal.html#terms">Terms</a> · <a href="legal.html#privacy">Privacy</a> · <a href="rules.html">Rules</a></span>
+</div></footer>
+</body>
+</html>
