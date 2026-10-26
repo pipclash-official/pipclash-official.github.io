@@ -506,3 +506,51 @@ button,input,select,textarea{font-family:inherit}
 .dq-li .dq-badge{margin-left:auto}
 [data-standings] td:nth-child(2){white-space:nowrap}
 @media (max-width:1400px){.c-move{display:none}[data-mv]{display:inline}}
+
+/* v30: light theme (button in top bar). Brand panels (hero, auth art) stay blue on purpose. */
+.ttheme{cursor:pointer;padding:0}
+.ttheme .i-sun{display:block}.ttheme .i-moon{display:none}
+:root[data-theme="light"] .ttheme .i-sun{display:none}:root[data-theme="light"] .ttheme .i-moon{display:block}
+:root[data-theme="light"]{
+  --bg:#F4F6FB; --surface:#FFFFFF; --surface2:#EEF3FF; --line:#E3E8F1; --line2:#CDD5E3;
+  --text:#0E1626; --muted:#556178; --muted2:#3B475E; --dim:#66728A;
+  --accent:#2563EB; --accent2:#1D4ED8; --gold:#A86B00; --up:#059669; --up2:#047857; --down:#DC2626;
+  --btn:#2563EB; color-scheme:light}
+:root[data-theme="light"],:root[data-theme="light"] body{background-color:#F4F6FB}
+:root[data-theme="light"] body{background-image:radial-gradient(900px 500px at 85% -5%,rgba(37,99,235,.10),rgba(244,246,251,0) 60%)}
+:root[data-theme="light"] a:hover{color:#1E40AF}
+:root[data-theme="light"] .top,:root[data-theme="light"] .tbar,:root[data-theme="light"] .qnav{background:rgba(244,246,251,.92)}
+:root[data-theme="light"] .btn-ghost,:root[data-theme="light"] .pill,:root[data-theme="light"] .live-chip,:root[data-theme="light"] .nav a{background:#fff}
+:root[data-theme="light"] .clock div{background:#fff;box-shadow:0 10px 24px rgba(15,23,42,.08)}
+:root[data-theme="light"] .step,:root[data-theme="light"] .res-card.win{background:#fff;box-shadow:0 16px 40px rgba(15,23,42,.08)}
+:root[data-theme="light"] .snav{background:#fff;border-right-color:var(--line)}
+:root[data-theme="light"] .sn-logo{background:#EEF3FF}
+:root[data-theme="light"] .sn-logo b{color:var(--text)}
+:root[data-theme="light"] .sn-sec,:root[data-theme="light"] .sn-foot{color:#66728A}
+:root[data-theme="light"] .sn-foot a{color:#3B475E}
+:root[data-theme="light"] .sn-it{color:#3B475E}
+:root[data-theme="light"] .sn-it svg{stroke:#3B475E}
+:root[data-theme="light"] .sn-it:hover{background:#EEF3FF;color:#0E1626}
+:root[data-theme="light"] .sn-it[aria-current="page"]{color:#fff}
+:root[data-theme="light"] .sn-it[aria-current="page"] svg{stroke:#fff}
+:root[data-theme="light"] .mbtn,:root[data-theme="light"] .tpill,:root[data-theme="light"] .tacc,:root[data-theme="light"] .qnav a{background:#fff;border-color:var(--line2)}
+:root[data-theme="light"] .mbtn svg,:root[data-theme="light"] .tacc svg{stroke:#0E1626}
+:root[data-theme="light"] .qnav a{color:#3B475E}
+:root[data-theme="light"] .chip{background:#E7EEFF;color:#1E3A8A}
+:root[data-theme="light"] .hero-b{background:linear-gradient(160deg,#E7EEFF,#fff 70%);border-color:#CFDBF7}
+:root[data-theme="light"] .hb-lab{color:#1E3A8A}
+:root[data-theme="light"] .purse{background:linear-gradient(140deg,#FFF4D6,#FFFBEF 60%,#fff);border-color:#F0D58A}
+:root[data-theme="light"] .acc input[type=email],:root[data-theme="light"] .acc input[type=text],:root[data-theme="light"] .acc input[type=tel],:root[data-theme="light"] .acc select{background:#fff;border-color:var(--line2)}
+:root[data-theme="light"] .acc-or::before,:root[data-theme="light"] .acc-or::after{background:var(--line2)}
+:root[data-theme="light"] .creds{background:#F4F6FB;border-color:var(--line2)}
+:root[data-theme="light"] .auth{background:#fff;border-color:var(--line2)}
+:root[data-theme="light"] .auth-form{background:#fff}
+:root[data-theme="light"] .auth-tabs{background:#F4F6FB;border-color:var(--line2)}
+:root[data-theme="light"] .auth-field svg{stroke:#66728A}
+:root[data-theme="light"] .dq-box{background:#fff}
+:root[data-theme="light"] .terminal-in{background:linear-gradient(165deg,#fff,#F4F6FB);border-color:var(--line2);box-shadow:0 40px 80px rgba(15,23,42,.12)}
+:root[data-theme="light"] .hero-b h1{color:#0E1626}
+:root[data-theme="light"] .hero-b h1 b,:root[data-theme="light"] .purse h2{color:#B7791F}
+:root[data-theme="light"] .lb-row.first{background:#FFF8E6}
+:root[data-theme="light"] [data-feed]>div{border-bottom-color:var(--line)!important}
+:root[data-theme="light"] .sn-logo b span{color:#2563EB}
