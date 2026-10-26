@@ -492,3 +492,17 @@ button,input,select,textarea{font-family:inherit}
 .auth-tabs button[aria-selected="true"]{background:#1D4ED8;color:#fff}
 .auth-tabs button:focus-visible{outline:2px solid #60A5FA;outline-offset:2px}
 [data-pane]{display:flex;flex-direction:column;gap:14px}[data-pane][hidden]{display:none!important}
+
+/* v28: flags, realized/unrealized, disqualified list */
+.flag{display:inline-block;vertical-align:-1px;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.12);margin-right:2px}
+.c-ru{font-size:13px;font-weight:500}
+@media (max-width:760px){.c-ru{display:none}}
+.dq-box{margin-top:14px;border:1px solid var(--line2);border-radius:12px;background:var(--bg)}
+.dq-box summary{display:block;cursor:pointer;padding:12px 16px;font-weight:600;color:var(--muted2,#B8C2D6);list-style:none}
+.dq-box summary::-webkit-details-marker{display:none}
+.dq-box summary::after{content:" ▾";color:var(--dim);font-size:12px}
+.dq-box[open] summary::after{content:" ▴";font-size:12px}
+.dq-li{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--line);font-size:14px}
+.dq-li .dq-badge{margin-left:auto}
+[data-standings] td:nth-child(2){white-space:nowrap}
+@media (max-width:1400px){.c-move{display:none}[data-mv]{display:inline}}
