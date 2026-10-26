@@ -16,16 +16,16 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0B1120">
-<link rel="icon" href="assets/favicon.svg?v=27" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=27" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=27" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=27">
+<link rel="icon" href="assets/favicon.svg?v=28" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=28" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=28" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=28">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=27">
-<script src="assets/site.js?v=27" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=28">
+<script src="assets/site.js?v=28" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -83,8 +83,9 @@
       <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);font-size:14px">
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="#94A0B8" stroke-width="2"/><path d="m20 20-4-4" stroke="#94A0B8" stroke-width="2" stroke-linecap="round"/></svg>
         <span class="muted" style="position:absolute;left:-9999px">Find your name</span><input id="find" type="search" placeholder="Find your name" style="background:transparent;border:0;outline:none;color:var(--text);font:inherit;width:160px"></label></div>
-    <div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="c-move">Move</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings></tbody></table></div>
-    <div class="sample">P&amp;L counts only trades opened after <span data-t="trade_start">4:30 PM</span> UAE. Disqualified players are not ranked. <span data-stat="updated"></span></div>
+    <div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="c-move">Move</th><th class="r c-ru">Realized</th><th class="r c-ru">Open</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings></tbody></table></div>
+    <div class="sample">P&amp;L counts only trades opened after <span data-t="trade_start">4:30 PM</span> UAE. Realized = closed trades, Open = trades still running. Disqualified players are not ranked. <span data-stat="updated"></span></div>
+    <details class="dq-box" data-dq hidden><summary>Disqualified today (<span data-dq-n>0</span>)</summary><div data-dq-list></div></details>
   </div>
   <div style="display:flex;flex-direction:column;gap:20px">
     <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--surface2),var(--surface))"><b class="display" style="font-size:18px">Title fight</b><div class="duel" data-duel style="grid-template-columns:minmax(0,1fr)"></div></div>
