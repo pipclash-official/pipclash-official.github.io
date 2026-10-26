@@ -87,18 +87,27 @@
 
   /* ---------- renderers ---------- */
   function standings() { return (D && D.standings) || []; }
+  function flag(c) { return c ? '<img class="flag" src="https://flagcdn.com/w20/' + esc(c) + '.png" width="18" height="13" alt="" loading="lazy" onerror="this.remove()"> ' : ''; }
+  function renderDQ() {
+    var list = (D && D.disqualified) || [];
+    $$('[data-dq]').forEach(function (box) {
+      box.hidden = !list.length;
+      var n = box.querySelector('[data-dq-n]'); if (n) n.textContent = list.length;
+      var b = box.querySelector('[data-dq-list]'); if (b) b.innerHTML = list.map(function (x) { return '<div class="dq-li">' + flag(x.cc) + '<b>' + esc(x.name) + '</b><span class="dq-badge">Rule broken</span></div>'; }).join('');
+    });
+  }
   function renderStandings() {
     $$('[data-standings]').forEach(function (box) {
       var lim = +box.getAttribute('data-limit') || 999, compact = box.hasAttribute('data-compact');
       var q = (($('#find') || {}).value || '').trim().toLowerCase();
       var rows = standings().filter(function (r) { return !q || r.name.toLowerCase().indexOf(q) >= 0; }).slice(0, lim);
-      if (!rows.length) { box.innerHTML = '<tr><td colspan="5" class="empty">' + (q ? 'No trader with that name.' : 'Standings appear when the battle starts at ' + uaeHM(sched().trade_start) + ' UAE.') + '</td></tr>'; return; }
+      if (!rows.length) { box.innerHTML = '<tr><td colspan="7" class="empty">' + (q ? 'No trader with that name.' : 'Standings appear when the battle starts at ' + uaeHM(sched().trade_start) + ' UAE.') + '</td></tr>'; return; }
       box.innerHTML = rows.map(function (r) {
         var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
         var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '<span class="muted">–</span>');
-        return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">' + rk(r.rank) + '</td><td style="font-weight:600">' + esc(r.name) +
+        return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">' + rk(r.rank) + '</td><td style="font-weight:600">' + flag(r.cc) + esc(r.name) +
           (compact ? ' <span class="mono" style="font-size:13px">' + mv + '</span>' : ' <span class="mono" style="font-size:13px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
-          (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
+          (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td><td class="mono r c-ru ' + cls(r.real || 0) + '">' + money(r.real || 0) + '</td><td class="mono r c-ru ' + cls(r.unreal || 0) + '">' + money(r.unreal || 0) + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
       }).join('');
     });
   }
@@ -184,7 +193,7 @@
     });
     if (D && D.prizes) $$('[data-prize]').forEach(function (el) { var v = D.prizes[el.getAttribute('data-prize')]; if (v != null) el.textContent = '$' + v; });
   }
-  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); tickClock(); }
+  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); tickClock(); }
 
   /* ---------- decorative live chart (home) ---------- */
   function chart() {
