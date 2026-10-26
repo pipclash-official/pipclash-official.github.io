@@ -117,7 +117,7 @@
       var items = feedItems().slice(0, +box.getAttribute('data-limit') || 12);
       box.innerHTML = items.length ? items.map(function (f) {
         var c = f.kind === 'profit' ? 'var(--up2)' : (f.kind === 'loss' ? 'var(--down)' : (f.kind === 'start' ? 'var(--gold)' : 'var(--accent2)'));
-        return '<div style="display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:12px 20px;border-bottom:1px solid #18223A;font-size:14px"><span class="mono" style="font-size:13px;color:var(--dim)">' + uae(f.t_utc) + '</span><span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span></div>';
+        return '<div style="display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:12px 20px;border-bottom:1px solid var(--line);font-size:14px"><span class="mono" style="font-size:13px;color:var(--dim)">' + uae(f.t_utc) + '</span><span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span></div>';
       }).join('') : '<div class="empty">The feed starts when the battle begins.</div>';
     });
     $$('[data-ticker]').forEach(function (box) {
@@ -181,7 +181,7 @@
     $$('[data-past]').forEach(function (box) {
       var past = (D && D.past) || [];
       box.innerHTML = past.length ? past.map(function (p) {
-        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:13px 20px;border-bottom:1px solid #18223A"><div style="display:flex;flex-direction:column"><span style="font-weight:700' + (p.winner ? '' : ';color:var(--muted)') + '">' + (p.winner ? esc(p.winner) : 'No winner') + '</span><span style="font-size:13px;color:var(--dim)">' + esc(p.date) + ' · Battle #' + p.id + '</span></div><span class="mono ' + (p.winner ? 'up' : 'muted') + '" style="font-weight:700;align-self:center">' + (p.winner ? money(p.pnl) : '–') + '</span></div>';
+        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:13px 20px;border-bottom:1px solid var(--line)"><div style="display:flex;flex-direction:column"><span style="font-weight:700' + (p.winner ? '' : ';color:var(--muted)') + '">' + (p.winner ? esc(p.winner) : 'No winner') + '</span><span style="font-size:13px;color:var(--dim)">' + esc(p.date) + ' · Battle #' + p.id + '</span></div><span class="mono ' + (p.winner ? 'up' : 'muted') + '" style="font-weight:700;align-self:center">' + (p.winner ? money(p.pnl) : '–') + '</span></div>';
       }).join('') : '<div class="empty">Past champions appear here.</div>';
     });
   }
