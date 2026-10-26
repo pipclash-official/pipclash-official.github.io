@@ -554,3 +554,10 @@ button,input,select,textarea{font-family:inherit}
 :root[data-theme="light"] .lb-row.first{background:#FFF8E6}
 :root[data-theme="light"] [data-feed]>div{border-bottom-color:var(--line)!important}
 :root[data-theme="light"] .sn-logo b span{color:#2563EB}
+/* v31: phone – theme button moves into the menu so the status pill has room; trophy clear of text */
+.sn-theme{width:100%;border:0;background:transparent;cursor:pointer;font:inherit;text-align:left;margin-top:8px}
+.sn-theme svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex:none}
+@media (min-width:521px){.sn-theme{display:none}}
+@media (max-width:520px){.tbar .ttheme{display:none}}
+@media (max-width:759px){.hb-art{width:100px;top:40px}}
+@media (max-width:359px){.hb-art{width:88px}}
