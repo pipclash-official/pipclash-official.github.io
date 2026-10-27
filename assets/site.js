@@ -102,13 +102,19 @@
       var q = (($('#find') || {}).value || '').trim().toLowerCase();
       var rows = standings().filter(function (r) { return !q || r.name.toLowerCase().indexOf(q) >= 0; }).slice(0, lim);
       if (!rows.length) { box.innerHTML = '<tr><td colspan="7" class="empty">' + (q ? 'No trader with that name.' : 'Standings appear when the battle starts at ' + uaeHM(sched().trade_start) + ' UAE.') + '</td></tr>'; return; }
-      box.innerHTML = rows.map(function (r) {
+      var rowHtml = function (r) {
         var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
         var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '');
         return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">' + rk(r.rank) + '</td><td style="font-weight:600">' + flag(r.cc) + esc(r.name) +
           (compact ? ' <span class="mono" style="font-size:13px">' + mv + '</span>' : ' <span class="mono" style="font-size:13px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
           (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td><td class="mono r c-ru ' + cls(r.real || 0) + '">' + money(r.real || 0) + '</td><td class="mono r c-ru ' + cls(r.unreal || 0) + '">' + money(r.unreal || 0) + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
-      }).join('');
+      };
+      // Laptop + 30 se zyada players: rank 1-30 baayein, 31-60 daayein (do column)
+      var split = +box.getAttribute('data-split') || 0, wrap = box.closest('.lb-cols');
+      var two = !!(split && wrap && !q && rows.length > split && window.innerWidth >= 1280);
+      if (wrap) { wrap.classList.toggle('two', two); var b2 = wrap.querySelector('[data-lb2]'); if (b2) b2.hidden = !two; }
+      box.innerHTML = (two ? rows.slice(0, split) : rows).map(rowHtml).join('');
+      if (two) wrap.querySelector('[data-standings2]').innerHTML = rows.slice(split, split * 2).map(rowHtml).join('');
     });
   }
   function feedItems() { return (D && D.feed) || []; }
@@ -195,6 +201,18 @@
     }
     $$('[data-hero-day]').forEach(function (el) { el.textContent = txt || 'today'; });
   }
+  function renderPrizeTable() {      // jitne log, utna inaam – entries band hone pe final
+    var P = D && D.prize_table, box = $('[data-prize-card]'); if (!box) return;
+    if (!P || !P.rows || !P.rows.length) { box.hidden = true; return; }
+    box.hidden = false;
+    $('[data-prize-title]').textContent = P.final ? 'Prize table' : 'Prize table so far';
+    $('[data-prize-note]').textContent = (P.paid ? P.players + ' traders · prize pool $' + P.pool.toFixed(2) + ' · ' : '') +
+      (P.final ? 'Final – only traders in profit can win.' : 'Grows with every entry until ' + uaeHM(sched().join_close) + ' UAE.');
+    var m = function (v) { return '$' + (v % 1 ? v.toFixed(2) : v); };
+    $('[data-prize-rows]').innerHTML = P.rows.map(function (r) {
+      return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:14px"><span class="mono muted2">#' + r.rank + '</span><b class="mono' + (r.rank === 1 ? ' gold' : '') + '">' + m(r.usd) + '</b></div>';
+    }).join('');
+  }
   function renderSchedule() {
     var s = sched();
     $$('[data-t]').forEach(function (el) { // data-t="trade_start" data-add="60"
@@ -203,7 +221,7 @@
     });
     if (D && D.prizes) $$('[data-prize]').forEach(function (el) { var v = D.prizes[el.getAttribute('data-prize')]; if (v != null) el.textContent = '$' + v; });
   }
-  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); tickClock(); }
+  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); renderPrizeTable(); tickClock(); }
 
   /* ---------- decorative live chart (home) ---------- */
   function chart() {
@@ -329,5 +347,6 @@
     chart(); sky(); renderAll(); load(); loadArchive();
     setInterval(tickClock, 1000);
     setInterval(load, 60000);
+    var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(renderStandings, 200); });
   });
 })();
