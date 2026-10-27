@@ -38,6 +38,17 @@
     return new Date(ymd + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
   }
   var user = null, profile = null, timer = null;
+  /* Refer: ?ref=CODE wale link se aaya – code yaad rakho (signup ke baad profile mein ref_by) */
+  var REF = (new URLSearchParams(location.search).get('ref') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+  try { if (REF) localStorage.setItem('pc_ref', REF); else REF = localStorage.getItem('pc_ref') || ''; } catch (e) { }
+  /* Profile banao – ref_by column abhi Supabase mein na ho (SQL nahi chala) to uske bina dobara */
+  function insertProfile(row) {
+    var ref = REF || ((user && user.user_metadata) || {}).ref || '';
+    var full = ref ? Object.assign({ ref_by: ref }, row) : row;
+    return sb.from('profiles').insert(full).then(function (r) {
+      return (r.error && full !== row && /ref_by|column|schema/i.test(r.error.message || '')) ? sb.from('profiles').insert(row) : r;
+    });
+  }
 
   function show(name) {
     root.querySelectorAll('[data-view]').forEach(function (v) { v.hidden = v.getAttribute('data-view') !== name; });
@@ -71,7 +82,7 @@
     if (!/^\+\d{8,15}$/.test(phone)) { msg('[data-signup-msg]', 'Please enter your mobile number (without the country code).', true); return; }
     if (!$('#su-agree').checked) { msg('[data-signup-msg]', 'Please confirm you are 18+ and accept the Rules and Terms.', true); return; }
     var btn = $('[data-signup-btn]'); btn.disabled = true; msg('[data-signup-msg]', 'Creating your account…');
-    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: redirect, data: { name: name, phone: phone } } }).then(function (r) {
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: redirect, data: { name: name, phone: phone, ref: REF || undefined } } }).then(function (r) {
       btn.disabled = false;
       if (r.error) { msg('[data-signup-msg]', errText(r.error.message), true); return; }
       msg('[data-signup-msg]', ''); sent(email);
@@ -99,7 +110,7 @@
     if (!/^\+\d{8,15}$/.test(phone)) { msg('[data-profile-msg]', 'Please enter your mobile number without the country code.', true); return; }
     if (!$('#acc-agree').checked) { msg('[data-profile-msg]', 'Please confirm you are 18+ and accept the rules.', true); return; }
     msg('[data-profile-msg]', 'Saving…');
-    sb.from('profiles').insert({ id: user.id, name: name, phone: phone }).then(function (r) {
+    insertProfile({ id: user.id, name: name, phone: phone }).then(function (r) {
       if (r.error) { msg('[data-profile-msg]', r.error.code === '23505' ? 'This phone number already has a PipClash account. One person = one account.' : 'Could not save: ' + r.error.message, true); return; }
       load();
     });
@@ -149,6 +160,20 @@
     box.innerHTML = out;
   }
 
+  function refCard() {          // Invite friends: apna link + kitne dost aaye/khele
+    var box = $('[data-ref-card]'); if (!box) return;
+    if (!profile || !profile.ref_code) { box.hidden = true; return; }
+    var link = location.origin + location.pathname + '?ref=' + profile.ref_code + '#signup';
+    box.hidden = false;
+    $('[data-ref-link]').textContent = link;
+    $('[data-ref-copy]').setAttribute('data-copy', link);
+    var wa = $('[data-ref-wa]'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent('Free daily trading battle – same $1,000 demo account, real prizes. Join with my link: ' + link);
+    sb.rpc('pc_my_referrals').then(function (r) {
+      var d = r.data && (r.data[0] || r.data);
+      $('[data-ref-stats]').textContent = d ? ('Friends joined: ' + (d.friends || 0) + ' · played a battle: ' + (d.played || 0)) : '';
+    });
+  }
+
   function refresh() {
     var t = windowState().date, nb = nextBattle();
     var q = function (tbl, cols, d) { return sb.from(tbl).select(cols).eq('contest_date', d).eq('user_id', user.id).maybeSingle(); };
@@ -167,13 +192,18 @@
     sb.auth.getUser().then(function (r) {
       user = r.data && r.data.user;
       if (!user) { show('login'); return; }
-      sb.from('profiles').select('name,phone').eq('id', user.id).maybeSingle().then(function (p) {
+      var prof = function () {   // ref_code abhi na ho (SQL nahi chala) to purana select
+        return sb.from('profiles').select('name,phone,ref_code').eq('id', user.id).maybeSingle().then(function (p) {
+          return p.error ? sb.from('profiles').select('name,phone').eq('id', user.id).maybeSingle() : p;
+        });
+      };
+      prof().then(function (p) {
         profile = p.data;
         if (!profile) {
           var md = user.user_metadata || {};
           if (md.name && md.phone && !load.tried) {
             load.tried = true;
-            sb.from('profiles').insert({ id: user.id, name: cleanName(md.name), phone: md.phone }).then(function (x) {
+            insertProfile({ id: user.id, name: cleanName(md.name), phone: md.phone }).then(function (x) {
               if (x.error) { show('profile'); $('#acc-name').value = md.name; msg('[data-profile-msg]', x.error.code === '23505' ? 'This phone number already has a PipClash account. One person = one account.' : 'Please check your details.', true); return; }
               load();
             });
@@ -184,6 +214,7 @@
         $('[data-hello]').textContent = profile.name;
         $('[data-who]').textContent = (user.email || '') + ' · phone ending ' + profile.phone.slice(-3);
         show('home');
+        refCard();
         refresh();
         clearInterval(timer); timer = setInterval(refresh, 20000);
       });
