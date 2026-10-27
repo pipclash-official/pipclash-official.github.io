@@ -104,7 +104,7 @@
       if (!rows.length) { box.innerHTML = '<tr><td colspan="7" class="empty">' + (q ? 'No trader with that name.' : 'Standings appear when the battle starts at ' + uaeHM(sched().trade_start) + ' UAE.') + '</td></tr>'; return; }
       box.innerHTML = rows.map(function (r) {
         var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
-        var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '<span class="muted">–</span>');
+        var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '');
         return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">' + rk(r.rank) + '</td><td style="font-weight:600">' + flag(r.cc) + esc(r.name) +
           (compact ? ' <span class="mono" style="font-size:13px">' + mv + '</span>' : ' <span class="mono" style="font-size:13px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
           (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td><td class="mono r c-ru ' + cls(r.real || 0) + '">' + money(r.real || 0) + '</td><td class="mono r c-ru ' + cls(r.unreal || 0) + '">' + money(r.unreal || 0) + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
@@ -132,8 +132,9 @@
   function renderDuel() {
     var s = standings(), box = $('[data-duel]'); if (!box) return;
     if (s.length < 2) { box.innerHTML = '<p class="muted">The title fight appears once the battle is running.</p>'; return; }
+    var fin = !(D && D.battle && D.battle.status === 'live');      // battle khatam = 'winner', chal rahi = 'leading'
     var a = s[0], b = s[1], max = Math.max(Math.abs(a.pnl), 1), w = Math.max(5, Math.min(100, (b.pnl / max) * 100));
-    box.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(a.name) + '</span><span class="mono gold" style="font-size:24px;font-weight:700">' + money(a.pnl) + '</span></div><div class="bar"><i style="width:100%;background:var(--gold)"></i></div><span class="muted" style="font-size:13px">' + (a.trades || 0) + ' trades · ' + pctOf(a.pnl) + ' · leading</span></div>' +
+    box.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(a.name) + '</span><span class="mono gold" style="font-size:24px;font-weight:700">' + money(a.pnl) + '</span></div><div class="bar"><i style="width:100%;background:var(--gold)"></i></div><span class="muted" style="font-size:13px">' + (a.trades || 0) + ' trades · ' + pctOf(a.pnl) + (fin ? ' · winner' : ' · leading') + '</span></div>' +
       '<div class="vs">vs</div>' +
       '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(b.name) + '</span><span class="mono acc" style="font-size:24px;font-weight:700">' + money(b.pnl) + '</span></div><div class="bar"><i style="width:' + w.toFixed(0) + '%;background:var(--accent)"></i></div><span class="muted" style="font-size:13px">' + (b.trades || 0) + ' trades · ' + pctOf(b.pnl) + ' · gap ' + money(a.pnl - b.pnl).replace('+', '') + '</span></div>';
   }
@@ -185,6 +186,15 @@
       }).join('') : '<div class="empty">Past champions appear here.</div>';
     });
   }
+  function renderHeroDay() {          // 'Win $200 today' – weekend / battle ke baad: tomorrow / on Monday
+    var sc = sched(), days = sc.days || [1, 2, 3, 4, 5], u = new Date(Date.now() + 4 * 36e5), hm = u.toISOString().slice(11, 16), txt = '';
+    for (var i = 0; i < 8 && !txt; i++) {
+      var d = new Date(Date.UTC(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate() + i));
+      if (days.indexOf(d.getUTCDay()) < 0 || (i === 0 && hm >= sc.trade_end)) continue;
+      txt = i === 0 ? 'today' : (i === 1 ? 'tomorrow' : 'on ' + d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' }));
+    }
+    $$('[data-hero-day]').forEach(function (el) { el.textContent = txt || 'today'; });
+  }
   function renderSchedule() {
     var s = sched();
     $$('[data-t]').forEach(function (el) { // data-t="trade_start" data-add="60"
@@ -193,7 +203,7 @@
     });
     if (D && D.prizes) $$('[data-prize]').forEach(function (el) { var v = D.prizes[el.getAttribute('data-prize')]; if (v != null) el.textContent = '$' + v; });
   }
-  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); tickClock(); }
+  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); tickClock(); }
 
   /* ---------- decorative live chart (home) ---------- */
   function chart() {
@@ -249,10 +259,10 @@
   function renderToasts() {
     var f = feedItems(), s = standings();
     var p = f.filter(function (x) { return x.kind === 'profit'; })[0], m = f.filter(function (x) { return x.kind === 'move'; })[0];
-    var set = function (i, t) { $$('[data-toast="' + i + '"]').forEach(function (el) { el.textContent = t; }); };
-    if (p) set(0, '▲ ' + p.text);
-    if (m) set(1, '⇧ ' + m.text);
-    if (s.length >= 2) set(2, '◆ Gap to #1: $' + Math.abs(s[0].pnl - s[1].pnl).toFixed(2));
+    var set = function (i, t) { $$('[data-toast="' + i + '"]').forEach(function (el) { el.hidden = !t; if (t) el.textContent = t; }); };
+    set(0, p && '▲ ' + p.text);
+    set(1, m && '⇧ ' + m.text);
+    set(2, s.length >= 2 && '◆ Gap to #1: $' + Math.abs(s[0].pnl - s[1].pnl).toFixed(2));
   }
 
   /* ---------- results archive (winners.html) ---------- */
