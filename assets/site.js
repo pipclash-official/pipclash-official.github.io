@@ -221,7 +221,12 @@
     });
     if (D && D.prizes) $$('[data-prize]').forEach(function (el) { var v = D.prizes[el.getAttribute('data-prize')]; if (v != null) el.textContent = '$' + v; });
   }
-  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); renderPrizeTable(); tickClock(); }
+  function renderPaid() {          // paid entry chalu = 'free' wale text chhupao, '$10' wale dikhao
+    var paid = !!(D && D.paid_entry);
+    $$('[data-free]').forEach(function (el) { el.hidden = paid; });
+    $$('[data-paid]').forEach(function (el) { el.hidden = !paid; });
+  }
+  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); renderPrizeTable(); renderPaid(); tickClock(); }
 
   /* ---------- decorative live chart (home) ---------- */
   function chart() {
