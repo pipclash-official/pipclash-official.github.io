@@ -561,3 +561,7 @@ button,input,select,textarea{font-family:inherit}
 @media (max-width:520px){.tbar .ttheme{display:none}}
 @media (max-width:759px){.hb-art{width:100px;top:40px}}
 @media (max-width:359px){.hb-art{width:88px}}
+
+/* Leaderboard: laptop + 30 se zyada players = do column (1-30 | 31-60) */
+.lb-cols{display:grid;gap:16px}
+@media (min-width:1280px){.lb-cols.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.lb-cols.two .c-ru,.lb-cols.two .c-move,.lb-cols.two .c-trades{display:none}}
