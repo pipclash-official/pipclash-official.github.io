@@ -38,6 +38,18 @@
     return new Date(ymd + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
   }
   var user = null, profile = null, timer = null;
+  /* Paid entry: Supabase pc_settings.paid_entry = true -> $10 wallet se. Tables na hon (SQL nahi chala) = free mode */
+  var PAY = { on: false, fee: 10, bal: 0, test: false };
+  function loadPay() {
+    return Promise.all([sb.from('pc_settings').select('key,value'), sb.from('wallets').select('balance').eq('user_id', user.id).maybeSingle()]).then(function (r) {
+      var S = {}; ((r[0] && r[0].data) || []).forEach(function (x) { S[x.key] = x.value; });
+      PAY = { on: S.paid_entry === true, fee: Number(S.entry_fee) || 10, bal: Number(r[1] && r[1].data && r[1].data.balance) || 0, test: S.mode === 'test' };
+    }, function () { });
+  }
+  var usd = function (v) { return '$' + (Number(v) || 0).toFixed(2); };
+  var PAYERR = { INSUFFICIENT_BALANCE: 'Not enough balance – add money to your wallet first.', ALREADY_IN: 'You already have a seat.', NO_PROFILE: 'Please complete your details first.',
+                 PAID_OFF: 'Paid entry is not open right now.', NOTHING_TO_CANCEL: 'This entry can no longer be cancelled.' };
+  function payErr(e) { var m = String((e && e.message) || e || ''); for (var k in PAYERR) if (m.indexOf(k) >= 0) return PAYERR[k]; return 'Something went wrong. Please refresh and try again.'; }
   /* Refer: ?ref=CODE wale link se aaya – code yaad rakho (signup ke baad profile mein ref_by) */
   var REF = (new URLSearchParams(location.search).get('ref') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
   try { if (REF) localStorage.setItem('pc_ref', REF); else REF = localStorage.getItem('pc_ref') || ''; } catch (e) { }
@@ -118,6 +130,25 @@
 
   /* ---------- join ---------- */
   root.addEventListener('click', function (e) {
+    var pb = e.target.closest('[data-pay]');
+    if (pb) {
+      pb.disabled = true; msg('[data-entry-msg]', 'Paying ' + usd(PAY.fee) + ' from your wallet…');
+      sb.rpc('pc_enter_battle').then(function (r) {
+        if (r.error) { pb.disabled = false; msg('[data-entry-msg]', payErr(r.error), true); return; }
+        msg('[data-entry-msg]', 'Paid ✅ Your seat is booked.'); refresh();
+      });
+      return;
+    }
+    var cb = e.target.closest('[data-cancel]');
+    if (cb) {
+      if (!confirm('Cancel your entry and get ' + usd(PAY.fee) + ' back to your wallet?')) return;
+      cb.disabled = true;
+      sb.rpc('pc_cancel_entry').then(function (r) {
+        if (r.error) { cb.disabled = false; msg('[data-entry-msg]', payErr(r.error), true); return; }
+        msg('[data-entry-msg]', 'Cancelled ✅ ' + usd(PAY.fee) + ' is back in your wallet.'); refresh();
+      });
+      return;
+    }
     var b = e.target.closest('[data-join]');
     if (b) {
       b.disabled = true;
@@ -138,15 +169,25 @@
   function entryCard(en, cr, date) {
     var s = sched(), w = windowState(), box = $('[data-entry]'), out = '', lab = dayLabel(date), today = date === w.date;
     var title = $('[data-entry-title]'); if (title) title.textContent = today ? 'Today’s battle' : 'Next battle · ' + lab.charAt(0).toUpperCase() + lab.slice(1);
-    if (!en) {
+    var tnote = PAY.on && PAY.test ? '<p class="w-test"><b>TEST MODE</b> – no real money.</p>' : '';
+    if (!en && PAY.on) {
+      var can = PAY.bal >= PAY.fee, what = today && w.open ? 'today’s battle' : esc(lab);
+      out = tnote + '<p class="muted2">Entry fee <b>' + usd(PAY.fee) + '</b> · your wallet <b>' + usd(PAY.bal) + '</b>. 80% of all entry fees go to the winners – the more traders, the bigger the prizes.</p>' +
+        (can ? '<button class="btn btn-lg" type="button" data-pay>Pay ' + usd(PAY.fee) + ' & join ' + what + '</button>'
+             : '<a class="btn btn-lg" href="wallet.html">Add money to your wallet</a>') +
+        '<p class="muted2" style="font-size:13px">You can cancel and get the fee back until you are entered into the battle at ' + hm12(s.join_open) + ' UAE.</p>';
+    } else if (!en) {
       if (today && w.open) out = '<p class="muted2">Today’s battle is open for entry until ' + hm12(s.join_close) + ' UAE.</p><button class="btn btn-lg" type="button" data-join="' + date + '">Join today’s battle</button>';
       else out = '<p class="muted2">Book your seat now for <b>' + esc(lab) + '</b>. You are entered automatically when entry opens at ' + hm12(s.join_open) + ' UAE – nothing else to tap.</p><button class="btn btn-lg" type="button" data-join="' + date + '">Book my seat for ' + esc(lab) + '</button>';
     } else if (en.status === 'pending' && (!today || w.before)) {
       out = '<p><span class="tag-ok">BOOKED</span> Your seat for <b>' + esc(lab) + '</b> is booked. You are entered automatically at ' + hm12(s.join_open) + ' UAE, and your MT5 login appears here at ' + hm12(s.creds_at) + ' UAE.</p>';
+      if (PAY.on) out = tnote + out + '<button class="btn btn-ghost" type="button" data-cancel>Cancel & get ' + usd(PAY.fee) + ' back</button>';
     } else if (en.status === 'pending') {
       out = '<p><span class="tag-wait">CONFIRMING</span> We received your entry. Your seat is confirmed within about a minute.</p>';
+      if (PAY.on) out = tnote + out + '<button class="btn btn-ghost" type="button" data-cancel>Cancel & get ' + usd(PAY.fee) + ' back</button>';
     } else if (en.status === 'rejected') {
-      out = '<p><span class="tag-bad">NOT ACCEPTED</span> ' + esc(en.reason || 'Your entry could not be accepted.') + '</p>';
+      out = '<p><span class="tag-bad">NOT ACCEPTED</span> ' + esc(en.reason || 'Your entry could not be accepted.') + '</p>' +
+        (PAY.on && !/back in your wallet/.test(en.reason || '') ? '<p class="muted2">Your entry fee has been refunded to your <a href="wallet.html">wallet</a>.</p>' : '');
     } else {
       out = '<p><span class="tag-ok">YOU’RE IN</span> Your battle name is <b>' + esc(en.public_name) + '</b>.</p>';
       if (cr) {
@@ -177,7 +218,7 @@
   function refresh() {
     var t = windowState().date, nb = nextBattle();
     var q = function (tbl, cols, d) { return sb.from(tbl).select(cols).eq('contest_date', d).eq('user_id', user.id).maybeSingle(); };
-    Promise.all([
+    loadPay().then(function () { return Promise.all([
       q('web_entries', 'status,reason,public_name', t),
       q('web_creds', 'server,login,password', t),
       nb === t ? Promise.resolve({ data: null }) : q('web_entries', 'status,reason,public_name', nb)
@@ -185,7 +226,7 @@
       // Aaj khel raha hai to result tak aaj ka card (MT5 login ke saath); warna agli battle ki booking
       if (nb !== t && r[0].data && uaeNow().hm <= (sched().result_at || '21:30')) entryCard(r[0].data, r[1].data, t);
       else entryCard(nb === t ? r[0].data : r[2].data, nb === t ? r[1].data : null, nb);
-    });
+    }); });
   }
 
   function load() {
