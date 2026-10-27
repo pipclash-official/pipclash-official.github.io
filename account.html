@@ -16,19 +16,19 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0B1120">
-<link rel="icon" href="assets/favicon.svg?v=31" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=31" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=31" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=31">
+<link rel="icon" href="assets/favicon.svg?v=32" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=32" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=32" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=32">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <script>try{if(localStorage.getItem("pc-theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
-<link rel="stylesheet" href="assets/site.css?v=31">
-<script src="assets/site.js?v=31" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=32">
+<script src="assets/site.js?v=32" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/account.js?v=31" defer></script>
+<script src="assets/account.js?v=32" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -58,7 +58,7 @@
     <aside class="auth-art" aria-hidden="true">
       <img src="assets/3d/trophy-only.webp" width="720" height="720" alt="">
       <span class="auth-kick">Mon – Fri · <span data-t="trade_start">4:30 PM</span> – <span data-t="trade_end">7:30 PM</span> UAE</span>
-      <p class="auth-big">Win <b data-prize="1">$200</b> today</p>
+      <p class="auth-big">Win <b data-prize="1">$200</b> <span data-hero-day>today</span></p>
       <ul class="auth-pts">
         <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Free entry, no deposit</li>
         <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Fresh $1,000 MT5 demo account</li>
@@ -77,7 +77,7 @@
             <label for="su-email">Email address</label>
             <div class="auth-field"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><input id="su-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required></div>
             <label for="su-phone">Mobile number</label>
-            <div class="acc-phone"><select id="su-cc" aria-label="Country code"><option value="+971">🇦🇪 +971</option><option value="+91">🇮🇳 +91</option><option value="+92">🇵🇰 +92</option><option value="+966">🇸🇦 +966</option><option value="+974">🇶🇦 +974</option><option value="+968">🇴🇲 +968</option><option value="+973">🇧🇭 +973</option><option value="+965">🇰🇼 +965</option></select><input id="su-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="50 123 4567" required></div>
+            <div class="acc-phone"><select id="su-cc" aria-label="Country code"><option value="+971">🇦🇪 +971</option><option value="+91">🇮🇳 +91</option><option value="+92">🇵🇰 +92</option><option value="+966">🇸🇦 +966</option><option value="+974">🇶🇦 +974</option><option value="+968">🇴🇲 +968</option><option value="+973">🇧🇭 +973</option><option value="+965">🇰🇼 +965</option><option value="+880">🇧🇩 +880</option><option value="+977">🇳🇵 +977</option><option value="+94">🇱🇰 +94</option><option value="+20">🇪🇬 +20</option><option value="+962">🇯🇴 +962</option><option value="+63">🇵🇭 +63</option><option value="+62">🇮🇩 +62</option><option value="+60">🇲🇾 +60</option><option value="+234">🇳🇬 +234</option><option value="+254">🇰🇪 +254</option><option value="+44">🇬🇧 +44</option><option value="+1">🇺🇸 +1</option></select><input id="su-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="50 123 4567" required></div>
             <div class="acc-check"><input id="su-agree" type="checkbox"><label for="su-agree">I am 18 or older and I accept the <a href="rules.html">Rules</a> and <a href="legal.html">Terms</a>.</label></div>
             <button class="btn btn-lg auth-main" type="submit" data-signup-btn>Create free account</button>
             <p class="acc-msg" data-signup-msg role="status"></p>
@@ -112,7 +112,7 @@
     <aside class="auth-art auth-art-sm" aria-hidden="true">
       <img src="assets/3d/trophy-only.webp" width="720" height="720" alt="">
       <span class="auth-kick">Mon – Fri · <span data-t="trade_start">4:30 PM</span> – <span data-t="trade_end">7:30 PM</span> UAE</span>
-      <p class="auth-big">Win <b data-prize="1">$200</b> today</p>
+      <p class="auth-big">Win <b data-prize="1">$200</b> <span data-hero-day>today</span></p>
       <ul class="auth-pts">
         <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Free entry, no deposit</li>
         <li><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Fresh $1,000 MT5 demo account</li>
@@ -126,7 +126,7 @@
         <label for="acc-name">First name</label>
         <input id="acc-name" type="text" autocomplete="given-name" maxlength="14" required>
         <label for="acc-phone">Mobile number</label>
-        <div class="acc-phone"><select id="acc-cc" aria-label="Country code"><option value="+971">🇦🇪 +971</option><option value="+91">🇮🇳 +91</option><option value="+92">🇵🇰 +92</option><option value="+966">🇸🇦 +966</option><option value="+974">🇶🇦 +974</option><option value="+968">🇴🇲 +968</option><option value="+973">🇧🇭 +973</option><option value="+965">🇰🇼 +965</option></select>
+        <div class="acc-phone"><select id="acc-cc" aria-label="Country code"><option value="+971">🇦🇪 +971</option><option value="+91">🇮🇳 +91</option><option value="+92">🇵🇰 +92</option><option value="+966">🇸🇦 +966</option><option value="+974">🇶🇦 +974</option><option value="+968">🇴🇲 +968</option><option value="+973">🇧🇭 +973</option><option value="+965">🇰🇼 +965</option><option value="+880">🇧🇩 +880</option><option value="+977">🇳🇵 +977</option><option value="+94">🇱🇰 +94</option><option value="+20">🇪🇬 +20</option><option value="+962">🇯🇴 +962</option><option value="+63">🇵🇭 +63</option><option value="+62">🇮🇩 +62</option><option value="+60">🇲🇾 +60</option><option value="+234">🇳🇬 +234</option><option value="+254">🇰🇪 +254</option><option value="+44">🇬🇧 +44</option><option value="+1">🇺🇸 +1</option></select>
           <input id="acc-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="50 123 4567" required></div>
         <div class="acc-check"><input id="acc-agree" type="checkbox"><label for="acc-agree">I am 18 or older and I accept the <a href="rules.html">Rules</a> and <a href="legal.html">Terms</a>.</label></div>
         <button class="btn btn-lg" type="submit">Save and continue</button>
@@ -138,7 +138,7 @@
 
   <div data-view="home" hidden>
     <div class="acc-head"><div><h1>Hi, <span data-hello></span></h1><p class="muted2" data-who></p></div><button class="btn btn-ghost" type="button" data-logout>Log out</button></div>
-    <div class="card acc-card"><h2>Today’s battle</h2><div data-entry><p class="muted2">Loading…</p></div><p class="acc-msg" data-entry-msg role="status"></p></div>
+    <div class="card acc-card"><h2 data-entry-title>Your battle</h2><div data-entry><p class="muted2">Loading…</p></div><p class="acc-msg" data-entry-msg role="status"></p></div>
     <div class="card acc-card"><h2>Before you trade</h2><p class="muted2">Install MetaTrader 5 once and learn how to log in. It takes 5 minutes.</p><a class="btn btn-ghost" href="guide.html">Open the MT5 guide</a></div>
   </div>
 </div></section>
