@@ -20,6 +20,23 @@
     var n = uaeNow(), s = sched(), day = (s.days || [1, 2, 3, 4, 5]).indexOf(n.wd) >= 0;
     return { open: day && n.hm >= s.join_open && n.hm <= s.join_close, day: day, before: n.hm < s.join_open, credsTime: n.hm >= s.creds_at, date: n.date };
   }
+  function addDays(ymd, n) { var d = new Date(ymd + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  /* Agli battle ki date (Supabase ka pc_next_battle_date jaisa): aaj, agar battle day hai aur entry abhi band nahi hui; warna agla Mon–Fri */
+  function nextBattle() {
+    var n = uaeNow(), s = sched(), days = s.days || [1, 2, 3, 4, 5];
+    for (var i = 0; i < 8; i++) {
+      var ymd = addDays(n.date, i), wd = new Date(ymd + 'T00:00:00Z').getUTCDay() || 7;
+      if (days.indexOf(wd) < 0 || (i === 0 && n.hm > s.join_close)) continue;
+      return ymd;
+    }
+    return n.date;
+  }
+  function dayLabel(ymd) {
+    var t = uaeNow().date;
+    if (ymd === t) return 'today';
+    if (ymd === addDays(t, 1)) return 'tomorrow';
+    return new Date(ymd + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  }
   var user = null, profile = null, timer = null;
 
   function show(name) {
@@ -93,8 +110,9 @@
     var b = e.target.closest('[data-join]');
     if (b) {
       b.disabled = true;
-      sb.from('web_entries').insert({ contest_date: windowState().date, user_id: user.id }).then(function (r) {
-        if (r.error && r.error.code !== '23505') { b.disabled = false; msg('[data-entry-msg]', 'Entry is closed right now. Entry is open Mon–Fri ' + hm12(sched().join_open) + ' – ' + hm12(sched().join_close) + ' UAE.', true); return; }
+      sb.from('web_entries').insert({ contest_date: b.getAttribute('data-join') || nextBattle(), user_id: user.id }).then(function (r) {
+        if (r.error && r.error.code !== '23505') { b.disabled = false; msg('[data-entry-msg]', 'Could not book your seat right now. Please refresh the page and try again.', true); return; }
+        msg('[data-entry-msg]', '');
         refresh();
       });
     }
@@ -106,12 +124,14 @@
     if (e.target.closest('[data-logout]')) sb.auth.signOut().then(function () { location.reload(); });
   });
 
-  function entryCard(en, cr) {
-    var s = sched(), w = windowState(), box = $('[data-entry]'), out = '';
+  function entryCard(en, cr, date) {
+    var s = sched(), w = windowState(), box = $('[data-entry]'), out = '', lab = dayLabel(date), today = date === w.date;
+    var title = $('[data-entry-title]'); if (title) title.textContent = today ? 'Today’s battle' : 'Next battle · ' + lab.charAt(0).toUpperCase() + lab.slice(1);
     if (!en) {
-      if (w.open) out = '<p class="muted2">Today’s battle is open for entry until ' + hm12(s.join_close) + ' UAE.</p><button class="btn btn-lg" type="button" data-join>Join today’s battle</button>';
-      else if (w.day && w.before) out = '<p class="muted2">Entry opens today at <b>' + hm12(s.join_open) + '</b> UAE. Come back then and tap Join.</p>';
-      else out = '<p class="muted2">Entry for the next battle opens at <b>' + hm12(s.join_open) + '</b> UAE, Monday to Friday.</p>';
+      if (today && w.open) out = '<p class="muted2">Today’s battle is open for entry until ' + hm12(s.join_close) + ' UAE.</p><button class="btn btn-lg" type="button" data-join="' + date + '">Join today’s battle</button>';
+      else out = '<p class="muted2">Book your seat now for <b>' + esc(lab) + '</b>. You are entered automatically when entry opens at ' + hm12(s.join_open) + ' UAE – nothing else to tap.</p><button class="btn btn-lg" type="button" data-join="' + date + '">Book my seat for ' + esc(lab) + '</button>';
+    } else if (en.status === 'pending' && (!today || w.before)) {
+      out = '<p><span class="tag-ok">BOOKED</span> Your seat for <b>' + esc(lab) + '</b> is booked. You are entered automatically at ' + hm12(s.join_open) + ' UAE, and your MT5 login appears here at ' + hm12(s.creds_at) + ' UAE.</p>';
     } else if (en.status === 'pending') {
       out = '<p><span class="tag-wait">CONFIRMING</span> We received your entry. Your seat is confirmed within about a minute.</p>';
     } else if (en.status === 'rejected') {
@@ -130,11 +150,17 @@
   }
 
   function refresh() {
-    var d = windowState().date;
+    var t = windowState().date, nb = nextBattle();
+    var q = function (tbl, cols, d) { return sb.from(tbl).select(cols).eq('contest_date', d).eq('user_id', user.id).maybeSingle(); };
     Promise.all([
-      sb.from('web_entries').select('status,reason,public_name').eq('contest_date', d).eq('user_id', user.id).maybeSingle(),
-      sb.from('web_creds').select('server,login,password').eq('contest_date', d).eq('user_id', user.id).maybeSingle()
-    ]).then(function (r) { entryCard(r[0].data, r[1].data); });
+      q('web_entries', 'status,reason,public_name', t),
+      q('web_creds', 'server,login,password', t),
+      nb === t ? Promise.resolve({ data: null }) : q('web_entries', 'status,reason,public_name', nb)
+    ]).then(function (r) {
+      // Aaj khel raha hai to result tak aaj ka card (MT5 login ke saath); warna agli battle ki booking
+      if (nb !== t && r[0].data && uaeNow().hm <= (sched().result_at || '21:30')) entryCard(r[0].data, r[1].data, t);
+      else entryCard(nb === t ? r[0].data : r[2].data, nb === t ? r[1].data : null, nb);
+    });
   }
 
   function load() {
