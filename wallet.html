@@ -16,20 +16,20 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080B12">
-<link rel="icon" href="assets/favicon.svg?v=45" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=45" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=45" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=45">
+<link rel="icon" href="assets/favicon.svg?v=46" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=46" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=46" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=46">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=45">
-<script src="assets/demo.js?v=45"></script>
-<script src="assets/site.js?v=45" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=46">
+<script src="assets/demo.js?v=46"></script>
+<script src="assets/site.js?v=46" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/wallet.js?v=45" defer></script>
-<script src="assets/v2.js?v=45" defer></script>
+<script src="assets/wallet.js?v=46" defer></script>
+<script src="assets/v2.js?v=46" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -50,6 +50,7 @@
 <main>
 
 <section class="section first"><div class="wrap acc wal" data-wallet>
+  <div data-w-view="loading"><p class="muted2">Loading your wallet…</p></div>
   <div class="w-test" data-w-test hidden><b>TEST MODE</b> – no real money. Deposits, entries and prizes here are for testing only.</div>
   <div class="card acc-card" data-w-view="login" hidden><h1>Wallet</h1><p class="muted2">Please log in to see your wallet.</p><a class="btn btn-lg" href="account.html#login">Log in</a></div>
   <div data-w-view="main" hidden class="w-main">
@@ -62,12 +63,17 @@
     <div class="v2-card" data-w-entries hidden></div>
 
     <div class="card acc-card" data-w-pane="dep"><h2>Deposit USDT</h2>
-      <ol class="w-steps"><li>Choose the network and copy our address.</li><li>Send USDT from your exchange or wallet (minimum <b data-w-min-dep>$10</b>).</li><li>Paste the amount and the transaction ID (TXID) below. We check it and add it to your wallet.</li></ol>
+      <ol class="w-steps"><li>Choose the network and type how much you want to add (minimum <b data-w-min-dep>$10</b>). We give you your own exact amount, like $50.37.</li><li>Send <b>exactly</b> that amount of USDT to our address.</li><li>Paste the transaction ID (TXID) below. We check it and add it to your wallet.</li></ol>
       <label for="w-dep-net">Network</label>
       <select id="w-dep-net"><option value="TRC20">USDT – TRON (TRC20)</option><option value="BEP20">USDT – BNB Smart Chain (BEP20)</option></select>
-      <div class="cred w-addr"><span>Send to</span><b class="mono" data-w-addr style="word-break:break-all">–</b><button class="btn btn-ghost btn-sm" type="button" data-w-addr-copy data-copy="">Copy</button></div>
-      <p class="muted2" style="font-size:13px">Send only USDT on <b data-w-net-name>TRON (TRC20)</b> to this address. Other coins or networks can be lost.</p>
-      <form data-w-dep-form><label for="w-dep-amt">Amount sent (USDT)</label><input id="w-dep-amt" type="number" min="1" step="0.01" inputmode="decimal" placeholder="10">
+      <form data-w-quote-form><label for="w-dep-want">Amount you want to add (USDT)</label><input id="w-dep-want" type="number" min="1" step="1" inputmode="numeric" placeholder="50">
+        <button class="btn" type="submit">Get my exact amount</button><p class="acc-msg" data-w-quote-msg role="status"></p></form>
+      <div data-w-send hidden>
+        <div class="cred w-addr"><span>Send exactly</span><b class="mono" data-w-quote-amt>–</b><button class="btn btn-ghost btn-sm" type="button" data-w-amt-copy data-copy="">Copy</button></div>
+        <div class="cred w-addr"><span>To</span><b class="mono" data-w-addr style="word-break:break-all">–</b><button class="btn btn-ghost btn-sm" type="button" data-w-addr-copy data-copy="">Copy</button></div>
+        <p class="muted2" style="font-size:13px">Send only USDT on <b data-w-net-name>TRON (TRC20)</b>, and exactly this amount – it is how we know the money is yours. Other coins or networks can be lost.</p>
+      </div>
+      <form data-w-dep-form hidden><label for="w-dep-amt">Amount sent (USDT)</label><input id="w-dep-amt" type="number" min="1" step="0.01" inputmode="decimal" placeholder="10" readonly>
         <label for="w-dep-tx">Transaction ID (TXID / hash)</label><input id="w-dep-tx" type="text" autocomplete="off" placeholder="Paste the TXID from your exchange">
         <button class="btn btn-lg" type="submit">I have sent it</button><p class="acc-msg" data-w-dep-msg role="status"></p></form>
       <div data-w-deps class="w-reqs"></div></div>
@@ -92,9 +98,12 @@
 </div></footer>
 </div></div>
 <script>(function(){var b=document.querySelector('[data-menu]'),n=document.getElementById('snav'),s=document.querySelector('[data-scrim]');
-function set(o){document.body.classList.toggle('menu-open',o);b.setAttribute('aria-expanded',o);s.hidden=!o;}
-b.addEventListener('click',function(){set(!document.body.classList.contains('menu-open'))});s.addEventListener('click',function(){set(false)});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
+var mq=matchMedia('(max-width:1023px)');   /* phone/tablet: band menu Tab se na pakda jaaye (WW9) */
+function set(o,f){document.body.classList.toggle('menu-open',o);b.setAttribute('aria-expanded',o);s.hidden=!o;n.inert=mq.matches&&!o;
+if(o&&f){var a=n.querySelector('a,button');if(a)a.focus();}if(!o&&f)b.focus();}
+set(false);mq.addEventListener('change',function(){set(false)});
+b.addEventListener('click',function(){var o=!document.body.classList.contains('menu-open');set(o,true)});s.addEventListener('click',function(){set(false,true)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('menu-open'))set(false,true)});
 })();</script>
 <script data-goatcounter="https://pipclash.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
