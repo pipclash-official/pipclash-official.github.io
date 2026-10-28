@@ -16,19 +16,19 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080B12">
-<link rel="icon" href="assets/favicon.svg?v=45" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=45" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=45" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=45">
+<link rel="icon" href="assets/favicon.svg?v=46" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=46" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=46" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=46">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=45">
-<script src="assets/demo.js?v=45"></script>
-<script src="assets/site.js?v=45" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=46">
+<script src="assets/demo.js?v=46"></script>
+<script src="assets/site.js?v=46" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/admin.js?v=45" defer></script>
+<script src="assets/admin.js?v=46" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -65,9 +65,12 @@
 </div></footer>
 </div></div>
 <script>(function(){var b=document.querySelector('[data-menu]'),n=document.getElementById('snav'),s=document.querySelector('[data-scrim]');
-function set(o){document.body.classList.toggle('menu-open',o);b.setAttribute('aria-expanded',o);s.hidden=!o;}
-b.addEventListener('click',function(){set(!document.body.classList.contains('menu-open'))});s.addEventListener('click',function(){set(false)});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')set(false)});
+var mq=matchMedia('(max-width:1023px)');   /* phone/tablet: band menu Tab se na pakda jaaye (WW9) */
+function set(o,f){document.body.classList.toggle('menu-open',o);b.setAttribute('aria-expanded',o);s.hidden=!o;n.inert=mq.matches&&!o;
+if(o&&f){var a=n.querySelector('a,button');if(a)a.focus();}if(!o&&f)b.focus();}
+set(false);mq.addEventListener('change',function(){set(false)});
+b.addEventListener('click',function(){var o=!document.body.classList.contains('menu-open');set(o,true)});s.addEventListener('click',function(){set(false,true)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('menu-open'))set(false,true)});
 })();</script>
 <script data-goatcounter="https://pipclash.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
