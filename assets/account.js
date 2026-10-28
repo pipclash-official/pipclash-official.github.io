@@ -189,29 +189,44 @@
       out = '<p><span class="tag-bad">NOT ACCEPTED</span> ' + esc(en.reason || 'Your entry could not be accepted.') + '</p>' +
         (PAY.on && !/back in your wallet/.test(en.reason || '') ? '<p class="muted2">Your entry fee has been refunded to your <a href="wallet.html">wallet</a>.</p>' : '');
     } else {
-      out = '<p><span class="tag-ok">YOU’RE IN</span> Your battle name is <b>' + esc(en.public_name) + '</b>.</p>';
-      if (cr) {
-        var row = function (k, v) { return '<div class="cred"><span>' + k + '</span><b class="mono">' + esc(v) + '</b><button class="btn btn-ghost btn-sm" type="button" data-copy="' + esc(v) + '">Copy</button></div>'; };
-        out += '<div class="creds"><h3>Your MT5 login</h3>' + row('Server', cr.server) + row('Login', cr.login) + row('Password', cr.password) +
-          '<p class="muted2">Trade only after ' + hm12(s.trade_start) + ' UAE. Do not change the password. All trades close at ' + hm12(s.trade_end) + '. <a href="guide.html">How to log in to MT5</a></p></div>';
+      out = cr ? '' : '<p><span class="tag-ok">YOU’RE IN</span> Your battle name is <b>' + esc(en.public_name) + '</b>.</p>';
+      if (cr) {   // final design: MT5 card – copy buttons + app kholne ka button + warning patti
+        var row = function (k, v) { return '<div class="v2-cred"><span>' + k + '</span><b class="tn">' + esc(v) + '</b><button class="v2-copy" type="button" data-copy="' + esc(v) + '" aria-label="Copy ' + k + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h11v11H9zM5 15H4V4h11v1"/></svg></button></div>'; };
+        var ua = navigator.userAgent, app = /android/i.test(ua) ? 'market://details?id=net.metaquotes.metatrader5'
+          : (/iphone|ipad/i.test(ua) ? 'https://apps.apple.com/app/metatrader-5/id413251709' : 'guide.html');
+        out += '<div class="v2-mt5"><div class="v2-lbl">🛡 Your MT5 login</div>' + row('Server', cr.server) + row('Login', cr.login) + row('Password', cr.password) +
+          '<a class="btn v2-btn" href="' + app + '">OPEN METATRADER 5</a></div>' +
+          '<div class="v2-warn">⏰ Trade only after <b>' + hm12(s.trade_start) + '</b>. Early trade = disqualified. Don’t change the password. <a href="guide.html">MT5 help</a></div>';
       } else {
         out += '<p class="muted2">Your MT5 login appears here at <b>' + hm12(s.creds_at) + '</b> UAE. Keep this page open or come back then.</p>';
       }
     }
     box.innerHTML = out;
+    var card = box.closest('.acc-card'); if (card) card.classList.toggle('v2-bare', !!(en && en.status === 'joined' && cr));
   }
 
   function refCard() {          // Invite friends: apna link + kitne dost aaye/khele
     var box = $('[data-ref-card]'); if (!box) return;
     if (!profile || !profile.ref_code) { box.hidden = true; return; }
     var link = location.origin + location.pathname + '?ref=' + profile.ref_code + '#signup';
+    var RF = window.PC_DEMO && window.PC_DEMO.refer; if (RF) link = RF.link;
     box.hidden = false;
     $('[data-ref-link]').textContent = link;
     $('[data-ref-copy]').setAttribute('data-copy', link);
     var wa = $('[data-ref-wa]'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent('Free daily trading battle – same $1,000 demo account, real prizes. Join with my link: ' + link);
-    sb.rpc('pc_my_referrals').then(function (r) {
-      var d = r.data && (r.data[0] || r.data);
-      $('[data-ref-stats]').textContent = d ? ('Friends joined: ' + (d.friends || 0) + ' · played a battle: ' + (d.played || 0)) : '';
+    var tg = $('[data-ref-tg]'); if (tg) tg.href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Daily MT5 trading battle – join with my link');
+    var cellR = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
+    if (RF) {
+      $('[data-ref-stats]').innerHTML = cellR(RF.friends, 'friends joined') + cellR(RF.played, 'played a battle') + cellR(usd(RF.earned), 'earned', true) + cellR(usd(RF.due), 'due after today');
+      var fl = $('[data-ref-friends]'); if (fl) { fl.hidden = false; fl.innerHTML = '<div class="v2-lbl">Your friends</div>' + RF.list.map(function (f) { return '<div class="v2-row v2-erow"><span>' + f[0] + '</span><span class="v2-mut">' + f[1] + ' battles · <b class="gold">' + usd(f[2]) + '</b></span></div>'; }).join(''); }
+      return;
+    }
+    Promise.all([sb.rpc('pc_my_referrals'), sb.from('ledger').select('amount,created_at').eq('user_id', user.id).eq('kind', 'referral')]).then(function (x) {
+      var d = x[0].data && (x[0].data[0] || x[0].data) || {}, rw = x[1].data || [], today = windowState().date;
+      var earned = rw.reduce(function (a, r) { return a + Number(r.amount); }, 0);
+      var todayAmt = rw.filter(function (r) { return String(r.created_at).slice(0, 10) === today; }).reduce(function (a, r) { return a + Number(r.amount); }, 0);
+      var cell = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
+      $('[data-ref-stats]').innerHTML = cell(d.friends || 0, 'friends joined') + cell(d.played || 0, 'played a battle') + cell(usd(earned), 'earned', true) + cell(usd(todayAmt), 'earned today');
     });
   }
 
@@ -230,6 +245,10 @@
   }
 
   function load() {
+    if (window.PC_DEMO) {   // preview demo: My battle + Refer PDF jaisa
+      var DM = window.PC_DEMO; user = { id: 'demo', email: '' }; profile = { name: 'Sultan', phone: '777', ref_code: 'DEMO' };
+      show('home'); entryCard({ status: 'joined', public_name: DM.user.name }, DM.creds, windowState().date); refCard(); return;
+    }
     sb.auth.getUser().then(function (r) {
       user = r.data && r.data.user;
       if (!user) { show('login'); return; }
