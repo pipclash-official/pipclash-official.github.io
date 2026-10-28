@@ -592,3 +592,23 @@ button,input,select,textarea{font-family:inherit}
 .a-act{white-space:nowrap}.a-act .btn{margin:2px}
 
 [data-free][hidden],[data-paid][hidden]{display:none!important}
+
+/* ---------- Admin v2 ---------- */
+.a-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.a-tabs button{flex:none;height:40px;padding:0 14px;border-radius:999px;border:1px solid #2A3A5E;background:transparent;color:var(--text);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.a-tabs button[aria-selected="true"]{background:var(--btn);border-color:var(--btn);color:#fff}
+.a-stat{text-align:left;cursor:pointer;color:var(--text);font:inherit;border:1px solid var(--line)}
+.a-stat:not([data-go]){cursor:default}
+.a-sm{font-size:12px}
+.a-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.a-row input{flex:1;min-width:180px}
+.a-form{display:flex;flex-direction:column;gap:10px}
+.a-flag td{background:rgba(245,158,11,.07)}
+.a-flags{font-size:12px;color:#FCD34D;margin-top:4px;word-break:break-word}
+.a-ticket{padding:14px;border-radius:12px;border:1px solid #22304D;display:flex;flex-direction:column;gap:6px}
+.a-total td{font-weight:800;border-top:2px solid var(--line)}
+.a-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#065F46;color:#D1FAE5;padding:10px 18px;border-radius:999px;font-weight:700;z-index:60}
+.adm select[data-bid]{height:44px;border-radius:12px;border:1px solid #2A3A5E;background:#0E1630;color:var(--text);font:inherit;padding:0 10px}
+:root[data-theme="light"] .a-tabs button{border-color:var(--line2)}
+:root[data-theme="light"] .a-ticket{border-color:var(--line2)}
+:root[data-theme="light"] .adm select[data-bid]{background:#fff;border-color:var(--line2)}
+:root[data-theme="light"] .a-flags{color:#B45309}
