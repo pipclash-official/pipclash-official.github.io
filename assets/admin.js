@@ -314,7 +314,8 @@
     }
   });
 
-  sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') load(); });
+  // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
+  sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
   load();
   setInterval(function () { if (!$('[data-a-view="main"]').hidden && ['dash', 'money', 'battle', 'support'].indexOf(TAB) >= 0 && !document.activeElement.matches('input,textarea,select')) render(); }, 30000);
 })();
