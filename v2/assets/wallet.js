@@ -52,6 +52,17 @@
 
   /* ---------- data ---------- */
   function load() {
+    if (window.PC_DEMO) {   // preview demo: PDF wale numbers, Supabase nahi
+      var W = window.PC_DEMO.wallet; show('main'); $('[data-w-test]').hidden = true;
+      $('[data-w-total]').textContent = usd(W.total); $('[data-w-bal]').textContent = usd(W.avail); $('[data-w-inb]').textContent = usd(W.inb);
+      $('[data-w-wdable]').textContent = usd(W.wdable); $('[data-w-wdp]').textContent = usd(W.wdp);
+      renderEntries(window.PC_DEMO.entries.map(function (e) { return { tier: e.tier, paid_fee: e.paid_fee, status: 'pending', contest_date: addDay(uaeDate(), 1) }; }));
+      $('[data-w-hist]').innerHTML = W.tx.map(function (t) {
+        return '<div class="v2-tx"><div><div>' + t[0] + '</div><div style="margin-top:4px">' + (t[3] ? '<span class="v2-chip v2-gold">PENDING</span>' : '<span class="v2-chip v2-up">COMPLETED</span>') + '</div></div>' +
+          '<div style="text-align:right"><b class="tn ' + (t[3] ? '' : (t[1] >= 0 ? 'up' : 'down')) + '">' + (t[3] ? usd(-t[1]) : (t[1] >= 0 ? '+' : '') + usd(t[1])) + '</b><div class="v2-mut tn" style="font-size:12px">bal ' + (t[2] == null ? '–' : usd(t[2])) + '</div></div></div>';
+      }).join('');
+      return;
+    }
     sb.auth.getUser().then(function (r) {
       user = r.data && r.data.user;
       if (!user) { show('login'); return; }
@@ -89,17 +100,18 @@
     var q = function (cols) { return sb.from('web_entries').select(cols).eq('user_id', user.id).gte('contest_date', uaeDate()).in('status', ['pending', 'joined']).order('contest_date', { ascending: true }); };
     return q('id,contest_date,status,tier,paid_fee,refunded').then(function (r) { return r.error ? q('id,contest_date,status,paid_fee,refunded') : r; });
   }
+  function addDay(d, n) { var x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
   function uaeDate() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Dubai' }).format(new Date()); }
   var TNAME = { 10: 'STARTER $10', 25: 'PRO $25', 50: 'ELITE $50' };
   function renderEntries(ents) {
     var box = $('[data-w-entries]'); if (!box) return;
     box.hidden = !ents.length;
-    var day = function (d) { return d === uaeDate() ? 'Today' : new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); };
-    box.innerHTML = '<div class="v2-lbl">Your entries</div>' + ents.map(function (e) {
+    var day = function (d) { return d === uaeDate() ? 'Today' : new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' }); };
+    box.innerHTML = '<div class="v2-lbl">Your entries today</div>' + ents.map(function (e) {
       return '<div class="v2-row v2-erow"><span><b>' + esc(TNAME[e.tier] || ('$' + Number(e.paid_fee))) + '</b> <span class="v2-mut">· ' + day(e.contest_date) + '</span></span>' +
         '<span class="v2-row" style="gap:8px"><span class="v2-chip v2-acc">' + (e.status === 'joined' ? 'IN BATTLE' : 'ENTERED') + '</span>' +
-        (e.status === 'pending' ? '<button class="btn btn-ghost btn-sm" type="button" data-w-cancel="' + (e.tier || '') + '" data-w-fee="' + Number(e.paid_fee) + '">Cancel</button>' : '') + '</span></div>';
-    }).join('') + '<p class="v2-mut" style="margin:8px 0 0">Cancel gives the fee back to your wallet until you are entered into the battle at 10:00 AM UAE.</p>';
+        (e.status === 'pending' ? '<button class="v2-cancel" type="button" data-w-cancel="' + (e.tier || '') + '" data-w-fee="' + Number(e.paid_fee) + '">Cancel</button>' : '') + '</span></div>';
+    }).join('');
   }
   root.addEventListener('click', function (e) {
     var b = e.target.closest('[data-w-cancel]'); if (!b) return;
