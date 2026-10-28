@@ -185,6 +185,8 @@
     } else if (en.status === 'pending') {
       out = '<p><span class="tag-wait">CONFIRMING</span> We received your entry. Your seat is confirmed within about a minute.</p>';
       if (PAY.on) out = tnote + out + '<button class="btn btn-ghost" type="button" data-cancel>Cancel & get ' + usd(PAY.fee) + ' back</button>';
+    } else if (en.status === 'joining') {   // engine abhi battle mein jod raha hai (E8) – cancel nahi
+      out = '<p><span class="tag-wait">CONFIRMING</span> You are being added to the battle right now. This takes about a minute.</p>';
     } else if (en.status === 'rejected') {
       out = '<p><span class="tag-bad">NOT ACCEPTED</span> ' + esc(en.reason || 'Your entry could not be accepted.') + '</p>' +
         (PAY.on && !/back in your wallet/.test(en.reason || '') ? '<p class="muted2">Your entry fee has been refunded to your <a href="wallet.html">wallet</a>.</p>' : '');
