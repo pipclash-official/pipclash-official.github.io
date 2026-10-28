@@ -785,3 +785,19 @@ body.v2-refer-only #refer>.v2-lbl:first-child{display:none}
 .res-table td,.res-table th{white-space:nowrap}.pct-sm{white-space:nowrap}
 .v2-me a,.v2-lo,.v2-foot a,.cert-link{display:inline-block;padding:6px 2px}
 body:has(.v2-you:not([hidden])) .foot{padding-bottom:84px}   /* YOU patti footer links na dhake */
+
+/* ---- 29 Oct: website chhote kaam ---- */
+/* W15: neela sirf buttons ka – likhe hue link text rang + underline */
+a{color:var(--text);text-decoration:underline;text-decoration-color:rgba(238,242,248,.35);text-underline-offset:3px}
+a:hover{color:#fff;text-decoration-color:currentColor}
+.btn,.btn:hover,.sn-it,.v2-card,.v2-trow,.res-item,.v2-brand,.brand,.v2-login,.v2-balchip,.v2-depbtn,.v2-tgcard,.tjoin,.qnav a,.nav a,.sn-logo{text-decoration:none}
+/* W14: chhote tap targets kam se kam 40px */
+.v2-me a,.v2-lo,.v2-foot a,.cert-link,.v2-lbl a,.v2-mut a{display:inline-flex;align-items:center;min-height:40px;padding:0 4px}
+.acc-check{min-height:40px}.acc-check input{width:22px;height:22px}
+/* WW11: warning mein time gold nahi (gold sirf inaam ka) */
+.v2-warn b{color:var(--text)}
+/* WW10: 375px phone */
+.v2-stat b{white-space:nowrap}
+@media (max-width:420px){.v2-grid3 .v2-stat b{font-size:15.5px}.v2-steps span{font-size:11.5px;white-space:nowrap}}
+[id]{scroll-margin-top:84px}      /* #refer / #t25 upar wali patti ke neeche na chhupe */
+.res-name,.res-tn,td{overflow-wrap:normal;word-break:keep-all}
