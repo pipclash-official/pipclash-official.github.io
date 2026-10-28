@@ -14,6 +14,7 @@
   /* Test ke liye: page?at=11:00 = us UAE time jaisa dikhao (sirf dikhawa, data nahi badalta) */
   var SHIFT = 0, AT = (location.hostname === 'localhost' || location.pathname.indexOf('/v2/') === 0) && /[?&]at=(\d\d):(\d\d)/.exec(location.search);   // test switch – live site pe kabhi nahi
   function now() { return Date.now() + SHIFT; }
+  window.PC_NOW = now;      // site.js bhi wahi (test) time le (WW6)
   var DEMO_LIVE = null;
   function D() {
     var dm = window.PC_DEMO;
@@ -22,7 +23,7 @@
         var t0 = new Date().toISOString().slice(0, 10), L = dm.live;
         DEMO_LIVE = { updated_utc: 'demo', schedule: (window.PC_DATA || {}).schedule,
           battle: { status: 'live', players: L.players, in_profit: L.in_profit, update_no: L.update_no, updates_total: L.updates_total, start_utc: t0 + 'T12:30:00+00:00',
-                    next_update_utc: new Date(new Date(t0 + 'T' + L.next + ':00+04:00').getTime() + 6e5).toISOString() },
+                    next_update_utc: new Date(t0 + 'T' + L.next + ':00+04:00').toISOString() },
           standings: L.rows.map(function (r, i) { return { rank: i + 1, name: r[0], cc: r[1], pnl: r[2] }; }).concat([{ rank: L.you[0], name: dm.user.name, cc: 'in', pnl: L.you[1] }]) };
       }
       return DEMO_LIVE;
@@ -100,7 +101,7 @@
   function loadSettings() {
     return rest('pc_settings?select=key,value').then(function (rows) {
       (rows || []).forEach(function (r) {
-        if (r.key === 'paid_entry') S.paid = r.value === true;
+        if (r.key === 'paid_entry') { S.paid = r.value === true; window.PC_PAID = S.paid; }
         if (r.key === 'tiers' && Array.isArray(r.value)) S.tiers = r.value.map(Number).sort(function (a, b) { return a - b; });
         if (r.key === 'max_seats') S.seats = +r.value || 100;
       });
@@ -139,7 +140,7 @@
         S.kyc = x[3].data && x[3].data.status;
         S.mine = {};
         var today = uaeNow().date;
-        S.entries.forEach(function (e) { if (e.contest_date >= today && (e.status === 'pending' || e.status === 'joined')) S.mine[e.tier || 0] = e; });
+        S.entries.forEach(function (e) { if (e.contest_date >= today && (e.status === 'pending' || e.status === 'joining' || e.status === 'joined')) S.mine[e.tier || 0] = e; });
       });
     }).catch(function () {});
   }
@@ -177,13 +178,13 @@
     } else if (ph.k === 'closed' || ph.k === 'live') {
       var live = ph.k === 'live';
       head = (live ? chip('● LIVE', 'down') : chip('ENTRY CLOSED', 'gold')) + '<span class="v2-mut">' + (live ? 'time left' : 'starts in') + ' <b class="tn" data-v2-left>' + left(ph.to) + '</b></span>';
-      body = '<div class="v2-row v2-mut"><span class="tn">' + (b.players || t.taken) + ' traders</span><span class="tn">' + (live && b.update_no ? 'Round ' + b.update_no + ' / ' + (b.updates_total || 19) : 'Login sent ' + hm12(s.creds_at)) + '</span></div>' +
+      body = '<div class="v2-row v2-mut"><span class="tn">' + (b.players || t.taken) + ' traders</span><span class="tn">' + (live && b.update_no ? 'Round ' + b.update_no + ' / ' + (b.updates_total || 19) : (uaeNow().hm < s.creds_at ? 'Login at ' : 'Login sent ') + hm12(s.creds_at)) + '</span></div>' +
         bar(live && b.updates_total ? (b.update_no || 0) / b.updates_total * 100 : 0) + poolBox(t.free ? 'Prize table' : 'Final prize pool');
       cta = '<a class="btn btn-lg v2-btn" href="arena.html">WATCH LIVE ARENA →</a>';
     } else {
       var top = st[0], final = b.status === 'ended';
-      head = (final ? chip('COMPLETED', 'up') : chip('PENDING · RESULT ' + hm12(s.result_at) + ' UAE', 'gold')) + '<span class="v2-mut">' + dayName(ph.date) + '</span>';
-      body = top ? '<div class="v2-win"><img src="assets/3d/trophy-only.webp" width="64" height="64" alt=""><div><div class="v2-mut">' + (final ? 'Winner' : 'Leading') + '</div><b style="font-size:17px">' + esc(top.name) + '</b><div class="' + (top.pnl >= 0 ? 'up' : 'down') + ' tn">' + (top.pnl >= 0 ? '▲ +' : '▼ −') + usd(Math.abs(top.pnl), true) + '</div></div></div>'
+      head = (final ? chip('COMPLETED', 'up') : chip('PENDING · RESULT ' + (uaeNow().hm >= s.result_at ? 'SOON' : hm12(s.result_at) + ' UAE'), 'gold')) + '<span class="v2-mut">' + dayName(ph.date) + '</span>';
+      body = top ? '<div class="v2-win"><img src="assets/3d/trophy-cup.webp" width="64" height="64" alt=""><div><div class="v2-mut">' + (final ? 'Winner' : 'Leading') + '</div><b style="font-size:17px">' + esc(top.name) + '</b><div class="' + (top.pnl >= 0 ? 'up' : 'down') + ' tn">' + (top.pnl >= 0 ? '▲ +' : '▼ −') + usd(Math.abs(top.pnl), true) + '</div></div></div>'
         : '<div class="v2-mut">No ranked traders today.</div>';
       cta = '<a class="btn btn-lg v2-btn" href="' + (final ? 'winners.html' : 'arena.html') + '">' + (final ? 'SEE RESULTS' : 'SEE STANDINGS') + ' →</a><div class="v2-mut" style="text-align:center;margin-top:8px">Next battle: ' + dayName(ph.next) + ' · ' + hm12(s.trade_start) + ' UAE · <a href="join.html">book a seat</a></div>';
     }
@@ -239,7 +240,8 @@
     var when = $('[data-v2-when]');
     if (when) when.innerHTML = ph.k === 'open' ? 'Entry closes in <b class="tn" data-v2-left>' + left(ph.to) + '</b> · ' + hm12(sched().join_close) + ' UAE'
       : ph.k === 'soon' ? 'Entry opens ' + hm12(sched().join_open) + ' UAE – you can book a seat now'
-        : 'Today’s entry is closed – seats below are for ' + dayName(ph.k === 'next' ? ph.date : nextDay(ph.date, true));
+        : ph.k === 'next' ? 'No battle today – seats below are for ' + dayName(ph.date)
+        : 'Today’s entry is closed – seats below are for ' + dayName(nextDay(ph.date, true));
     box.innerHTML = list.map(function (t) {
       var elite = t.fee >= 50, pro = t.fee === 25, mine = S.mine[t.fee];
       var badge = t.free ? chip('FREE', 'up') : (t.taken >= t.max ? chip('FULL', 'down') : elite ? '<span class="v2-chip v2-vip">VIP</span>' : pro ? '<span class="v2-chip v2-pop">POPULAR</span>' : chip('● ENTRY OPEN', 'up'));
@@ -252,7 +254,7 @@
       else btn = '<button class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" data-enter="' + t.fee + '">' + (t.day === uaeNow().date ? 'JOIN BATTLE' : 'BOOK ' + dayName(t.day).toUpperCase()) + ' · ' + usd(t.fee) + '</button>';
       return '<div class="v2-card v2-tcard' + (elite ? ' gold' : pro ? ' pro' : '') + '" id="t' + t.fee + '">' +
         '<div class="v2-row"><div><div class="v2-eyebrow' + (elite ? ' gold' : pro ? ' acc' : '') + '">' + t.name + '</div><b class="tn" style="font-size:22px">' + (t.free ? 'Free' : usd(t.fee)) + ' <span class="v2-mut" style="font-weight:500">entry</span></b></div>' + badge + '</div>' +
-        '<div class="v2-grid3"><div><div class="v2-mut">Prize pool</div><b class="tn gold">' + usd(t.pool) + '</b></div><div><div class="v2-mut">Players</div><b class="tn">' + t.taken + '</b></div><div><div class="v2-mut">' + (t.max ? 'Seats left' : 'Day') + '</div><b class="tn">' + (t.max ? Math.max(0, t.max - t.taken) : dayName(t.day)) + '</b></div></div>' +
+        '<div class="v2-grid3"><div><div class="v2-mut">' + (t.free ? 'Prizes' : 'Prize pool') + '</div><b class="tn gold">' + usd(t.pool) + '</b></div><div><div class="v2-mut">Players</div><b class="tn">' + t.taken + '</b></div><div><div class="v2-mut">' + (t.max ? 'Seats left' : 'Day') + '</div><b class="tn">' + (t.max ? Math.max(0, t.max - t.taken) : dayName(t.day)) + '</b></div></div>' +
         (t.max ? bar(t.taken / t.max * 100, elite) : '') + '<div class="v2-mut tn" style="margin:8px 0 12px">' + prizes + '</div>' + btn + '<p class="v2-msg" data-msg="' + t.fee + '" role="status"></p></div>';
     }).join('');
   }
@@ -283,13 +285,15 @@
       chipH = chip('● LIVE', 'down') + '<b class="tn">' + (b.players || 0) + ' TRADERS</b>' + (waiting ? chip('⟳ UPDATING', 'acc') : chip('Round ' + (b.update_no || 0) + ' / ' + (b.updates_total || 19), 'acc'));
       lab = 'TIME LEFT'; big = '<span data-v2-left>' + left(ph.to) + '</span>';
       var ft = t[t.length - 1];
-      foot = (ft.free ? 'FREE battle' : ft.name + ' ' + usd(ft.fee)) + ' · pool ' + usd(pool) + ' · ' + (b.in_profit || 0) + ' in profit' + (nxt && !waiting ? ' · next update ' + nxt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Dubai' }) : '');
+      foot = (ft.free ? 'FREE battle · prizes ' : ft.name + ' ' + usd(ft.fee) + ' · pool ') + usd(pool) + ' · ' + (b.in_profit || 0) + ' in profit' + (nxt && !waiting ? ' · next update ' + nxt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Dubai' }) : '');
     } else if (ph.k === 'closed') {
       chipH = chip('ENTRY CLOSED', 'gold') + '<b class="tn">' + (b.players || 0) + ' TRADERS</b>';
       lab = 'STARTS IN'; big = '<span data-v2-left>' + left(ph.to) + '</span>'; foot = 'MT5 logins are sent at ' + hm12(s.creds_at) + ' UAE';
     } else if (ph.k === 'done' && today && (st === 'review' || st === 'live')) {
       chipH = chip('PENDING', 'gold') + '<b class="tn">' + (b.players || 0) + ' TRADERS</b>';
-      lab = 'FINAL RESULT AT'; big = hm12(s.result_at); foot = 'Trades are checked before prizes are final.';
+      var late = uaeNow().hm >= s.result_at;
+      lab = late ? 'FINAL RESULT' : 'FINAL RESULT AT'; big = late ? 'Soon' : hm12(s.result_at);
+      foot = late ? 'Checks are taking a little longer – the final result is coming soon.' : 'Trades are checked before prizes are final.';
     } else if (ph.k === 'done' && today) {
       chipH = chip('COMPLETED', 'up') + '<b class="tn">' + (b.players || 0) + ' TRADERS</b>';
       lab = 'BATTLE COMPLETE'; big = 'Final'; foot = '<a href="winners.html">See the full result →</a>';
@@ -322,11 +326,12 @@
   function steps() {
     var box = $('[data-v2-steps]'); if (!box) return;
     if (!S.user) { box.innerHTML = ''; return; }
-    var ph = phase(), s = sched(), today = uaeNow().date, mineToday = (S.entries || []).some(function (e) { return e.contest_date === today && (e.status === 'pending' || e.status === 'joined'); });
+    var ph = phase(), s = sched(), today = uaeNow().date, mineToday = (S.entries || []).some(function (e) { return e.contest_date === today && (e.status === 'pending' || e.status === 'joining' || e.status === 'joined'); });
     var hm = uaeNow().hm, done = [mineToday, hm >= s.join_close, hm >= s.creds_at, hm >= s.trade_start];
-    var lab = ['Entered', 'Closed ' + hm12(s.join_close), 'Login ' + hm12(s.creds_at), 'Trade ' + hm12(s.trade_start)];
+    var sh = function (hm) { return hm12(hm).replace(':00', ''); };      // '4 PM' – phone pe ek line (WW10)
+    var lab = ['Entered', 'Closed ' + sh(s.join_close), 'Login ' + sh(s.creds_at), 'Trade ' + sh(s.trade_start)];
     if (!mineToday) { box.innerHTML = ''; return; }
-    var mine = (S.entries || []).filter(function (e) { return e.contest_date === today && (e.status === 'pending' || e.status === 'joined'); });
+    var mine = (S.entries || []).filter(function (e) { return e.contest_date === today && (e.status === 'pending' || e.status === 'joining' || e.status === 'joined'); });
     var pills = mine.map(function (e, i) { var f = e.tier || Number(e.paid_fee) || 0; return '<span class="v2-chip ' + (i ? 'v2-out' : 'v2-pop') + '">' + (f ? (NAMES[f] || '') + ' ' + usd(f) : 'FREE BATTLE') + '</span>'; }).join('');
     box.innerHTML = '<div class="v2-row" style="margin-bottom:10px"><span class="v2-row" style="gap:6px">' + pills + '</span>' + chip(mine.some(function (e) { return e.status === 'joined'; }) ? 'ENTERED' : 'BOOKED', 'acc') + '</div>' +
       '<div class="v2-steps">' + lab.map(function (l, i) { return '<div class="' + (done[i] ? 'on' : '') + '"><i></i><span>' + l + '</span></div>'; }).join('') + '</div>' +
@@ -358,8 +363,8 @@
     if (window.PC_DEMO) {   // PDF: YOU FINISHED #3 · PRO $25
       var X = window.PC_DEMO.result, pt = paidTable(X.traders, X.fee), rk = { 1: 'g', 2: 's', 3: 'b' };
       box.innerHTML = '<div class="v2-cere"><div class="v2-spark"></div>' + chip('COMPLETED', 'up') + '<div class="v2-eyebrow gold" style="margin-top:8px">BATTLE COMPLETE · ' + X.table + '</div>' +
-        '<img src="assets/3d/trophy-only.webp" width="110" height="110" alt="" class="v2-cere-cup"><div class="v2-mut">YOU FINISHED</div><div class="v2-cere-rank">#' + X.you + '</div>' +
-        '<div class="v2-grid3"><div class="v2-stat"><span>P&amp;L</span><b class="tn up">+' + usd(X.pnl, true) + ' ▲</b></div><div class="v2-stat"><span>ROI</span><b class="tn up">' + (X.pnl / 10).toFixed(2) + '%</b></div>' +
+        '<img src="assets/3d/trophy-cup.webp" width="110" height="110" alt="" class="v2-cere-cup"><div class="v2-mut">YOU FINISHED</div><div class="v2-cere-rank">#' + X.you + '</div>' +
+        '<div class="v2-grid3"><div class="v2-stat"><span>P&amp;L</span><b class="tn up">+' + usd(X.pnl, true) + '</b></div><div class="v2-stat"><span>ROI</span><b class="tn up">▲ +' + (X.pnl / 10).toFixed(2) + '%</b></div>' +
         '<div class="v2-stat" style="border-color:#D6A84F"><span>Prize</span><b class="tn gold">' + usd(pt.rows[X.you - 1], true) + '</b></div></div>' +
         '<div class="v2-mut" style="margin-top:8px">' + chip('PENDING', 'gold') + ' added to wallet after ID check</div></div>' +
         '<div class="v2-card" style="padding:8px 10px;margin-top:12px">' + X.top.map(function (t, i) { return '<div class="v2-lrow' + (t[0] === 'YOU' ? ' me' : '') + '"><span class="v2-rk ' + rk[i + 1] + '">' + (i + 1) + '</span><b class="v2-ln">' + t[0] + '</b><span class="v2-lp tn up"><b>+' + usd(t[1], true) + ' ▲</b><small>+' + (t[1] / 10).toFixed(1) + '%</small></span><b class="tn gold" style="width:64px;text-align:right">' + usd(pt.rows[i], true) + '</b></div>'; }).join('') + '</div>' +
@@ -374,7 +379,7 @@
     var pct = hero.pct != null ? hero.pct : hero.pnl / 10;
     box.innerHTML = '<div class="v2-cere"><div class="v2-spark"></div>' + chip('COMPLETED', 'up') +
       '<div class="v2-eyebrow gold" style="margin-top:8px">BATTLE COMPLETE · ' + esc(b.date).toUpperCase() + ' · #' + b.id + '</div>' +
-      '<img src="assets/3d/trophy-only.webp" width="110" height="110" alt="" class="v2-cere-cup">' +
+      '<img src="assets/3d/trophy-cup.webp" width="110" height="110" alt="" class="v2-cere-cup">' +
       '<div class="v2-mut">' + (me ? 'YOU FINISHED' : 'WINNER') + '</div><div class="v2-cere-rank">' + (me ? '#' + me.rank : esc(hero.name)) + '</div>' +
       '<div class="v2-grid3"><div class="v2-stat"><span>P&amp;L</span><b class="tn ' + (hero.pnl >= 0 ? 'up' : 'down') + '">' + (hero.pnl >= 0 ? '+' : '−') + usd(Math.abs(hero.pnl), true) + '</b></div>' +
       '<div class="v2-stat"><span>ROI</span><b class="tn ' + (pct >= 0 ? 'up' : 'down') + '">' + (pct >= 0 ? '▲ +' : '▼ −') + Math.abs(pct).toFixed(2) + '%</b></div>' +
@@ -383,7 +388,7 @@
       '</div>' +
       '<div class="v2-card" style="padding:8px 10px;margin-top:12px">' + ranked.slice(0, 3).map(function (r) {
         var p = r.pnl || 0, pc = r.pct != null ? r.pct : p / 10;
-        return '<div class="v2-lrow' + (r.name === nm ? ' me' : '') + '"><span class="v2-rk ' + ({ 1: 'g', 2: 's', 3: 'b' }[r.rank] || '') + '">' + r.rank + '</span><b class="v2-ln">' + esc(r.name === nm ? 'YOU' : r.name) + '</b>' +
+        return '<div class="v2-lrow' + (r.name === nm ? ' me' : '') + '"><span class="v2-rk ' + (p > 0 && { 1: 'g', 2: 's', 3: 'b' }[r.rank] || '') + '">' + r.rank + '</span><b class="v2-ln">' + esc(r.name === nm ? 'YOU' : r.name) + '</b>' +
           '<span class="v2-lp tn ' + (p > 0 ? 'up' : p < 0 ? 'down' : '') + '"><b>' + (p < 0 ? '−' : '+') + usd(Math.abs(p), true) + '</b><small>' + (p > 0 ? '▲ +' : p < 0 ? '▼ −' : '') + Math.abs(pc).toFixed(1) + '%</small></span>' +
           '<b class="tn gold" style="width:56px;text-align:right">' + (r.prize ? usd(r.prize) : '–') + '</b></div>';
       }).join('') + '</div>' +
@@ -400,7 +405,7 @@
     var list = rows.filter(function (r) { return !q || r.name.toLowerCase().indexOf(q) >= 0; });
     box.innerHTML = (list.length ? list.map(function (r) {
       var p = r.pnl || 0, pct = p / 10, up = p > 0, dn = p < 0;
-      return '<div class="v2-lrow' + (r.rank === 1 && p > 0 ? ' first' : '') + (r.name === nm ? ' me' : '') + '"><span class="v2-rk ' + (medal[r.rank] || '') + '">' + r.rank + '</span>' +
+      return '<div class="v2-lrow' + (r.rank === 1 && p > 0 ? ' first' : '') + (r.name === nm ? ' me' : '') + '"><span class="v2-rk ' + (p > 0 && medal[r.rank] || '') + '">' + r.rank + '</span>' +
         (r.cc ? '<span class="v2-cc">' + esc(r.cc.toUpperCase()) + '</span>' : '') + '<b class="v2-ln">' + esc(r.name) + (r.move > 0 ? ' <span class="up" style="font-size:11px">▲' + r.move + '</span>' : '') + '</b>' +
         '<span class="v2-lp tn ' + (up ? 'up' : dn ? 'down' : '') + '"><b>' + (dn ? '−' : '+') + usd(Math.abs(p), true) + '</b><small>' + (up ? '▲ +' : dn ? '▼ −' : '') + Math.abs(pct).toFixed(1) + '%</small></span></div>';
     }).join('') : '<div class="v2-mut">' + (q ? 'No trader with that name.' : 'Standings appear when the battle starts at ' + hm12(sched().trade_start) + ' UAE.') + '</div>') +
@@ -441,9 +446,14 @@
     document.body.insertBefore(d, document.body.firstChild);
   }
 
+  var LOAD_FAIL = false;
+  function paidToggle() {   // WW4: data-free / data-paid hamesha pc_settings (asli switch) se
+    document.querySelectorAll('[data-free]').forEach(function (el) { el.hidden = S.paid; });
+    document.querySelectorAll('[data-paid]').forEach(function (el) { el.hidden = !S.paid; });
+  }
   function renderAll() {
-    if (!window.PC_DATA && !window.PC_DEMO) { shell(); join(); return; }   // live.js aane tak 'Loading…' – galat halat ki jhalak nahi
-    demoStrip(); referMode(); shell(); hero(); upcoming(); perf(); join(); arena(); leaderboard(); steps(); past(); ceremony(); }
+    if (!window.PC_DATA && !window.PC_DEMO && !LOAD_FAIL) { shell(); join(); return; }   // live.js aane tak 'Loading…' – galat halat ki jhalak nahi
+    demoStrip(); referMode(); paidToggle(); shell(); hero(); upcoming(); perf(); join(); arena(); leaderboard(); steps(); past(); ceremony(); }
   function tick() {
     var ph = phase(), a = $('[data-v2-arena]');
     document.querySelectorAll('[data-v2-left]').forEach(function (el) { if (ph.to) el.textContent = left(ph.to); });
@@ -465,6 +475,7 @@
     renderAll();
     Promise.all([loadSettings(), loadUser(), results()]).then(renderAll);
     setInterval(watch, 1000);
+    setTimeout(function () { if (!window.PC_DATA) { LOAD_FAIL = true; renderAll(); } }, 12000);   // net/data fail
     setInterval(function () { loadSettings().then(renderAll); }, 60000);
   });
 })();
