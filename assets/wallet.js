@@ -9,8 +9,8 @@
   var sb = window.PC_SB = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' } });   // v2.js bhi yahi use karta hai
   var $ = function (s) { return root.querySelector(s); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var usd = function (v) { v = Number(v) || 0; return (v < 0 ? '−' : '') + '$' + Math.abs(v).toFixed(2); };
-  var when = function (iso) { return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
+  var usd = function (v) { v = Number(v) || 0; return (v < 0 ? '−' : '') + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };   // $1,250.00 (WW12)
+  var when = function (iso) { return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' }) + ' UAE'; };   // UAE time (WW12)
   var S = {}, user = null, kyc = null;
 
   var ERR = {
@@ -18,7 +18,9 @@
     BAD_TXID: 'Please paste the full transaction ID (TXID / hash).', BAD_ADDRESS: 'Please paste your full USDT wallet address.',
     TOO_MANY_PENDING: 'You already have 3 deposits waiting. Please wait until they are checked.', ONE_PENDING: 'You already have a withdrawal waiting. Please wait until it is paid.',
     KYC_REQUIRED: 'Please verify your ID first (below).', NO_PROFILE: 'Please complete your details on My account first.', BAD_NETWORK: 'Please choose TRC20 or BEP20.',
-    ALREADY_APPROVED: 'Your ID is already verified.', BAD_PATH: 'Upload failed – please try again.'
+    ALREADY_APPROVED: 'Your ID is already verified.', BAD_PATH: 'Upload failed – please try again.',
+    GET_AMOUNT_FIRST: 'Please tap “Get my exact amount” first.', AMOUNT_MISMATCH: 'Please send and enter exactly your amount – get a new one if you changed the network.',
+    TXID_USED: 'This TXID was already submitted.', TRY_AGAIN: 'Please try again in a moment.'
   };
   function errText(e) {
     var m = String((e && (e.message || e.error_description)) || e || '');
@@ -79,7 +81,7 @@
         var bal = x[0].data ? Number(x[0].data.balance) : 0;
         var ents = (x[5].data || []).filter(function (e) { return Number(e.paid_fee) > 0 && !e.refunded; });
         var inb = ents.reduce(function (a, e) { return a + Number(e.paid_fee); }, 0);
-        var wdp = (x[3].data || []).filter(function (w) { return w.status === 'pending'; }).reduce(function (a, w) { return a + Number(w.amount); }, 0);
+        var wdp = (x[3].data || []).filter(function (w) { return w.status === 'pending' || w.status === 'processing'; }).reduce(function (a, w) { return a + Number(w.amount); }, 0);
         kyc = x[4].data;
         $('[data-w-bal]').textContent = usd(bal);
         $('[data-w-inb]').textContent = usd(inb);
@@ -88,16 +90,17 @@
         $('[data-w-total]').textContent = usd(bal + inb + wdp);
         renderEntries(ents);
         var pend = (x[2].data || []).filter(function (d) { return d.status === 'pending'; }).map(function (d) { return { kind: 'deposit', note: d.network, amount: Number(d.amount), created_at: d.created_at, pending: true }; })
-          .concat((x[3].data || []).filter(function (w) { return w.status === 'pending'; }).map(function (w) { return { kind: 'withdraw', note: w.network, amount: -Number(w.amount), created_at: w.created_at, pending: true }; }));
+          .concat((x[3].data || []).filter(function (w) { return w.status === 'pending' || w.status === 'processing'; }).map(function (w) { return { kind: 'withdraw', note: w.network, amount: -Number(w.amount), created_at: w.created_at, pending: true }; }));
         renderHistory(pend.concat(x[1].data || []));
         renderReq('[data-w-deps]', x[2].data || [], 'deposit');
+        loadQuote();
         renderReq('[data-w-wds]', x[3].data || [], 'withdraw');
         renderKyc();
       });
     });
   }
   function myEntries() {   // tier column supabase_tiers.sql ke baad aata hai – usse pehle bina tier
-    var q = function (cols) { return sb.from('web_entries').select(cols).eq('user_id', user.id).gte('contest_date', uaeDate()).in('status', ['pending', 'joined']).order('contest_date', { ascending: true }); };
+    var q = function (cols) { return sb.from('web_entries').select(cols).eq('user_id', user.id).gte('contest_date', uaeDate()).in('status', ['pending', 'joining', 'joined']).order('contest_date', { ascending: true }); };
     return q('id,contest_date,status,tier,paid_fee,refunded').then(function (r) { return r.error ? q('id,contest_date,status,paid_fee,refunded') : r; });
   }
   function addDay(d, n) { var x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
@@ -107,7 +110,7 @@
     var box = $('[data-w-entries]'); if (!box) return;
     box.hidden = !ents.length;
     var day = function (d) { return d === uaeDate() ? 'Today' : new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' }); };
-    box.innerHTML = '<div class="v2-lbl">Your entries today</div>' + ents.map(function (e) {
+    box.innerHTML = '<div class="v2-lbl">' + (ents.every(function (e) { return e.contest_date === uaeDate(); }) ? 'Your entries today' : 'Your upcoming entries') + '</div>' + ents.map(function (e) {
       return '<div class="v2-row v2-erow"><span><b>' + esc(TNAME[e.tier] || ('$' + Number(e.paid_fee))) + '</b> <span class="v2-mut">· ' + day(e.contest_date) + '</span></span>' +
         '<span class="v2-row" style="gap:8px"><span class="v2-chip v2-acc">' + (e.status === 'joined' ? 'IN BATTLE' : 'ENTERED') + '</span>' +
         (e.status === 'pending' ? '<button class="v2-cancel" type="button" data-w-cancel="' + (e.tier || '') + '" data-w-fee="' + Number(e.paid_fee) + '">Cancel</button>' : '') + '</span></div>';
@@ -155,7 +158,37 @@
   }
 
   /* ---------- actions ---------- */
-  $('#w-dep-net').addEventListener('change', setAddr);
+  $('#w-dep-net').addEventListener('change', function () { setAddr(); quote(null); });
+  // S5: har player ka apna exact amount ($50.37) – usi se pata chalta hai ki TXID usi ka hai
+  var QUOTE_OK = true;     // false = supabase_paid_round2.sql abhi nahi chala – purana form
+  function quote(q) {
+    var on = !!q || !QUOTE_OK;
+    $('[data-w-send]').hidden = !on; $('[data-w-dep-form]').hidden = !on;
+    $('#w-dep-amt').readOnly = QUOTE_OK;
+    if (q) {
+      $('[data-w-quote-amt]').textContent = usd(q.amount) + ' USDT'; $('[data-w-amt-copy]').setAttribute('data-copy', Number(q.amount).toFixed(2));
+      $('#w-dep-amt').value = Number(q.amount).toFixed(2);
+      if (q.network && $('#w-dep-net').value !== q.network) { $('#w-dep-net').value = q.network; setAddr(); }
+    } else if (QUOTE_OK) $('#w-dep-amt').value = '';
+  }
+  function loadQuote() {
+    if (!user) return;
+    sb.from('deposit_quotes').select('amount,network,created_at').eq('user_id', user.id).maybeSingle().then(function (r) {
+      if (r.error) { QUOTE_OK = false; $('[data-w-quote-form]').hidden = true; quote(null); return; }
+      var q = r.data; quote(q && Date.now() - new Date(q.created_at) < 864e5 ? q : null);
+    });
+  }
+  $('[data-w-quote-form]').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var want = parseFloat($('#w-dep-want').value), b = e.submitter || $('[data-w-quote-form] button');
+    if (!(want > 0)) { msg('[data-w-quote-msg]', 'Please type how much you want to add.', true); return; }
+    b.disabled = true;
+    sb.rpc('pc_deposit_amount', { base: want, net: $('#w-dep-net').value }).then(function (r) {
+      b.disabled = false;
+      if (r.error) { msg('[data-w-quote-msg]', errText(r.error), true); return; }
+      msg('[data-w-quote-msg]', ''); quote({ amount: r.data, network: $('#w-dep-net').value });
+    });
+  });
   root.querySelectorAll('[data-w-tab]').forEach(function (t) { t.addEventListener('click', function () { tab(t.getAttribute('data-w-tab')); }); });
   root.addEventListener('click', function (e) {
     var c = e.target.closest('[data-copy]');
