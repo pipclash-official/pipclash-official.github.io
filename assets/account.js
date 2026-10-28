@@ -261,6 +261,11 @@
       });
     });
   }
-  sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') load(); });
+  // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
+  sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
   load();
+  setTimeout(function () {   // 15 sec baad bhi Loading… = refresh ka rasta do (kamzor internet)
+    var l = root.querySelector('[data-view="loading"]');
+    if (l && !l.hidden) l.innerHTML = '<p class="muted2">This is taking long. <a href="account.html">Tap to refresh</a></p>';
+  }, 15000);
 })();
