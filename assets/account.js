@@ -253,7 +253,8 @@
           show('profile'); $('#acc-name').value = (md.name || md.given_name || '').split(' ')[0]; return;
         }
         $('[data-hello]').textContent = profile.name;
-        $('[data-who]').textContent = (user.email || '') + ' · phone ending ' + profile.phone.slice(-3);
+        var em = /@telegram\.pipclash\.app$/.test(user.email || '') ? 'Telegram login' : (user.email || '');   // bot wala nakli email mat dikhao
+        $('[data-who]').textContent = em + ' · phone ending ' + profile.phone.slice(-3);
         show('home');
         refCard();
         refresh();
