@@ -12,7 +12,7 @@
 
   /* ---------- time (UAE) ---------- */
   /* Test ke liye: page?at=11:00 = us UAE time jaisa dikhao (sirf dikhawa, data nahi badalta) */
-  var SHIFT = 0, AT = /[?&]at=(\d\d):(\d\d)/.exec(location.search);
+  var SHIFT = 0, AT = (location.hostname === 'localhost' || location.pathname.indexOf('/v2/') === 0) && /[?&]at=(\d\d):(\d\d)/.exec(location.search);   // test switch – live site pe kabhi nahi
   function now() { return Date.now() + SHIFT; }
   var DEMO_LIVE = null;
   function D() {
@@ -36,6 +36,7 @@
       .formatToParts(new Date(now())).forEach(function (p) { o[p.type] = p.value; });
     return { date: o.year + '-' + o.month + '-' + o.day, hm: (o.hour === '24' ? '00' : o.hour) + ':' + o.minute, wd: { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 }[o.weekday] };
   }
+  function uaeDay(iso) { return new Date(new Date(iso).getTime() + 4 * 36e5).toISOString().slice(0, 10); }   // UTC time -> UAE din
   function at(date, hm) { return new Date(date + 'T' + hm + ':00+04:00'); }
   function addDays(ymd, n) { var d = new Date(ymd + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
   function nextDay(from, skipToday) {   // agla Mon–Fri
@@ -152,7 +153,7 @@
         return { fee: fee, name: NAMES[fee] || ('$' + fee), day: t.day, taken: t.taken, max: t.max_seats || S.seats, pool: pt.pool, rows: pt.rows, full: t.day !== ph.date && ph.k === 'open' };
       });
     }
-    var ft = freeTable(), todayBattle = b.start_utc && b.start_utc.slice(0, 10) === new Date().toISOString().slice(0, 10);
+    var ft = freeTable(), todayBattle = b.start_utc && uaeDay(b.start_utc) === uaeNow().date;
     var booking = ph.k === 'open' || ph.k === 'soon' || ph.k === 'next';      // 4 PM ke baad = agle din ki seat
     return [{ fee: 0, name: 'FREE', day: booking ? ph.date : nextDay(ph.date, true), taken: booking && todayBattle ? (b.players || 0) : 0,
               max: null, pool: ft.pool, rows: ft.rows, free: true, live: !booking && todayBattle ? (b.players || 0) : 0 }];
@@ -256,7 +257,7 @@
     }).join('');
   }
   document.addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-enter],[data-cancel]'); if (!b || !S.sb) return;
+    var b = ev.target.closest('[data-enter],[data-cancel]:not([data-cancel=""])'); if (!b || !S.sb) return;   // account.js ka khaali data-cancel uska apna
     var fee = +(b.getAttribute('data-enter') || b.getAttribute('data-cancel')), enter = b.hasAttribute('data-enter'), msg = $('[data-msg="' + fee + '"]');
     if (!enter && !confirm('Cancel your ' + usd(fee) + ' seat? The fee goes back to your wallet.')) return;
     b.disabled = true;
@@ -275,7 +276,7 @@
   function arena() {
     var box = $('[data-v2-arena]'); if (!box) return;
     var ph = phase(), b = D().battle || {}, s = sched(), t = tablesData(), pool = t[t.length - 1].pool;
-    var today = b.start_utc && b.start_utc.slice(0, 10) === new Date(now()).toISOString().slice(0, 10), st = b.status;
+    var today = b.start_utc && uaeDay(b.start_utc) === uaeNow().date, st = b.status;
     var chipH, lab, big, foot = '';
     var nxt = b.next_update_utc ? new Date(b.next_update_utc) : null, waiting = nxt && now() > nxt.getTime() + 60e3;
     if (ph.k === 'live' && today) {
