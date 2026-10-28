@@ -358,7 +358,29 @@
     s.onerror = function () { s.remove(); renderAll(); };
     document.head.appendChild(s);
   }
+  /* ---------- Install app: Android = ek tap ka popup, iPhone = chhota guide (Apple khud install nahi karne deta) ---------- */
+  var installEvt = null;
+  var standalone = function () { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; };
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function showInstall(on) { $$('[data-install]').forEach(function (b) { b.hidden = !on; }); }
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installEvt = e; showInstall(!standalone()); });
+  window.addEventListener('appinstalled', function () { installEvt = null; showInstall(false); });
+  function iosGuide() {
+    var d = document.createElement('div'); d.className = 'v2-ios'; d.setAttribute('role', 'dialog');
+    d.innerHTML = '<div><b style="font-size:18px">Install PipClash on iPhone</b><ol><li>Open this page in <b>Safari</b>.</li>' +
+      '<li>Tap the <b>Share</b> button <span aria-hidden="true">⬆️</span> at the bottom.</li><li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>' +
+      '<button class="btn" type="button" style="width:100%;justify-content:center">OK</button></div>';
+    d.addEventListener('click', function (e) { if (e.target === d || e.target.tagName === 'BUTTON') d.remove(); });
+    document.body.appendChild(d);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-install]'); if (!b) return;
+    if (installEvt) { installEvt.prompt(); installEvt.userChoice.then(function (c) { if (c.outcome === 'accepted') showInstall(false); installEvt = null; }); }
+    else if (ios) iosGuide();
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
+    if (ios && !standalone()) showInstall(true);     // iPhone pe browser event nahi aata – button khud dikhao (guide ke liye)
     var f = $('#find'); if (f) f.addEventListener('input', renderStandings);
     chart(); sky(); renderAll(); load(); loadArchive();
     setInterval(tickClock, 1000);
