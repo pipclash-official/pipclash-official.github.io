@@ -10,7 +10,8 @@
   var money = function (v) { v = Number(v) || 0; return (v >= 0 ? '+$' : '−$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
   var cls = function (v) { return Number(v) >= 0 ? 'up' : 'down'; };
   var BAL = 1000;   // har account ka start balance
-  var pctOf = function (pnl) { var v = (Number(pnl) || 0) / BAL * 100; return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
+  var arrow = function (v) { return v > 0 ? '▲ ' : (v < 0 ? '▼ ' : ''); };   // rang ke saath nishaan bhi (final design)
+  var pctOf = function (pnl) { var v = (Number(pnl) || 0) / BAL * 100; return arrow(v) + (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
   var pad = function (n) { return String(n).padStart(2, '0'); };
   function uae(iso) { // UTC ISO -> "4:30 PM" UAE
     if (!iso) return '';
@@ -172,7 +173,7 @@
     if (pod) {
       var p = r.rows.filter(function (x) { return x.pnl > 0; }).slice(0, 3), card = function (x, i) {
         var styles = [
-          'border-color:var(--gold);background:linear-gradient(170deg,rgba(245,197,66,.14),var(--surface) 55%);transform:scale(1.03)',
+          'border-color:var(--gold);background:linear-gradient(170deg,rgba(242,200,102,.14),var(--surface) 55%);transform:scale(1.03)',
           'background:linear-gradient(170deg,#182440,var(--surface));transform:rotateY(8deg) translateY(20px)',
           'background:linear-gradient(170deg,#1E1A16,var(--surface));transform:rotateY(-8deg) translateY(34px)'][i];
         var col = ['var(--gold)', '#D8DEE9', '#D7B48C'][i];
@@ -240,14 +241,14 @@
       var hi = Math.max.apply(null, ks.map(function (k) { return k.h; })), lo = Math.min.apply(null, ks.map(function (k) { return k.l; }));
       var H = 290, y = function (v) { return 14 + (hi - v) / (hi - lo) * (H - 28); }, slot = 100 / 30, html = '', vol = '';
       ks.forEach(function (k, i) {
-        var up = k.c >= k.o, col = up ? '#3EE6A8' : '#FF6B7A', dk = up ? '#13805A' : '#8C2433', t = y(Math.max(k.o, k.c)), b = y(Math.min(k.o, k.c));
+        var up = k.c >= k.o, col = up ? '#22C55E' : '#EF4444', dk = up ? '#13805A' : '#8C2433', t = y(Math.max(k.o, k.c)), b = y(Math.min(k.o, k.c));
         html += '<div class="k" style="left:' + (i * slot + slot * .2).toFixed(2) + '%;width:' + (slot * .6).toFixed(2) + '%"><div class="w" style="top:' + y(k.h).toFixed(1) + 'px;height:' + Math.max(2, y(k.l) - y(k.h)).toFixed(1) + 'px;background:' + col + '"></div><div class="b" style="top:' + t.toFixed(1) + 'px;height:' + Math.max(2, b - t).toFixed(1) + 'px;background:linear-gradient(90deg,' + col + ' 62%,' + dk + ');box-shadow:4px -3px 0 ' + dk + (i === 29 ? ',0 0 18px ' + col : '') + '"></div></div>';
         vol += '<i style="left:' + (i * slot + slot * .2).toFixed(2) + '%;width:' + (slot * .6).toFixed(2) + '%;height:' + Math.round(k.v) + 'px;background:' + col + '"></i>';
       });
       var ma = ks.map(function (k, i) { var w = ks.slice(Math.max(0, i - 4), i + 1); return w.reduce(function (a, b) { return a + b.c; }, 0) / w.length; });
       var path = 'M' + ma.map(function (v, i) { return ((i + .5) * 10).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' L');
-      var diff = price - ks[0].o, col = diff >= 0 ? '#3EE6A8' : '#FF6B7A', py = y(price);
-      box.innerHTML = html + '<svg viewBox="0 0 300 290" preserveAspectRatio="none" aria-hidden="true"><path d="' + path + '" fill="none" stroke="#60A5FA" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>' +
+      var diff = price - ks[0].o, col = diff >= 0 ? '#22C55E' : '#EF4444', py = y(price);
+      box.innerHTML = html + '<svg viewBox="0 0 300 290" preserveAspectRatio="none" aria-hidden="true"><path d="' + path + '" fill="none" stroke="#4DA3FF" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>' +
         '<div class="pline" style="top:' + py.toFixed(1) + 'px;border-color:' + col + '"></div><span class="ptag" style="top:' + (py - 9).toFixed(1) + 'px;background:' + col + '">' + price.toFixed(2) + '</span>' +
         '<span class="hilo" style="top:2px">' + hi.toFixed(1) + '</span><span class="hilo" style="bottom:2px">' + lo.toFixed(1) + '</span>';
       var v = $('[data-vol]'); if (v) v.innerHTML = vol;
@@ -274,7 +275,7 @@
     var seed = 7, r = function () { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
     $$('[data-sky]').forEach(function (box) {
       var html = '', lvl = 60;
-      for (var i = 0; i < 40; i++) { lvl = Math.max(30, Math.min(190, lvl + (r() - 0.42) * 30)); var col = r() > 0.38 ? '#3EE6A8' : '#FF6B7A'; html += '<div><i style="height:' + Math.round(8 + r() * 22) + 'px;background:' + col + '"></i><b style="height:' + Math.round(lvl) + 'px;background:' + col + '"></b></div>'; }
+      for (var i = 0; i < 40; i++) { lvl = Math.max(30, Math.min(190, lvl + (r() - 0.42) * 30)); var col = r() > 0.38 ? '#22C55E' : '#EF4444'; html += '<div><i style="height:' + Math.round(8 + r() * 22) + 'px;background:' + col + '"></i><b style="height:' + Math.round(lvl) + 'px;background:' + col + '"></b></div>'; }
       box.innerHTML = html;
     });
   }
@@ -289,7 +290,7 @@
   }
 
   /* ---------- results archive (winners.html) ---------- */
-  var pct = function (v) { v = Number(v) || 0; return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
+  var pct = function (v) { v = Number(v) || 0; return arrow(v) + (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
   function renderArchive() {
     var main = $('[data-res-main]'); if (!main) return;
     var R = window.PC_RESULTS || { list: [], detail: {} };
@@ -334,15 +335,16 @@
   function loadArchive() {
     if (!$('[data-res-main]')) return;
     var s = document.createElement('script');
-    s.src = 'data/results.js?t=' + Date.now();
+    s.src = DATA + 'results.js?t=' + Date.now();
     s.onload = s.onerror = function () { s.remove(); renderArchive(); };
     document.head.appendChild(s);
   }
 
   /* ---------- data loading ---------- */
+  var DATA = location.pathname.indexOf('/v2/') === 0 ? '/data/' : 'data/';   // /v2/ preview = main site ka live data
   function load() {
     var s = document.createElement('script');
-    s.src = 'data/live.js?t=' + Date.now();
+    s.src = DATA + 'live.js?t=' + Date.now();
     s.onload = function () { D = window.PC_DATA || D; renderAll(); s.remove(); };
     s.onerror = function () { s.remove(); renderAll(); };
     document.head.appendChild(s);
