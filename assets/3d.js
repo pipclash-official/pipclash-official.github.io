@@ -39,7 +39,7 @@ export function trophy(prize = '$200') {
     g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 64, .075, 20, false), gold));
   }
   const base = new THREE.Mesh(new THREE.BoxGeometry(1.7, .5, 1.2), M.dark()); base.position.y = -.25; g.add(base);
-  const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.3, .4), new THREE.MeshStandardMaterial({ map: label(prize, '#F5C451', '#1A2340', 520, 160, '700 120px "Chakra Petch", sans-serif'), metalness: .3, roughness: .4 }));
+  const plate = new THREE.Mesh(new THREE.PlaneGeometry(1.3, .4), new THREE.MeshStandardMaterial({ map: label(prize, '#D6A84F', '#1A2340', 520, 160, '700 120px "Chakra Petch", sans-serif'), metalness: .3, roughness: .4 }));
   plate.position.set(0, -.25, .61); g.add(plate);
   const back = plate.clone(); back.position.z = -.61; back.rotation.y = Math.PI; g.add(back);
   const sh = new THREE.Shape();
