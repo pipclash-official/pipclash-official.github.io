@@ -141,7 +141,8 @@
         '<div class="v2-mut tn" style="font-size:12px">' + (r.pending ? 'checking' : 'bal ' + usd(r.balance_after)) + '</div></div></div>';
     }).join('') : '<div class="v2-mut">No transactions yet.</div>';
   }
-  var ST = { pending: '<span class="tag-wait">CHECKING</span>', approved: '<span class="tag-ok">ADDED</span>', paid: '<span class="tag-ok">PAID</span>', rejected: '<span class="tag-bad">REJECTED</span>' };
+  var ST = { pending: '<span class="tag-wait">CHECKING</span>', approved: '<span class="tag-ok">ADDED</span>', paid: '<span class="tag-ok">PAID</span>', rejected: '<span class="tag-bad">REJECTED</span>',
+             reversed: '<span class="tag-bad">REVERSED</span>', processing: '<span class="tag-wait">SENDING</span>' };   // A5 / A1
   function renderReq(sel, rows, kind) {
     var box = $(sel); if (!box) return;
     box.innerHTML = rows.map(function (r) {
