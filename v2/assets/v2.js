@@ -14,7 +14,21 @@
   /* Test ke liye: page?at=11:00 = us UAE time jaisa dikhao (sirf dikhawa, data nahi badalta) */
   var SHIFT = 0, AT = /[?&]at=(\d\d):(\d\d)/.exec(location.search);
   function now() { return Date.now() + SHIFT; }
-  function D() { return window.PC_DATA || {}; }
+  var DEMO_LIVE = null;
+  function D() {
+    var dm = window.PC_DEMO;
+    if (dm && document.querySelector('[data-v2-arena]')) {   // demo arena = PDF wala leaderboard
+      if (!DEMO_LIVE) {
+        var t0 = new Date().toISOString().slice(0, 10), L = dm.live;
+        DEMO_LIVE = { updated_utc: 'demo', schedule: (window.PC_DATA || {}).schedule,
+          battle: { status: 'live', players: L.players, in_profit: L.in_profit, update_no: L.update_no, updates_total: L.updates_total, start_utc: t0 + 'T12:30:00+00:00',
+                    next_update_utc: new Date(new Date(t0 + 'T' + L.next + ':00+04:00').getTime() + 6e5).toISOString() },
+          standings: L.rows.map(function (r, i) { return { rank: i + 1, name: r[0], cc: r[1], pnl: r[2] }; }).concat([{ rank: L.you[0], name: dm.user.name, cc: 'in', pnl: L.you[1] }]) };
+      }
+      return DEMO_LIVE;
+    }
+    return window.PC_DATA || {};
+  }
   function sched() { return D().schedule || { join_open: '10:00', join_close: '16:00', creds_at: '16:25', trade_start: '16:30', trade_end: '19:30', result_at: '21:30', days: [1, 2, 3, 4, 5] }; }
   function uaeNow() {
     var o = {};
@@ -92,13 +106,20 @@
       return S.tiers.length ? rest('rpc/pc_tables', {}) : null;      // supabase_tiers.sql na chala ho to null
     }).then(function (t) {
       S.tables = Array.isArray(t) && t.length ? t : null;
-      if ((location.hostname === 'localhost' || location.pathname.indexOf('/v2/') === 0) && /[?&]demo=paid/.test(location.search)) {   // sirf preview (laptop ya /v2/) – asli site pe kabhi nahi
+      if (window.PC_DEMO) {   // preview demo (demo.js) – PDF wale numbers
         var d = uaeNow().date; S.paid = true; S.demo = true;
-        S.tables = [{ tier: 10, day: d, taken: 63, max_seats: 100 }, { tier: 25, day: d, taken: 88, max_seats: 100 }, { tier: 50, day: d, taken: 41, max_seats: 100 }];
+        S.tables = window.PC_DEMO.tables.map(function (t) { return { tier: t.tier, day: d, taken: t.taken, max_seats: 100 }; });
       }
     });
   }
   function loadUser() {
+    if (window.PC_DEMO) {
+      var u = window.PC_DEMO.user, td = uaeNow().date;
+      S.user = { id: 'demo' }; S.bal = u.bal; S.kyc = u.kyc; S.profile = { name: u.name.split('-')[0], phone: '777' };
+      S.entries = window.PC_DEMO.entries.map(function (e) { return { contest_date: td, status: e.status, tier: e.tier, paid_fee: e.paid_fee, public_name: e.public_name }; });
+      S.mine = {}; S.entries.forEach(function (e) { S.mine[e.tier] = e; });
+      return Promise.resolve();
+    }
     if (!window.supabase) return Promise.resolve();
     S.sb = S.sb || window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' } });
     return S.sb.auth.getSession().then(function (r) {
@@ -165,7 +186,6 @@
         : '<div class="v2-mut">No ranked traders today.</div>';
       cta = '<a class="btn btn-lg v2-btn" href="winners.html">SEE RESULTS →</a><div class="v2-mut" style="text-align:center;margin-top:8px">Next battle: ' + dayName(ph.next) + ' · ' + hm12(s.trade_start) + ' UAE · <a href="join.html">book a seat</a></div>';
     }
-    if (S.demo) head += chip('DEMO NUMBERS', 'gold');
     box.className = 'v2-hero' + (elite ? ' v2-elite' : '');
     box.innerHTML = '<div class="v2-row">' + head + '</div><div class="v2-row" style="margin:12px 0 10px">' + '<div>' + label + '</div>' + coin(t.free ? '$' : t.fee) + '</div>' + body + '<div style="height:12px"></div>' + cta;
   }
@@ -188,15 +208,17 @@
   /* ---------- HOME: your performance (login ho to) ---------- */
   function perf() {
     var box = $('[data-v2-perf]'); if (!box) return;
+    var cell = function (k, v, cls) { return '<div class="v2-stat"><span>' + k + '</span><b class="tn ' + (cls || '') + '">' + v + '</b></div>'; };
     var cell0 = function (k) { return '<div class="v2-stat"><span>' + k + '</span><b class="tn">–</b></div>'; };
     if (!S.user) { box.innerHTML = '<div class="v2-row v2-lbl"><span>Your performance</span><a class="v2-mut" href="account.html#login" style="font-weight:600">Log in to see yours →</a></div><div class="v2-grid2">' + cell0('Last rank') + cell0('P&amp;L') + cell0('Win rate') + cell0('Battles') + '</div>'; return; }
     var R = window.PC_RESULTS, name = (S.entries || []).map(function (e) { return e.public_name; }).filter(Boolean)[0];
     if (!name && S.profile) name = S.profile.name + '-' + String(S.profile.phone || '').slice(-3);
+    if (window.PC_DEMO) { var P = window.PC_DEMO.perf;
+      box.innerHTML = '<div class="v2-lbl">Your performance</div><div class="v2-grid2">' + cell('Last rank', '#' + P.rank) + cell('P&amp;L', '+' + usd(P.pnl) + ' ▲', 'up') + cell('Win rate', P.win + '%') + cell('Battles', P.battles) + '</div>'; return; }
     if (!R) { box.innerHTML = ''; return; }
     var mine = [];
     (R.list || []).forEach(function (b) { var d = R.detail[String(b.id)]; (d && d.rows || []).forEach(function (r) { if (r.name === name && !r.dq) mine.push(r); }); });
     var tot = mine.reduce(function (a, r) { return a + (r.pnl || 0); }, 0), wins = mine.filter(function (r) { return r.pnl > 0; }).length;
-    var cell = function (k, v, cls) { return '<div class="v2-stat"><span>' + k + '</span><b class="tn ' + (cls || '') + '">' + v + '</b></div>'; };
     box.innerHTML = '<div class="v2-lbl">Your performance</div><div class="v2-grid2">' +
       cell('Last rank', mine.length ? '#' + mine[0].rank : '–') + cell('P&amp;L', mine.length ? (tot >= 0 ? '▲ +' : '▼ −') + usd(Math.abs(tot), true) : '–', tot > 0 ? 'up' : (tot < 0 ? 'down' : '')) +
       cell('Win rate', mine.length ? Math.round(wins / mine.length * 100) + '%' : '–') + cell('Battles', mine.length) + '</div>';
@@ -214,7 +236,6 @@
     if (note) note.innerHTML = list[0].free ? 'Free entry – no deposit, no fee · only traders in profit win · one entry per person (one phone number).'
       : 'No fixed prize · 80% of entries go to the winners · fewer than 5 players = full refund · max ' + S.seats + ' per table.<br>Each table is its own battle with its own leaderboard.';
     var when = $('[data-v2-when]');
-    if (when && S.demo) { when.innerHTML = '<span class="v2-chip v2-gold">DEMO NUMBERS – preview only</span>'; when = null; }
     if (when) when.innerHTML = ph.k === 'open' ? 'Entry closes in <b class="tn" data-v2-left>' + left(ph.to) + '</b> · ' + hm12(sched().join_close) + ' UAE'
       : ph.k === 'soon' ? 'Entry opens ' + hm12(sched().join_open) + ' UAE – you can book a seat now'
         : 'Today’s entry is closed – seats below are for ' + dayName(ph.k === 'next' ? ph.date : nextDay(ph.date, true));
@@ -247,6 +268,7 @@
 
   /* ---------- ARENA: bada timer card + neeche "YOU" patti ---------- */
   function myName() {
+    if (window.PC_DEMO) return window.PC_DEMO.user.name;
     var n = (S.entries || []).map(function (e) { return e.public_name; }).filter(Boolean)[0];
     return n || (S.profile ? S.profile.name + '-' + String(S.profile.phone || '').slice(-3) : null);
   }
@@ -304,16 +326,20 @@
     var lab = ['Entered', 'Closed ' + hm12(s.join_close), 'Login ' + hm12(s.creds_at), 'Trade ' + hm12(s.trade_start)];
     if (!mineToday) { box.innerHTML = ''; return; }
     var mine = (S.entries || []).filter(function (e) { return e.contest_date === today && (e.status === 'pending' || e.status === 'joined'); });
-    var pills = mine.map(function (e, i) { var f = e.tier || Number(e.paid_fee) || 0; return '<span class="v2-chip ' + (i ? 'v2-acc' : 'v2-pop') + '">' + (f ? (NAMES[f] || '') + ' ' + usd(f) : 'FREE BATTLE') + '</span>'; }).join('');
+    var pills = mine.map(function (e, i) { var f = e.tier || Number(e.paid_fee) || 0; return '<span class="v2-chip ' + (i ? 'v2-out' : 'v2-pop') + '">' + (f ? (NAMES[f] || '') + ' ' + usd(f) : 'FREE BATTLE') + '</span>'; }).join('');
     box.innerHTML = '<div class="v2-row" style="margin-bottom:10px"><span class="v2-row" style="gap:6px">' + pills + '</span>' + chip(mine.some(function (e) { return e.status === 'joined'; }) ? 'ENTERED' : 'BOOKED', 'acc') + '</div>' +
       '<div class="v2-steps">' + lab.map(function (l, i) { return '<div class="' + (done[i] ? 'on' : '') + '"><i></i><span>' + l + '</span></div>'; }).join('') + '</div>' +
       (ph.k === 'live' ? '<div class="v2-row" style="margin-top:8px">' + chip('● LIVE', 'down') + '<a href="arena.html">Watch your rank →</a></div>' : '');
   }
   function past() {
     var box = $('[data-v2-past]'); if (!box) return;
+    if (window.PC_DEMO) { box.hidden = false;
+      box.innerHTML = '<div class="v2-lbl">Past battles</div>' + window.PC_DEMO.past.map(function (p) {
+        var up = p[3] >= 0; return '<div class="v2-past"><span>' + p[0] + '</span><span class="tn">$' + p[1] + '</span><span class="tn">#' + p[2] + '</span><span class="r tn ' + (up ? 'up' : 'down') + '"><b>' + (up ? '+' : '−') + usd(Math.abs(p[3])) + ' ' + (up ? '▲' : '▼') + '</b><small>' + (up ? '+' : '−') + Math.abs(p[4]).toFixed(1) + '%</small></span></div>'; }).join('');
+      return; }
     var rows = myRows(); box.hidden = !rows.length;
     if (!rows.length) return;
-    box.innerHTML = '<div class="v2-lbl">Past battles</div><div class="v2-past v2-mut"><span>Day</span><span>Table</span><span>Rank</span><span class="r">P&amp;L</span></div>' +
+    box.innerHTML = '<div class="v2-lbl">Past battles</div>' +
       rows.slice(0, 10).map(function (x) {
         var r = x.r, up = r.pnl > 0, dn = r.pnl < 0;
         var pc = r.pct != null ? r.pct : (r.pnl || 0) / 10, day = String(x.b.date).replace(/^\w+ /, '');
@@ -326,8 +352,19 @@
   /* ---------- RESULTS: winner ceremony (sabse nayi battle) ---------- */
   function ceremony() {
     var box = $('[data-v2-ceremony]'); if (!box) return;
-    var h1 = $('[data-res-title]'); if (h1) h1.hidden = !/[?&]id=/.test(location.search);   // naam top bar mein hai
+    var h1 = $('[data-res-title]'); if (h1) h1.parentElement.parentElement.hidden = !/[?&]id=/.test(location.search);   // naam top bar mein hai
     var R = window.PC_RESULTS;
+    if (window.PC_DEMO) {   // PDF: YOU FINISHED #3 · PRO $25
+      var X = window.PC_DEMO.result, pt = paidTable(X.traders, X.fee), rk = { 1: 'g', 2: 's', 3: 'b' };
+      box.innerHTML = '<div class="v2-cere"><div class="v2-spark"></div>' + chip('COMPLETED', 'up') + '<div class="v2-eyebrow gold" style="margin-top:8px">BATTLE COMPLETE · ' + X.table + '</div>' +
+        '<img src="assets/3d/trophy-only.webp" width="110" height="110" alt="" class="v2-cere-cup"><div class="v2-mut">YOU FINISHED</div><div class="v2-cere-rank">#' + X.you + '</div>' +
+        '<div class="v2-grid3"><div class="v2-stat"><span>P&amp;L</span><b class="tn up">+' + usd(X.pnl, true) + ' ▲</b></div><div class="v2-stat"><span>ROI</span><b class="tn up">' + (X.pnl / 10).toFixed(2) + '%</b></div>' +
+        '<div class="v2-stat" style="border-color:#D6A84F"><span>Prize</span><b class="tn gold">' + usd(pt.rows[X.you - 1], true) + '</b></div></div>' +
+        '<div class="v2-mut" style="margin-top:8px">' + chip('PENDING', 'gold') + ' added to wallet after ID check</div></div>' +
+        '<div class="v2-card" style="padding:8px 10px;margin-top:12px">' + X.top.map(function (t, i) { return '<div class="v2-lrow' + (t[0] === 'YOU' ? ' me' : '') + '"><span class="v2-rk ' + rk[i + 1] + '">' + (i + 1) + '</span><b class="v2-ln">' + t[0] + '</b><span class="v2-lp tn up"><b>+' + usd(t[1], true) + ' ▲</b><small>+' + (t[1] / 10).toFixed(1) + '%</small></span><b class="tn gold" style="width:64px;text-align:right">' + usd(pt.rows[i], true) + '</b></div>'; }).join('') + '</div>' +
+        '<div class="v2-mut tn" style="text-align:center;margin:10px 0">' + X.traders + ' traders · pool ' + usd(pt.pool) + ' · ' + pt.rows.length + ' winners</div><a class="btn btn-ghost v2-btn2" href="winners.html">VIEW FULL LEADERBOARD</a>';
+      return;
+    }
     if (!R || !R.list || !R.list.length || /[?&]id=/.test(location.search)) { box.innerHTML = ''; return; }
     var b = R.list[0], d = R.detail[String(b.id)] || { rows: [] }, nm = S.user && myName(), me = null, ranked = d.rows.filter(function (r) { return !r.dq; });
     ranked.forEach(function (r) { if (r.name === nm) me = r; });
@@ -396,7 +433,14 @@
   }
   window.addEventListener('hashchange', referMode);
 
-  function renderAll() { referMode(); shell(); hero(); upcoming(); perf(); join(); arena(); leaderboard(); steps(); past(); ceremony(); }
+  function demoStrip() {
+    if (!window.PC_DEMO || $('.v2-demo')) return;
+    var d = document.createElement('div'); d.className = 'v2-demo';
+    d.innerHTML = 'DEMO · sample numbers like the design PDF · <a href="?demo=0">exit demo</a>';
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+
+  function renderAll() { demoStrip(); referMode(); shell(); hero(); upcoming(); perf(); join(); arena(); leaderboard(); steps(); past(); ceremony(); }
   function tick() {
     var ph = phase(), a = $('[data-v2-arena]');
     document.querySelectorAll('[data-v2-left]').forEach(function (el) { if (ph.to) el.textContent = left(ph.to); });
@@ -412,7 +456,8 @@
     if (!$('[data-v2-perf],[data-v2-past],[data-v2-ceremony]') || window.PC_RESULTS) return Promise.resolve();
     return new Promise(function (ok) { var s = document.createElement('script'); s.src = (location.pathname.indexOf('/v2/') === 0 ? '/data/' : 'data/') + 'results.js?t=' + Date.now(); s.onload = s.onerror = function () { s.remove(); ok(); }; document.head.appendChild(s); });
   }
-  if (AT) { var u0 = uaeNow(); SHIFT = at(u0.date, AT[1] + ':' + AT[2]) - Date.now(); }
+  var DM = window.PC_DEMO || null;
+  if (AT || DM) { var u0 = uaeNow(), hm0 = AT ? AT[1] + ':' + AT[2] : DM.at; SHIFT = at(u0.date, hm0) - Date.now(); }
   document.addEventListener('DOMContentLoaded', function () {
     renderAll();
     Promise.all([loadSettings(), loadUser(), results()]).then(renderAll);
