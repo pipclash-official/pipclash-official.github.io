@@ -52,6 +52,17 @@
 
   /* ---------- data ---------- */
   function load() {
+    if (window.PC_DEMO) {   // preview demo: PDF wale numbers, Supabase nahi
+      var W = window.PC_DEMO.wallet; show('main'); $('[data-w-test]').hidden = true;
+      $('[data-w-total]').textContent = usd(W.total); $('[data-w-bal]').textContent = usd(W.avail); $('[data-w-inb]').textContent = usd(W.inb);
+      $('[data-w-wdable]').textContent = usd(W.wdable); $('[data-w-wdp]').textContent = usd(W.wdp);
+      renderEntries(window.PC_DEMO.entries.map(function (e) { return { tier: e.tier, paid_fee: e.paid_fee, status: 'pending', contest_date: addDay(uaeDate(), 1) }; }));
+      $('[data-w-hist]').innerHTML = W.tx.map(function (t) {
+        return '<div class="v2-tx"><div><div>' + t[0] + '</div><div style="margin-top:4px">' + (t[3] ? '<span class="v2-chip v2-gold">PENDING</span>' : '<span class="v2-chip v2-up">COMPLETED</span>') + '</div></div>' +
+          '<div style="text-align:right"><b class="tn ' + (t[3] ? '' : (t[1] >= 0 ? 'up' : 'down')) + '">' + (t[3] ? usd(-t[1]) : (t[1] >= 0 ? '+' : '') + usd(t[1])) + '</b><div class="v2-mut tn" style="font-size:12px">bal ' + (t[2] == null ? '–' : usd(t[2])) + '</div></div></div>';
+      }).join('');
+      return;
+    }
     sb.auth.getUser().then(function (r) {
       user = r.data && r.data.user;
       if (!user) { show('login'); return; }
@@ -61,25 +72,71 @@
         sb.from('ledger').select('amount,kind,note,balance_after,created_at').eq('user_id', user.id).order('id', { ascending: false }).limit(50),
         sb.from('deposits').select('amount,network,txid,status,note,created_at').eq('user_id', user.id).order('id', { ascending: false }).limit(10),
         sb.from('withdrawals').select('amount,network,address,status,note,created_at').eq('user_id', user.id).order('id', { ascending: false }).limit(10),
-        sb.from('kyc').select('status,note').eq('user_id', user.id).maybeSingle()
+        sb.from('kyc').select('status,note').eq('user_id', user.id).maybeSingle(),
+        myEntries()
       ]).then(function (x) {
-        $('[data-w-bal]').textContent = usd(x[0].data ? x[0].data.balance : 0);
-        renderHistory(x[1].data || []);
+        // Phone pe saaf hisaab: Available (wallet) + battles mein laga + withdraw hold = Total
+        var bal = x[0].data ? Number(x[0].data.balance) : 0;
+        var ents = (x[5].data || []).filter(function (e) { return Number(e.paid_fee) > 0 && !e.refunded; });
+        var inb = ents.reduce(function (a, e) { return a + Number(e.paid_fee); }, 0);
+        var wdp = (x[3].data || []).filter(function (w) { return w.status === 'pending'; }).reduce(function (a, w) { return a + Number(w.amount); }, 0);
+        kyc = x[4].data;
+        $('[data-w-bal]').textContent = usd(bal);
+        $('[data-w-inb]').textContent = usd(inb);
+        $('[data-w-wdp]').textContent = usd(wdp);
+        $('[data-w-wdable]').textContent = kyc && kyc.status === 'approved' ? usd(bal) : 'ID check first';
+        $('[data-w-total]').textContent = usd(bal + inb + wdp);
+        renderEntries(ents);
+        var pend = (x[2].data || []).filter(function (d) { return d.status === 'pending'; }).map(function (d) { return { kind: 'deposit', note: d.network, amount: Number(d.amount), created_at: d.created_at, pending: true }; })
+          .concat((x[3].data || []).filter(function (w) { return w.status === 'pending'; }).map(function (w) { return { kind: 'withdraw', note: w.network, amount: -Number(w.amount), created_at: w.created_at, pending: true }; }));
+        renderHistory(pend.concat(x[1].data || []));
         renderReq('[data-w-deps]', x[2].data || [], 'deposit');
         renderReq('[data-w-wds]', x[3].data || [], 'withdraw');
-        kyc = x[4].data; renderKyc();
+        renderKyc();
       });
     });
   }
+  function myEntries() {   // tier column supabase_tiers.sql ke baad aata hai – usse pehle bina tier
+    var q = function (cols) { return sb.from('web_entries').select(cols).eq('user_id', user.id).gte('contest_date', uaeDate()).in('status', ['pending', 'joined']).order('contest_date', { ascending: true }); };
+    return q('id,contest_date,status,tier,paid_fee,refunded').then(function (r) { return r.error ? q('id,contest_date,status,paid_fee,refunded') : r; });
+  }
+  function addDay(d, n) { var x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+  function uaeDate() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Dubai' }).format(new Date()); }
+  var TNAME = { 10: 'STARTER $10', 25: 'PRO $25', 50: 'ELITE $50' };
+  function renderEntries(ents) {
+    var box = $('[data-w-entries]'); if (!box) return;
+    box.hidden = !ents.length;
+    var day = function (d) { return d === uaeDate() ? 'Today' : new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' }); };
+    box.innerHTML = '<div class="v2-lbl">Your entries today</div>' + ents.map(function (e) {
+      return '<div class="v2-row v2-erow"><span><b>' + esc(TNAME[e.tier] || ('$' + Number(e.paid_fee))) + '</b> <span class="v2-mut">· ' + day(e.contest_date) + '</span></span>' +
+        '<span class="v2-row" style="gap:8px"><span class="v2-chip v2-acc">' + (e.status === 'joined' ? 'IN BATTLE' : 'ENTERED') + '</span>' +
+        (e.status === 'pending' ? '<button class="v2-cancel" type="button" data-w-cancel="' + (e.tier || '') + '" data-w-fee="' + Number(e.paid_fee) + '">Cancel</button>' : '') + '</span></div>';
+    }).join('');
+  }
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-w-cancel]'); if (!b) return;
+    var t = b.getAttribute('data-w-cancel'), fee = b.getAttribute('data-w-fee');
+    if (!confirm('Cancel this entry? $' + fee + ' goes back to your wallet.')) return;
+    b.disabled = true;
+    (t ? sb.rpc('pc_cancel_table', { t: +t }) : sb.rpc('pc_cancel_entry')).then(function (r) {
+      if (r.error) { b.disabled = false; alert(r.error.message.indexOf('NOTHING_TO_CANCEL') >= 0 ? 'Already entered into the battle – it can’t be cancelled now.' : 'Could not cancel. Please try again.'); return; }
+      load();
+    });
+  });
   var KIND = { deposit: 'Deposit', withdraw: 'Withdrawal', withdraw_refund: 'Withdrawal returned', entry: 'Battle entry', entry_refund: 'Entry refund',
                prize: 'Prize', referral: 'Referral reward', adjust: 'Adjustment' };
-  function renderHistory(rows) {
+  function renderHistory(rows) {   // final design: line + status chip + bacha balance
     $('[data-w-hist]').innerHTML = rows.length ? rows.map(function (r) {
-      return '<tr><td class="muted2" style="font-size:13px">' + when(r.created_at) + '</td><td>' + esc(KIND[r.kind] || r.kind) +
-        (r.note ? '<div class="muted2" style="font-size:12px;word-break:break-all">' + esc(r.note) + '</div>' : '') + '</td>' +
-        '<td class="mono r ' + (r.amount >= 0 ? 'up' : 'down') + '">' + (r.amount >= 0 ? '+' : '') + usd(r.amount) + '</td>' +
-        '<td class="mono r muted2">' + usd(r.balance_after) + '</td></tr>';
-    }).join('') : '<tr><td colspan="4" class="empty">No transactions yet.</td></tr>';
+      var up = r.amount >= 0;
+      var m = /\$(\d+)/.exec(r.note || ''), fee = m && +m[1], TN = { 10: 'STARTER', 25: 'PRO', 50: 'ELITE' };
+      var label = (r.kind === 'entry' || r.kind === 'entry_refund') && fee ? (r.kind === 'entry' ? 'Entry' : 'Refund') + ' · ' + (TN[fee] ? TN[fee] + ' ' : '') + '$' + fee
+        : esc(KIND[r.kind] || r.kind) + (r.note ? ' · ' + esc(r.note) : '');
+      return '<div class="v2-tx"><div><div>' + label + '</div>' +
+        '<div class="v2-row" style="justify-content:flex-start;gap:6px;margin-top:4px">' + (r.pending ? '<span class="v2-chip v2-gold">PENDING</span>' : '<span class="v2-chip v2-up">COMPLETED</span>') +
+        '<span class="v2-mut" style="font-size:12px">' + when(r.created_at) + '</span></div></div>' +
+        '<div style="text-align:right"><b class="tn ' + (r.pending ? '' : (up ? 'up' : 'down')) + '">' + (up ? '+' : '') + usd(r.amount) + '</b>' +
+        '<div class="v2-mut tn" style="font-size:12px">' + (r.pending ? 'checking' : 'bal ' + usd(r.balance_after)) + '</div></div></div>';
+    }).join('') : '<div class="v2-mut">No transactions yet.</div>';
   }
   var ST = { pending: '<span class="tag-wait">CHECKING</span>', approved: '<span class="tag-ok">ADDED</span>', paid: '<span class="tag-ok">PAID</span>', rejected: '<span class="tag-bad">REJECTED</span>' };
   function renderReq(sel, rows, kind) {
@@ -150,5 +207,6 @@
   // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
   sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
   loadSettings().then(load);
-  tab(location.hash === '#withdraw' ? 'wd' : 'dep');
+  function hashTab() { tab(location.hash === '#withdraw' ? 'wd' : (location.hash === '#deposit' ? 'dep' : '')); }   // form tab dabane pe hi khule
+  hashTab(); window.addEventListener('hashchange', hashTab);
 })();
