@@ -16,20 +16,20 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080B12">
-<link rel="icon" href="assets/favicon.svg?v=47" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=47" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=47" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=47">
+<link rel="icon" href="assets/favicon.svg?v=48" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=48" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=48" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=48">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=47">
-<script src="assets/demo.js?v=47"></script>
-<script src="assets/site.js?v=47" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=48">
+<script src="assets/demo.js?v=48"></script>
+<script src="assets/site.js?v=48" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/wallet.js?v=47" defer></script>
-<script src="assets/v2.js?v=47" defer></script>
+<script src="assets/wallet.js?v=48" defer></script>
+<script src="assets/v2.js?v=48" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -84,8 +84,9 @@
         <p class="muted2" style="font-size:13px">The name must match your PipClash account. Only our team can see this photo.</p>
         <button class="btn" type="submit">Upload ID</button><p class="acc-msg" data-w-kyc-msg role="status"></p></form>
       <form data-w-wd-form hidden><label for="w-wd-amt">Amount (USDT, minimum <span data-w-min-wd>$10</span>)</label><input id="w-wd-amt" type="number" min="1" step="0.01" inputmode="decimal">
-        <label for="w-wd-net">Network</label><select id="w-wd-net"><option value="TRC20">USDT – TRON (TRC20)</option><option value="BEP20">USDT – BNB Smart Chain (BEP20)</option></select>
-        <label for="w-wd-addr">Your USDT address</label><input id="w-wd-addr" type="text" autocomplete="off" placeholder="Your wallet address on the network above">
+        <label for="w-wd-net">Network</label><select id="w-wd-net"><option value="BEP20">USDT – BNB Smart Chain (BEP20)</option></select>
+        <p class="muted2" style="font-size:13px">Withdrawals are paid only on <b>BNB Smart Chain (BEP20)</b> – very low fees. In Binance and most wallets choose “BSC / BEP20” when you copy your USDT address.</p>
+        <label for="w-wd-addr">Your USDT BEP20 address</label><input id="w-wd-addr" type="text" autocomplete="off" placeholder="0x… (42 characters)">
         <button class="btn btn-lg" type="submit">Request withdrawal</button><p class="acc-msg" data-w-wd-msg role="status"></p></form>
       <div data-w-wds class="w-reqs"></div></div>
 
