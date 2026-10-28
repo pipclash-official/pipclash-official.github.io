@@ -17,7 +17,10 @@
   var owner = function () { return ROLE === 'owner'; };
   var ERR = { OWNER_ONLY: 'Only the owner can do this.', NOT_ADMIN: 'You are not an admin.', NEEDS_SECOND_ADMIN: 'Big withdrawal: another admin must press "Check" first.',
               ALREADY_DECIDED: 'Someone already handled this.', NO_SUCH_USER: 'No PipClash account with this email – they must sign up on the website first.',
-              NOT_YOURSELF: 'You cannot remove yourself.', REASON_REQUIRED: 'Please write a reason.', INSUFFICIENT_BALANCE: 'Player balance is too low for this.' };
+              NOT_YOURSELF: 'You cannot remove yourself.', REASON_REQUIRED: 'Please write a reason.', INSUFFICIENT_BALANCE: 'Player balance is too low for this.',
+              NEEDS_CHECK: 'Someone must press "Check" first.', START_FIRST: 'Press "Start payout" first – before you send any USDT.', TXID_REQUIRED: 'Paste the full payout TXID.',
+              IN_PROCESSING: 'This payout was started – the owner may have sent the USDT. Only the owner can undo it.', ALREADY_CHECKED: 'Someone already checked this.',
+              SELF: 'You cannot decide your own request.', KYC_REQUIRED: 'This player has no approved ID.', BLOCKED: 'This player is blocked.' };
   function errText(e) { var m = String((e && e.message) || e || ''); for (var k in ERR) if (m.indexOf(k) >= 0) return ERR[k]; return m; }
   function call(fn, args, btn, done) {
     if (btn) btn.disabled = true;
@@ -101,29 +104,41 @@
   function money() {
     Promise.all([
       sb.from('deposits').select('*').eq('status', 'pending').order('id'),
-      sb.from('withdrawals').select('*').eq('status', 'pending').order('id'),
+      sb.from('withdrawals').select('*').in('status', ['pending', 'processing']).order('id'),
       sb.from('kyc').select('*').eq('status', 'pending').order('updated_at'),
       sb.from('deposits').select('*').neq('status', 'pending').order('id', { ascending: false }).limit(15),
       sb.from('withdrawals').select('*').neq('status', 'pending').order('id', { ascending: false }).limit(15)
     ]).then(function (x) {
-      var all = [].concat(x[0].data, x[1].data, x[2].data, x[3].data, x[4].data).filter(Boolean);
-      people(all.map(function (o) { return o.user_id; })).then(function () {
-        var big = Number(S.big_withdraw) || 100;
+      var all = [].concat(x[0].data, x[1].data, x[2].data, x[3].data, x[4].data).filter(Boolean), wds = x[1].data || [];
+      var wdUsers = wds.map(function (w) { return w.user_id; });
+      Promise.all([people(all.map(function (o) { return o.user_id; })),
+        // A4: withdraw row pe "deposit kisne approve kiya" · A1: BIG = 24 ghante ka jod ($99 + $99 + $99 nahi)
+        wdUsers.length ? sb.from('deposits').select('user_id,decided_by,checked_name,amount').in('user_id', wdUsers).eq('status', 'approved').order('id', { ascending: false }) : Promise.resolve({ data: [] }),
+        Promise.all(wds.map(function (w) { return sb.rpc('pc_wd_day_total', { wid: w.id }); }))
+      ]).then(function (y) {
+        var big = Number(S.big_withdraw) || 100, bigDep = Number(S.big_deposit) || 200, depBy = {}, dayTot = {};
+        (y[1].data || []).forEach(function (d) { if (!depBy[d.user_id]) depBy[d.user_id] = d; });
+        wds.forEach(function (w, i) { var r = y[2][i]; dayTot[w.id] = r && !r.error && r.data != null ? Number(r.data) : Number(w.amount); });
         pane().innerHTML =
-          card('Deposits to check', table(['Player', 'Amount', 'TXID', ''], (x[0].data || []).map(function (d) {
-            return '<tr><td>' + who(d.user_id) + '</td><td class="mono"><b>' + usd(d.amount) + '</b><div class="muted2 a-sm">' + esc(d.network) + ' · ' + when(d.created_at) + '</div></td>' +
+          card('Deposits to check', table(['Player', 'Amount', 'TXID', 'Check', ''], (x[0].data || []).map(function (d) {
+            var isBig = Number(d.amount) >= bigDep;
+            return '<tr><td>' + who(d.user_id) + '</td><td class="mono"><b>' + usd(d.amount) + '</b>' + (isBig ? ' <span class="tag-bad">BIG</span>' : '') + '<div class="muted2 a-sm">' + esc(d.network) + ' · ' + when(d.created_at) + '</div></td>' +
               '<td><a class="w-mono" href="' + TX[d.network] + encodeURIComponent(d.txid) + '" target="_blank" rel="noopener">' + esc(d.txid) + '</a></td>' +
+              '<td>' + (d.checked_name ? '<span class="tag-ok">✓ ' + esc(d.checked_name) + '</span>' : (isBig ? '<button class="btn btn-ghost btn-sm" data-dep-check="' + d.id + '">Check</button>' : '<span class="muted2 a-sm">not needed</span>')) + '</td>' +
               '<td class="a-act"><button class="btn btn-sm" data-dep-ok="' + d.id + '">Approve</button><button class="btn btn-ghost btn-sm" data-dep-no="' + d.id + '">Reject</button></td></tr>';
-          }), 'No deposits waiting ✅'), 'Open the TXID, check the USDT arrived at our address, then approve.') +
-          card('Withdrawals', table(['Player', 'Amount', 'Address', 'Check', ''], (x[1].data || []).map(function (w) {
-            var isBig = Number(w.amount) >= big;
-            return '<tr><td>' + who(w.user_id) + '</td><td class="mono"><b>' + usd(w.amount) + '</b>' + (isBig ? ' <span class="tag-bad">BIG</span>' : '') +
+          }), 'No deposits waiting ✅'), 'Open the TXID: the amount on the blockchain must be EXACTLY the amount here (every player gets their own cents, like $50.37) and it must have arrived at our address. ' +
+            usd(bigDep) + '+ needs a Check from a DIFFERENT admin before Approve.') +
+          card('Withdrawals', table(['Player', 'Amount', 'Address', 'Check', ''], wds.map(function (w) {
+            var isBig = dayTot[w.id] >= big, proc = w.status === 'processing', dep = depBy[w.user_id];
+            return '<tr' + (proc ? ' class="a-flag"' : '') + '><td>' + who(w.user_id) + (dep ? '<div class="muted2 a-sm">last deposit approved by ' + esc([dep.checked_name, dep.decided_by].filter(Boolean).join(' + ')) + '</div>' : '<div class="muted2 a-sm">no approved deposit</div>') + '</td>' +
+              '<td class="mono"><b>' + usd(w.amount) + '</b>' + (isBig ? ' <span class="tag-bad" title="24h total ' + usd(dayTot[w.id]) + '">BIG</span>' : '') + (proc ? ' <span class="tag-wait">SENDING</span>' : '') +
               '<div class="muted2 a-sm">' + esc(w.network) + ' · ' + when(w.created_at) + '</div></td>' +
               '<td><span class="w-mono">' + esc(w.address) + '</span> <button class="btn btn-ghost btn-sm" data-copy="' + esc(w.address) + '">Copy</button></td>' +
               '<td>' + (w.checked_name ? '<span class="tag-ok">✓ ' + esc(w.checked_name) + '</span>' : '<button class="btn btn-ghost btn-sm" data-wd-check="' + w.id + '">Check</button>') + '</td>' +
-              '<td class="a-act">' + (owner() ? '<button class="btn btn-sm" data-wd-ok="' + w.id + '">Paid</button>' : '') + '<button class="btn btn-ghost btn-sm" data-wd-no="' + w.id + '">Reject</button></td></tr>';
-          }), 'No withdrawals waiting ✅'), 'Step 1: any admin checks name, ID and history and presses Check. Step 2: the owner sends the USDT and presses Paid. ' +
-            usd(big) + '+ needs the Check from a DIFFERENT admin. Reject = money goes back to the player.') +
+              '<td class="a-act">' + (proc ? (owner() ? '<button class="btn btn-sm" data-wd-ok="' + w.id + '">Paid – paste TXID</button><button class="btn btn-ghost btn-sm" data-wd-undo="' + w.id + '">Not sent – undo</button>' : '<span class="muted2 a-sm">owner is sending</span>')
+                : (owner() ? '<button class="btn btn-sm" data-wd-start="' + w.id + '"' + (w.checked_name ? '' : ' disabled title="Check first"') + '>Start payout</button>' : '') + '<button class="btn btn-ghost btn-sm" data-wd-no="' + w.id + '">Reject</button>') + '</td></tr>';
+          }), 'No withdrawals waiting ✅'), 'Step 1: an admin checks name, ID and history and presses Check. Step 2: the owner presses Start payout – ALL checks run now, BEFORE any USDT leaves. ' +
+            'Step 3: send the USDT, then Paid + TXID. ' + usd(big) + '+ in 24 hours needs the Check from a DIFFERENT admin. A started payout cannot be rejected. Reject = money goes back to the player.') +
           card('IDs to check', table(['Player', 'Sent', 'ID', ''], (x[2].data || []).map(function (k) {
             return '<tr><td>' + who(k.user_id) + '</td><td class="muted2">' + when(k.updated_at) + '</td><td><button class="btn btn-ghost btn-sm" data-kyc-view="' + esc(k.doc_path) + '">View ID</button></td>' +
               '<td class="a-act"><button class="btn btn-sm" data-kyc-ok="' + k.user_id + '">Approve</button><button class="btn btn-ghost btn-sm" data-kyc-no="' + k.user_id + '">Reject</button></td></tr>';
@@ -186,11 +201,12 @@
   }
   function player(id) {
     Promise.all([
-      sb.rpc('pc_admin_find', { q: '' }),
+      sb.rpc('pc_admin_player', { uid: id }),      // A3: sirf yahi player (pehle 50 ki list mein dhoondhta – 51st pe '?')
       sb.from('ledger').select('*').eq('user_id', id).order('id', { ascending: false }).limit(30),
       sb.from('web_entries').select('contest_date,status,paid_fee,refunded,public_name').eq('user_id', id).order('contest_date', { ascending: false }).limit(15)
     ]).then(function (x) {
-      var p = (x[0].data || []).filter(function (o) { return o.id === id; })[0] || { name: '?', phone: '', balance: 0 };
+      var p = (x[0].data || [])[0];
+      if (!p) { pane().innerHTML = card('Player', '<p class="acc-msg bad">Could not load this player' + (x[0].error ? ': ' + esc(errText(x[0].error)) : '') + '.</p><button class="btn btn-ghost btn-sm" data-go="players">← Back</button>'); return; }
       pane().innerHTML = card(esc(p.name) + (p.blocked ? ' <span class="tag-bad">BLOCKED</span>' : ''),
         '<p class="muted2">' + esc(p.phone) + ' · ' + esc(p.email || '') + ' · ref ' + esc(p.ref_code || '–') + ' · ID: ' + esc(p.kyc || 'none') + '</p>' +
         '<p>Wallet <b class="mono">' + usd(p.balance) + '</b></p>' +
@@ -249,7 +265,9 @@
   /* ---------- Team (owner) ---------- */
   function team() {
     sb.from('pc_admins').select('*').order('added_at').then(function (r) {
-      pane().innerHTML = card('Team', table(['Name', 'Role', 'Added', ''], (r.data || []).map(function (a) {
+      var few = (r.data || []).length < 2;
+      pane().innerHTML = (few ? '<div class="card acc-card a-flag"><b>⚠️ Only one admin.</b><p class="muted2">Big withdrawals and big deposits need a SECOND admin to press Check – with one admin they cannot be done. Add at least one trusted person below.</p></div>' : '') +
+        card('Team', table(['Name', 'Role', 'Added', ''], (r.data || []).map(function (a) {
         return '<tr><td><b>' + esc(a.name || '') + '</b></td><td>' + esc(a.role) + '</td><td class="muted2">' + when(a.added_at) + '</td>' +
           '<td>' + (owner() ? '<button class="btn btn-ghost btn-sm" data-team-rm="' + a.user_id + '">Remove</button>' : '') + '</td></tr>';
       }), 'No admins.') + (owner() ? '<h3>Add a team member</h3><p class="muted2 a-sm">They must first create a PipClash account on the website with this email.</p>' +
@@ -277,7 +295,10 @@
     if (a('data-dep-ok') && confirm('Approve this deposit? Check the TXID on the explorer first.')) call('pc_admin_deposit', { did: +a('data-dep-ok'), ok: true, why: null }, b);
     if (a('data-dep-no')) { var w1 = prompt('Reason for rejecting this deposit:'); if (w1) call('pc_admin_deposit', { did: +a('data-dep-no'), ok: false, why: w1 }, b); }
     if (a('data-wd-check') && confirm('I checked the name, ID and history – this withdrawal looks OK.')) call('pc_admin_withdraw_check', { wid: +a('data-wd-check') }, b);
-    if (a('data-wd-ok')) { var tx = prompt('Send the USDT first. Then paste the payout TXID:'); if (tx) call('pc_admin_withdraw', { wid: +a('data-wd-ok'), paid: true, why: tx }, b); }
+    if (a('data-dep-check') && confirm('BIG deposit: I opened the TXID – the exact amount arrived at our address.')) call('pc_admin_deposit_check', { did: +a('data-dep-check') }, b);
+    if (a('data-wd-start') && confirm('Start payout? All checks run now. Only AFTER this, send the USDT.')) call('pc_admin_withdraw_start', { wid: +a('data-wd-start') }, b);
+    if (a('data-wd-undo') && confirm('You did NOT send the USDT? The withdrawal goes back to waiting.')) call('pc_admin_withdraw_unstart', { wid: +a('data-wd-undo') }, b);
+    if (a('data-wd-ok')) { var tx = prompt('You sent the USDT. Paste the payout TXID:'); if (tx) call('pc_admin_withdraw', { wid: +a('data-wd-ok'), paid: true, why: tx }, b); }
     if (a('data-wd-no')) { var w2 = prompt('Reason for rejecting (the amount goes back to the player):'); if (w2) call('pc_admin_withdraw', { wid: +a('data-wd-no'), paid: false, why: w2 }, b); }
     if (a('data-kyc-ok') && confirm('Approve this ID? The name must match the account.')) call('pc_admin_kyc', { uid: a('data-kyc-ok'), ok: true, why: null }, b);
     if (a('data-kyc-no')) { var w3 = prompt('Reason (shown to the player):'); if (w3) call('pc_admin_kyc', { uid: a('data-kyc-no'), ok: false, why: w3 }, b); }
