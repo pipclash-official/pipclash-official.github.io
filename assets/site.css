@@ -781,3 +781,6 @@ body.v2-refer-only #refer>.v2-lbl:first-child{display:none}
 
 .v2-stat b{color:var(--text)}.v2-stat b.gold{color:#F2C866}.v2-stat b.up{color:#22C55E}.v2-stat b.down{color:#EF4444}
 .snav>*{flex-shrink:0}   /* menu ke card dabne na paayein (balance card kat raha tha) */
+/* audit: results table phone pe naam/% na toote; chhote links ko tap jagah */
+.res-table td,.res-table th{white-space:nowrap}.pct-sm{white-space:nowrap}
+.v2-me a,.v2-lo,.v2-foot a,.cert-link{display:inline-block;padding:6px 2px}
