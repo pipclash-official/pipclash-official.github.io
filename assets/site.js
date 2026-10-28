@@ -4,7 +4,7 @@
   'use strict';
   var D = null;
   var $ = function (s, r) { return (r || document).querySelector(s); };
-  var rk = function (n) { return n && n <= 3 ? '<span class="medal m' + n + '" role="img" aria-label="Rank ' + n + '">' + n + '</span>' : '#' + n; };
+  var rk = function (n, pnl) { return n && n <= 3 && !(pnl <= 0) ? '<span class="medal m' + n + '" role="img" aria-label="Rank ' + n + '">' + n + '</span>' : '#' + n; };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var money = function (v) { v = Number(v) || 0; return (v >= 0 ? '+$' : '−$') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
@@ -67,7 +67,7 @@
   }
   function tickClock() {
     liveChip();
-    var now = new Date(), w = nextWindow(now), left = Math.max(0, Math.floor((w.target - now) / 1000));
+    var now = new Date(window.PC_NOW ? window.PC_NOW() : Date.now()), w = nextWindow(now), left = Math.max(0, Math.floor((w.target - now) / 1000));
     $$('[data-clock]').forEach(function (el) {
       var h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), s = left % 60;
       var b = el.querySelectorAll('b'); if (b.length === 3) { b[0].textContent = pad(h); b[1].textContent = pad(m); b[2].textContent = pad(s); }
@@ -106,7 +106,7 @@
       var rowHtml = function (r) {
         var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
         var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '');
-        return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">' + rk(r.rank) + '</td><td style="font-weight:600">' + flag(r.cc) + esc(r.name) +
+        return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">' + rk(r.rank, r.pnl) + '</td><td style="font-weight:600">' + flag(r.cc) + esc(r.name) +
           (compact ? ' <span class="mono" style="font-size:13px">' + mv + '</span>' : ' <span class="mono" style="font-size:13px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
           (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td><td class="mono r c-ru ' + cls(r.real || 0) + '">' + money(r.real || 0) + '</td><td class="mono r c-ru ' + cls(r.unreal || 0) + '">' + money(r.unreal || 0) + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
       };
@@ -133,7 +133,10 @@
       var bar = box.parentElement; if (bar) bar.hidden = !(items.length && (st === 'live' || st === 'review'));   // patti sirf battle ke time
       if (!items.length) { box.innerHTML = ''; return; }
       var html = items.map(function (f) { var c = f.kind === 'profit' ? 'var(--up2)' : (f.kind === 'loss' ? 'var(--down)' : 'var(--accent2)'); return '<span><span style="color:' + c + '">●</span> ' + esc(f.text) + '</span>'; }).join('');
-      box.innerHTML = html + html;
+      // Loop ke liye list 2 baar chahiye – par 1-3 event ho to "Battle started" do baar dikhta (E18): tab ruki hui patti
+      var few = items.length < 4;
+      box.innerHTML = few ? html : html + html;
+      box.style.animation = few ? 'none' : '';
     });
   }
   function renderDuel() {
@@ -182,7 +185,7 @@
       pod.innerHTML = p.length ? p.map(card).join('') : '<p class="muted" style="grid-column:1/-1">No winner in this battle – nobody finished in profit.</p>';
     }
     if (body) body.innerHTML = r.rows.map(function (x) {
-      return '<tr><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank) + '</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '</td><td class="mono r" style="font-weight:700;color:' + (x.rank === 1 ? 'var(--gold)' : 'var(--text)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
+      return '<tr><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank, x.pnl) + '</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '</td><td class="mono r" style="font-weight:700;color:' + (x.rank === 1 ? 'var(--gold)' : 'var(--text)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
     }).join('');
   }
   function renderPast() {
@@ -223,7 +226,7 @@
     if (D && D.prizes) $$('[data-prize]').forEach(function (el) { var v = D.prizes[el.getAttribute('data-prize')]; if (v != null) el.textContent = '$' + v; });
   }
   function renderPaid() {          // paid entry chalu = 'free' wale text chhupao, '$10' wale dikhao
-    var paid = !!(D && D.paid_entry);
+    var paid = window.PC_PAID != null ? window.PC_PAID : !!(D && D.paid_entry);
     $$('[data-free]').forEach(function (el) { el.hidden = paid; });
     $$('[data-paid]').forEach(function (el) { el.hidden = !paid; });
   }
@@ -315,10 +318,16 @@
       main.innerHTML = '<div class="card"><div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="r">P&amp;L</th><th class="r c-pct">%</th><th class="r">Prize</th></tr></thead><tbody>' +
         d.rows.map(function (x) {
           if (x.dq) return '<tr class="dq-row"><td class="mono muted">–</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td colspan="3" class="r"><span class="dq-badge">DISQUALIFIED</span></td></tr>';
-          return '<tr' + (x.rank === 1 && x.pnl > 0 ? ' class="lb-row first"' : '') + '><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank) + '</td><td style="font-weight:600">' + esc(x.name) +
+          return '<tr' + (x.rank === 1 && x.pnl > 0 ? ' class="lb-row first"' : '') + '><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank, x.pnl) + '</td><td style="font-weight:600">' + esc(x.name) +
             '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '<span class="pct-sm">' + pct(x.pct) + '</span></td><td class="mono r c-pct ' + cls(x.pnl) + '">' + pct(x.pct) +
             '</td><td class="mono r" style="font-weight:700;color:' + (x.prize ? (x.rank === 1 ? 'var(--gold)' : 'var(--text)') : 'var(--dim)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
         }).join('') + '</tbody></table></div><div class="sample">P&amp;L counts only trades opened in the battle window. % is profit on the $1,000 starting balance.</div></div>';
+      return;
+    }
+    if (id) {                 // ?id=99 – aisi battle nahi (WW12)
+      if (back) back.hidden = false;
+      pod.innerHTML = '';
+      main.innerHTML = '<div class="card"><div class="empty">Battle #' + esc(id) + ' was not found. <a href="winners.html">See all results →</a></div></div>';
       return;
     }
     if (back) back.hidden = true;
@@ -326,7 +335,7 @@
     if (!R.list.length) { main.innerHTML = '<div class="card"><div class="empty">The first result will appear here after the first battle.</div></div>'; return; }
     main.innerHTML = '<div class="res-list">' + R.list.map(function (b) {
       var top = b.top.map(function (t) {
-        return '<div class="res-top">' + rk(t.rank) + '<span class="res-tn">' + esc(t.name) + '</span><span class="mono ' + cls(t.pnl) + '">' + money(t.pnl) + '</span></div>';
+        return '<div class="res-top">' + rk(t.rank, t.pnl) + '<span class="res-tn">' + esc(t.name) + '</span><span class="mono ' + cls(t.pnl) + '">' + money(t.pnl) + '</span></div>';
       }).join('') || '<div class="muted">No ranked traders</div>';
       return '<a class="card res-item" href="winners.html?id=' + b.id + '"><div class="res-head"><div><b class="display" style="font-size:19px">' + esc(b.date) + '</b><div class="muted" style="font-size:13px">Battle #' + b.id + ' · ' + b.traders + ' traders</div></div>' +
         (b.winner ? '' : '<span class="pill" style="font-size:13px;padding:4px 10px">No winner</span>') + '</div>' + top + '<span class="res-view">View full result →</span></a>';
