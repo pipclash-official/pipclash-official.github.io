@@ -766,4 +766,17 @@ body:has(.v2-you:not([hidden])) main{padding-bottom:84px}
 .v2-tk{width:18px;height:18px;stroke:#4DA3FF;fill:none;stroke-width:2;flex:none}
 .v2-past{grid-template-columns:1fr .7fr .6fr 1.4fr}.v2-past .r{display:flex;flex-direction:column;align-items:flex-end;line-height:1.2}.v2-past small{font-size:11.5px}
 body.v2-refer-only [data-v2-steps],body.v2-refer-only [data-v2-past],body.v2-refer-only .acc-card:has([data-entry]){display:none!important}
-body.v2-refer-only #refer .v2-lbl:first-child{display:none}
+body.v2-refer-only #refer>.v2-lbl:first-child{display:none}
+/* PDF match: My battle bare MT5 card, copy icon, outline pill, demo strip, compact */
+.acc-card.v2-bare{background:none;border:0;box-shadow:none;padding:0}.acc-card.v2-bare>h2{display:none}
+.acc-card.v2-bare .v2-mt5{margin-top:0}
+.v2-copy{padding:4px 6px;line-height:0}.v2-copy svg{width:15px;height:15px;stroke:#4DA3FF;fill:none;stroke-width:2}
+.v2-out{color:var(--muted);background:transparent;border-color:#263149}
+.v2-demo{background:#2F80FF;color:#fff;text-align:center;font-size:12.5px;font-weight:700;padding:5px 8px}.v2-demo a{color:#fff}
+.w-test{font-size:12.5px;padding:6px 12px;border-radius:10px}
+.v2-wrap{gap:14px}.v2-card{padding:13px 14px}.v2-stat{padding:9px 12px}.v2-stat b{font-size:18px}
+.v2-past .down b,.v2-past .down small{color:#EF4444}.v2-past .up b,.v2-past .up small{color:#22C55E}.v2-card .v2-lp.down b{color:#EF4444}.v2-card .v2-lp.up b{color:#22C55E}
+.v2-erow{flex-wrap:nowrap;font-size:14px}.v2-erow>span:first-child{min-width:0}
+.v2-cancel{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:0 0 0 4px;text-decoration:underline}
+
+.v2-stat b{color:var(--text)}.v2-stat b.gold{color:#F2C866}.v2-stat b.up{color:#22C55E}.v2-stat b.down{color:#EF4444}
