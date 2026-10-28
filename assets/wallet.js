@@ -20,7 +20,7 @@
     KYC_REQUIRED: 'Please verify your ID first (below).', NO_PROFILE: 'Please complete your details on My account first.', BAD_NETWORK: 'Please choose TRC20 or BEP20.',
     ALREADY_APPROVED: 'Your ID is already verified.', BAD_PATH: 'Upload failed – please try again.',
     GET_AMOUNT_FIRST: 'Please tap “Get my exact amount” first.', AMOUNT_MISMATCH: 'Please send and enter exactly your amount – get a new one if you changed the network.',
-    TXID_USED: 'This TXID was already submitted.', TRY_AGAIN: 'Please try again in a moment.'
+    TXID_USED: 'This TXID was already submitted.', TRY_AGAIN: 'Please try again in a moment.', BEP20_ONLY: 'Withdrawals are paid only on BEP20 (BNB Smart Chain).'
   };
   function errText(e) {
     var m = String((e && (e.message || e.error_description)) || e || '');
@@ -228,6 +228,7 @@
     e.preventDefault();
     var amt = parseFloat($('#w-wd-amt').value), addr = $('#w-wd-addr').value.trim(), net = $('#w-wd-net').value, b = $('[data-w-wd-form] button');
     if (!(amt > 0)) { msg('[data-w-wd-msg]', 'Please enter an amount.', true); return; }
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { msg('[data-w-wd-msg]', 'This is not a BEP20 address. It must start with 0x and have 42 characters (choose “BSC / BEP20” in your wallet).', true); return; }
     if (!confirm('Withdraw ' + usd(amt) + ' USDT to ' + net + ' address\n' + addr + ' ?\n\nPlease check the address – crypto transfers cannot be reversed.')) return;
     b.disabled = true; msg('[data-w-wd-msg]', 'Sending…');
     sb.rpc('pc_request_withdraw', { amt: amt, net: net, addr: addr }).then(function (r) {
