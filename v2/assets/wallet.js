@@ -76,7 +76,9 @@
         $('[data-w-wdable]').textContent = kyc && kyc.status === 'approved' ? usd(bal) : 'ID check first';
         $('[data-w-total]').textContent = usd(bal + inb + wdp);
         renderEntries(ents);
-        renderHistory(x[1].data || []);
+        var pend = (x[2].data || []).filter(function (d) { return d.status === 'pending'; }).map(function (d) { return { kind: 'deposit', note: d.network, amount: Number(d.amount), created_at: d.created_at, pending: true }; })
+          .concat((x[3].data || []).filter(function (w) { return w.status === 'pending'; }).map(function (w) { return { kind: 'withdraw', note: w.network, amount: -Number(w.amount), created_at: w.created_at, pending: true }; }));
+        renderHistory(pend.concat(x[1].data || []));
         renderReq('[data-w-deps]', x[2].data || [], 'deposit');
         renderReq('[data-w-wds]', x[3].data || [], 'withdraw');
         renderKyc();
@@ -111,13 +113,18 @@
   });
   var KIND = { deposit: 'Deposit', withdraw: 'Withdrawal', withdraw_refund: 'Withdrawal returned', entry: 'Battle entry', entry_refund: 'Entry refund',
                prize: 'Prize', referral: 'Referral reward', adjust: 'Adjustment' };
-  function renderHistory(rows) {
+  function renderHistory(rows) {   // final design: line + status chip + bacha balance
     $('[data-w-hist]').innerHTML = rows.length ? rows.map(function (r) {
-      return '<tr><td class="muted2" style="font-size:13px">' + when(r.created_at) + '</td><td>' + esc(KIND[r.kind] || r.kind) +
-        (r.note ? '<div class="muted2" style="font-size:12px;word-break:break-all">' + esc(r.note) + '</div>' : '') + '</td>' +
-        '<td class="mono r ' + (r.amount >= 0 ? 'up' : 'down') + '">' + (r.amount >= 0 ? '+' : '') + usd(r.amount) + '</td>' +
-        '<td class="mono r" style="font-weight:700">' + usd(r.balance_after) + '</td></tr>';
-    }).join('') : '<tr><td colspan="4" class="empty">No transactions yet.</td></tr>';
+      var up = r.amount >= 0;
+      var m = /\$(\d+)/.exec(r.note || ''), fee = m && +m[1], TN = { 10: 'STARTER', 25: 'PRO', 50: 'ELITE' };
+      var label = (r.kind === 'entry' || r.kind === 'entry_refund') && fee ? (r.kind === 'entry' ? 'Entry' : 'Refund') + ' · ' + (TN[fee] ? TN[fee] + ' ' : '') + '$' + fee
+        : esc(KIND[r.kind] || r.kind) + (r.note ? ' · ' + esc(r.note) : '');
+      return '<div class="v2-tx"><div><div>' + label + '</div>' +
+        '<div class="v2-row" style="justify-content:flex-start;gap:6px;margin-top:4px">' + (r.pending ? '<span class="v2-chip v2-gold">PENDING</span>' : '<span class="v2-chip v2-up">COMPLETED</span>') +
+        '<span class="v2-mut" style="font-size:12px">' + when(r.created_at) + '</span></div></div>' +
+        '<div style="text-align:right"><b class="tn ' + (r.pending ? '' : (up ? 'up' : 'down')) + '">' + (up ? '+' : '') + usd(r.amount) + '</b>' +
+        '<div class="v2-mut tn" style="font-size:12px">' + (r.pending ? 'checking' : 'bal ' + usd(r.balance_after)) + '</div></div></div>';
+    }).join('') : '<div class="v2-mut">No transactions yet.</div>';
   }
   var ST = { pending: '<span class="tag-wait">CHECKING</span>', approved: '<span class="tag-ok">ADDED</span>', paid: '<span class="tag-ok">PAID</span>', rejected: '<span class="tag-bad">REJECTED</span>' };
   function renderReq(sel, rows, kind) {
@@ -188,5 +195,6 @@
   // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
   sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
   loadSettings().then(load);
-  tab(location.hash === '#withdraw' ? 'wd' : 'dep');
+  function hashTab() { tab(location.hash === '#withdraw' ? 'wd' : (location.hash === '#deposit' ? 'dep' : '')); }   // form tab dabane pe hi khule
+  hashTab(); window.addEventListener('hashchange', hashTab);
 })();
