@@ -121,7 +121,7 @@
       return Promise.resolve();
     }
     if (!window.supabase) return Promise.resolve();
-    S.sb = S.sb || window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' } });
+    S.sb = S.sb || window.PC_SB || (window.PC_SB = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' } }));   // ek hi client (account/wallet wala)
     return S.sb.auth.getSession().then(function (r) {
       S.user = r.data && r.data.session && r.data.session.user;
       if (!S.user) return;
@@ -181,10 +181,10 @@
       cta = '<a class="btn btn-lg v2-btn" href="arena.html">WATCH LIVE ARENA →</a>';
     } else {
       var top = st[0], final = b.status === 'ended';
-      head = (final ? chip('COMPLETED', 'up') : chip('PENDING · RESULT ' + hm12(s.result_at), 'gold')) + '<span class="v2-mut">' + dayName(ph.date) + '</span>';
+      head = (final ? chip('COMPLETED', 'up') : chip('PENDING · RESULT ' + hm12(s.result_at) + ' UAE', 'gold')) + '<span class="v2-mut">' + dayName(ph.date) + '</span>';
       body = top ? '<div class="v2-win"><img src="assets/3d/trophy-only.webp" width="64" height="64" alt=""><div><div class="v2-mut">' + (final ? 'Winner' : 'Leading') + '</div><b style="font-size:17px">' + esc(top.name) + '</b><div class="' + (top.pnl >= 0 ? 'up' : 'down') + ' tn">' + (top.pnl >= 0 ? '▲ +' : '▼ −') + usd(Math.abs(top.pnl), true) + '</div></div></div>'
         : '<div class="v2-mut">No ranked traders today.</div>';
-      cta = '<a class="btn btn-lg v2-btn" href="winners.html">SEE RESULTS →</a><div class="v2-mut" style="text-align:center;margin-top:8px">Next battle: ' + dayName(ph.next) + ' · ' + hm12(s.trade_start) + ' UAE · <a href="join.html">book a seat</a></div>';
+      cta = '<a class="btn btn-lg v2-btn" href="' + (final ? 'winners.html' : 'arena.html') + '">' + (final ? 'SEE RESULTS' : 'SEE STANDINGS') + ' →</a><div class="v2-mut" style="text-align:center;margin-top:8px">Next battle: ' + dayName(ph.next) + ' · ' + hm12(s.trade_start) + ' UAE · <a href="join.html">book a seat</a></div>';
     }
     box.className = 'v2-hero' + (elite ? ' v2-elite' : '');
     box.innerHTML = '<div class="v2-row">' + head + '</div><div class="v2-row" style="margin:12px 0 10px">' + '<div>' + label + '</div>' + coin(t.free ? '$' : t.fee) + '</div>' + body + '<div style="height:12px"></div>' + cta;
@@ -242,7 +242,7 @@
     box.innerHTML = list.map(function (t) {
       var elite = t.fee >= 50, pro = t.fee === 25, mine = S.mine[t.fee];
       var badge = t.free ? chip('FREE', 'up') : (t.taken >= t.max ? chip('FULL', 'down') : elite ? '<span class="v2-chip v2-vip">VIP</span>' : pro ? '<span class="v2-chip v2-pop">POPULAR</span>' : chip('● ENTRY OPEN', 'up'));
-      var prizes = t.rows.length ? '1st ' + usd(t.rows[0], true) + (t.rows[1] ? ' · 2nd ' + usd(t.rows[1], true) : '') + (t.rows[2] ? ' · 3rd ' + usd(t.rows[2], true) : '') + ' · ' + t.rows.length + ' paid' : 'Prizes start from 13 players';
+      var prizes = t.rows.length ? '1st ' + usd(t.rows[0], true) + (t.rows[1] ? ' · 2nd ' + usd(t.rows[1], true) : '') + (t.rows[2] ? ' · 3rd ' + usd(t.rows[2], true) : '') + ' · up to ' + t.rows.length + ' prizes' : 'Prizes start from 13 players';
       var btn;
       if (t.free) btn = '<a class="btn v2-btn" href="account.html#signup">JOIN FREE</a><a class="btn btn-ghost v2-btn2" href="https://t.me/PipClashBot">or join on Telegram</a>';
       else if (mine) btn = '<div class="v2-row">' + chip('ENTERED · ' + dayName(mine.contest_date), 'acc') + (mine.status === 'pending' ? '<button class="btn btn-ghost btn-sm" data-cancel="' + t.fee + '">Cancel · refund ' + usd(t.fee) + '</button>' : '') + '</div>';
@@ -250,7 +250,7 @@
       else if ((S.bal || 0) < t.fee) btn = '<a class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" href="wallet.html">ADD ' + usd(t.fee - (S.bal || 0), true) + ' TO JOIN</a><div class="v2-mut" style="text-align:center">Balance ' + usd(S.bal || 0, true) + ' · entry ' + usd(t.fee) + '</div>';
       else btn = '<button class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" data-enter="' + t.fee + '">' + (t.day === uaeNow().date ? 'JOIN BATTLE' : 'BOOK ' + dayName(t.day).toUpperCase()) + ' · ' + usd(t.fee) + '</button>';
       return '<div class="v2-card v2-tcard' + (elite ? ' gold' : pro ? ' pro' : '') + '" id="t' + t.fee + '">' +
-        '<div class="v2-row"><div><div class="v2-eyebrow' + (elite ? ' gold' : pro ? ' acc' : '') + '">' + t.name + '</div><b class="tn" style="font-size:22px">' + (t.free ? '$0' : usd(t.fee)) + ' <span class="v2-mut" style="font-weight:500">entry</span></b></div>' + badge + '</div>' +
+        '<div class="v2-row"><div><div class="v2-eyebrow' + (elite ? ' gold' : pro ? ' acc' : '') + '">' + t.name + '</div><b class="tn" style="font-size:22px">' + (t.free ? 'Free' : usd(t.fee)) + ' <span class="v2-mut" style="font-weight:500">entry</span></b></div>' + badge + '</div>' +
         '<div class="v2-grid3"><div><div class="v2-mut">Prize pool</div><b class="tn gold">' + usd(t.pool) + '</b></div><div><div class="v2-mut">Players</div><b class="tn">' + t.taken + '</b></div><div><div class="v2-mut">' + (t.max ? 'Seats left' : 'Day') + '</div><b class="tn">' + (t.max ? Math.max(0, t.max - t.taken) : dayName(t.day)) + '</b></div></div>' +
         (t.max ? bar(t.taken / t.max * 100, elite) : '') + '<div class="v2-mut tn" style="margin:8px 0 12px">' + prizes + '</div>' + btn + '<p class="v2-msg" data-msg="' + t.fee + '" role="status"></p></div>';
     }).join('');
@@ -376,7 +376,7 @@
       '<img src="assets/3d/trophy-only.webp" width="110" height="110" alt="" class="v2-cere-cup">' +
       '<div class="v2-mut">' + (me ? 'YOU FINISHED' : 'WINNER') + '</div><div class="v2-cere-rank">' + (me ? '#' + me.rank : esc(hero.name)) + '</div>' +
       '<div class="v2-grid3"><div class="v2-stat"><span>P&amp;L</span><b class="tn ' + (hero.pnl >= 0 ? 'up' : 'down') + '">' + (hero.pnl >= 0 ? '+' : '−') + usd(Math.abs(hero.pnl), true) + '</b></div>' +
-      '<div class="v2-stat"><span>ROI</span><b class="tn ' + (pct >= 0 ? 'up' : 'down') + '">' + (pct >= 0 ? '▲ ' : '▼ ') + Math.abs(pct).toFixed(2) + '%</b></div>' +
+      '<div class="v2-stat"><span>ROI</span><b class="tn ' + (pct >= 0 ? 'up' : 'down') + '">' + (pct >= 0 ? '▲ +' : '▼ −') + Math.abs(pct).toFixed(2) + '%</b></div>' +
       '<div class="v2-stat" style="border-color:#D6A84F"><span>Prize</span><b class="tn gold">' + (hero.prize ? usd(hero.prize) : '–') + '</b></div></div>' +
       (me && me.prize ? '<div class="v2-mut" style="margin-top:8px">' + chip('PENDING', 'gold') + ' paid after a quick ID check</div>' : '') +
       '</div>' +
@@ -386,7 +386,7 @@
           '<span class="v2-lp tn ' + (p > 0 ? 'up' : p < 0 ? 'down' : '') + '"><b>' + (p < 0 ? '−' : '+') + usd(Math.abs(p), true) + '</b><small>' + (p > 0 ? '▲ +' : p < 0 ? '▼ −' : '') + Math.abs(pc).toFixed(1) + '%</small></span>' +
           '<b class="tn gold" style="width:56px;text-align:right">' + (r.prize ? usd(r.prize) : '–') + '</b></div>';
       }).join('') + '</div>' +
-      '<div class="v2-mut tn" style="text-align:center;margin:10px 0">' + b.traders + ' traders · ' + ranked.filter(function (r) { return r.prize; }).length + ' winners · prizes ' +
+      '<div class="v2-mut tn" style="text-align:center;margin:10px 0">' + b.traders + ' traders · ' + (function (k) { return k + (k === 1 ? ' winner' : ' winners'); })(ranked.filter(function (r) { return r.prize; }).length) + ' · prizes ' +
         usd(ranked.reduce(function (a, r) { return a + (r.prize || 0); }, 0)) + '</div>' +
       '<a class="btn btn-ghost v2-btn2" href="winners.html?id=' + b.id + '">VIEW FULL LEADERBOARD</a>';
   }
@@ -440,7 +440,9 @@
     document.body.insertBefore(d, document.body.firstChild);
   }
 
-  function renderAll() { demoStrip(); referMode(); shell(); hero(); upcoming(); perf(); join(); arena(); leaderboard(); steps(); past(); ceremony(); }
+  function renderAll() {
+    if (!window.PC_DATA && !window.PC_DEMO) { shell(); join(); return; }   // live.js aane tak 'Loading…' – galat halat ki jhalak nahi
+    demoStrip(); referMode(); shell(); hero(); upcoming(); perf(); join(); arena(); leaderboard(); steps(); past(); ceremony(); }
   function tick() {
     var ph = phase(), a = $('[data-v2-arena]');
     document.querySelectorAll('[data-v2-left]').forEach(function (el) { if (ph.to) el.textContent = left(ph.to); });
