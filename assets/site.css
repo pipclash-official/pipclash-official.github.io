@@ -881,3 +881,37 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .ar-tab.g.on{border-color:#D6A84F;background:linear-gradient(165deg,#1d1a12,var(--surface2));box-shadow:0 0 0 1px #D6A84F inset,0 10px 22px -12px rgba(214,168,79,.6)}
 .ar-tab.g b{color:#F2C866}
 @media (prefers-reduced-motion:reduce){.v2-tier.g:after{animation:none}}
+/* #11 header countdown (har page) */
+.tb-cd{display:inline-flex;align-items:center;gap:6px;margin-left:auto;margin-right:10px;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);font-size:12.5px;text-decoration:none;white-space:nowrap}
+.tb-cd b{color:var(--text);font-size:13.5px}
+.tb-cd.closes{border-color:rgba(34,197,94,.45);color:#86efac}.tb-cd.closes b{color:#22C55E}
+.tb-cd.live{border-color:rgba(239,68,68,.5);color:#fca5a5}.tb-cd.live b{color:#fff}
+.tb-cd:hover{color:var(--text)}
+@media (max-width:600px){.tb-cd{padding:5px 9px;margin-right:6px;gap:5px;flex:none}.tb-cd b{font-size:12px}.tb-cd span{display:none}.tb-cd:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.8}}
+.tb-cd:not([hidden])+.v2-tright{margin-left:0}
+/* #17 desh filter + biggest climbers */
+.ar-cc{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:0 20px 12px}
+.ar-cc button{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line2);background:var(--bg);color:var(--text);font:inherit;font-size:13px;cursor:pointer}
+.ar-cc button.on{border-color:var(--accent);background:var(--surface2)}
+.ar-cc-top{font-size:13px;color:var(--muted);margin-left:4px}.ar-cc-top b{color:#F2C866}
+.ar-climb{padding:20px}
+.ar-cl{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.ar-cl:first-child{border-top:0}
+/* #20 asli inaam feed */
+.pay-card{padding:16px 18px;margin-top:14px}
+.pay-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.pay-tot{display:flex;flex-direction:column;align-items:flex-end;text-align:right}.pay-tot b{font-size:22px;font-weight:900}
+.pay-row{display:grid;grid-template-columns:80px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);color:var(--text);text-decoration:none;font-size:14px}
+.pay-amt{font-weight:800;color:#F2C866}
+/* #19 trader dashboard calendar */
+.v2-cal{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;max-width:260px}
+.v2-cal i,.v2-key{display:block;aspect-ratio:1;border-radius:5px;background:var(--surface2);border:1px solid var(--line)}
+.v2-cal i.w,.v2-key.w{background:#22C55E;border-color:#22C55E}.v2-cal i.l,.v2-key.l{background:#EF4444;border-color:#EF4444}.v2-cal i.z{background:#64748b}
+.v2-key{display:inline-block;width:10px;height:10px;vertical-align:-1px}
+/* #21 rules: bade number wale cards */
+.rk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.rk{display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:16px;border:1px solid var(--line2);background:linear-gradient(160deg,var(--surface2),var(--surface))}
+.rk-k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.rk-v{font-size:22px;font-weight:900;line-height:1.15}.rk-s{font-size:12.5px;color:var(--muted)}
+.rk.gold{border-color:rgba(214,168,79,.5)}.rk.gold .rk-v{color:#F2C866}
+@media (max-width:760px){.rk-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rk-v{font-size:19px}}
