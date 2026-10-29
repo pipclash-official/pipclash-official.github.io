@@ -841,3 +841,18 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .w-pager{margin-top:10px}.w-pager button[disabled]{opacity:.4}
 
 .w-auto{margin:8px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(47,128,255,.08);border:1px solid #1E3A6E;font-size:13.5px;color:var(--muted2)}
+/* Live Arena v3: purane arena ke hisse (tiles, asli TradingView chart, table, title fight, prize, feed) naye design mein */
+.ar-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:24px;align-items:stretch}
+.ar-left{display:flex;flex-direction:column;gap:16px;min-width:0}
+.ar-h1{font-family:var(--f-display);font-size:clamp(34px,5vw,58px);line-height:1;margin:0;letter-spacing:-.02em}
+.ar-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ar-stats .stat .v{font-size:28px}
+.ar-next{border-color:var(--accent);background:var(--surface2)}
+.ar-chart{padding:10px;display:flex;flex-direction:column;min-height:440px;overflow:hidden}
+.ar-tv{flex:1;min-height:400px;border-radius:12px;overflow:hidden}
+.ar-tv .tradingview-widget-container__widget{height:100%;width:100%}
+.ar-src{margin:8px 6px 2px;font-size:12px;color:var(--muted)}
+.ar-src a{color:inherit}
+#find.v2-find{max-width:200px}
+@media (max-width:960px){.ar-grid{grid-template-columns:minmax(0,1fr)}.ar-chart{min-height:380px}.ar-tv{min-height:340px}}
+@media (max-width:600px){.ar-stats .stat .v{font-size:22px}.ar-chart{min-height:330px}.ar-tv{min-height:290px}#find.v2-find{max-width:none;width:100%}}
