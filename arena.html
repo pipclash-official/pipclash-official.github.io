@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Live Arena – PipClash</title>
-<meta name="description" content="Live timer and standings for today's PipClash battle.">
+<meta name="description" content="Live standings, title fight and battle feed for today's PipClash battle.">
 <meta property="og:title" content="Live Arena – PipClash">
-<meta property="og:description" content="Live timer and standings for today's PipClash battle.">
+<meta property="og:description" content="Live standings, title fight and battle feed for today's PipClash battle.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://pipclash-official.github.io/arena.html">
 <meta property="og:url" content="https://pipclash-official.github.io/arena.html">
@@ -16,19 +16,19 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080B12">
-<link rel="icon" href="assets/favicon.svg?v=56" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=56" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=56" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=56">
+<link rel="icon" href="assets/favicon.svg?v=57" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=57" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=57" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=57">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=56">
-<script src="assets/demo.js?v=56"></script>
-<script src="assets/site.js?v=56" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=57">
+<script src="assets/demo.js?v=57"></script>
+<script src="assets/site.js?v=57" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/v2.js?v=56" defer></script>
+<script src="assets/v2.js?v=57" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -49,16 +49,37 @@
 </header>
 <main>
 
-<section class="section first"><div class="wrap v2-wrap" style="max-width:900px">
-  <div class="v2-hero" data-v2-arena><div class="v2-mut">Loading battle…</div></div>
+<section class="section first ar-top"><div class="wrap ar-grid">
+  <div class="ar-left">
+    <h1 class="ar-h1">Live Arena</h1>
+    <div class="v2-hero" data-v2-arena><div class="v2-mut">Loading battle…</div></div>
+    <div class="ar-stats">
+      <div class="stat"><div class="k">Traders</div><div class="v" data-stat="players">–</div></div>
+      <div class="stat"><div class="k">In profit</div><div class="v up" data-stat="inprofit">–</div></div>
+      <div class="stat"><div class="k">Rank update</div><div class="v" data-stat="update">–</div></div>
+      <div class="stat ar-next"><div class="k">Next update</div><div class="v acc" data-stat="next">–</div></div>
+    </div>
+  </div>
+  <div class="card ar-chart">
+    <div class="tradingview-widget-container ar-tv"><div class="tradingview-widget-container__widget"></div>
+      <script src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>{"autosize": true, "symbol": "OANDA:XAUUSD", "interval": "5", "timezone": "Asia/Dubai", "theme": "dark", "style": "1", "locale": "en", "backgroundColor": "rgba(17,24,39,1)", "gridColor": "rgba(255,255,255,0.04)", "hide_side_toolbar": true, "hide_volume": true, "allow_symbol_change": true, "save_image": false, "calendar": false, "support_host": "https://www.tradingview.com"}</script></div>
+    <p class="ar-src">Live gold price by <a href="https://www.tradingview.com/symbols/XAUUSD/" target="_blank" rel="noopener">TradingView</a> · your MT5 broker price can differ by a few cents</p>
+  </div>
 </div></section>
-<section class="section" style="padding-top:12px"><div class="wrap v2-wrap" style="max-width:900px">
-  <div class="v2-tabs" data-v2-tabs hidden></div>
-  <div class="v2-card v2-lbcard">
-    <div class="v2-row" style="margin-bottom:8px"><b style="font-size:16px">Leaderboard</b>
-      <input id="v2-find" class="v2-find" type="search" placeholder="Find your name" aria-label="Find your name"></div>
-    <div data-v2-lb><div class="v2-mut">Standings appear when the battle starts.</div></div>
-    <p class="v2-mut" style="margin:10px 0 0;font-size:12.5px">P&amp;L counts only trades opened after <span data-t="trade_start">4:30 PM</span> UAE · % = profit on the $1,000 account · ranks update every 10 minutes.</p>
+<section class="section" style="padding-top:18px"><div class="wrap side">
+  <div class="card">
+    <div class="v2-tabs" data-v2-tabs hidden style="padding:16px 20px 0"></div>
+    <div class="card-h"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><b data-stand-title>Standings</b><span class="live-chip" data-live-chip hidden></span></div>
+      <input id="find" class="v2-find" type="search" placeholder="Find your name" aria-label="Find your name"></div>
+    <div class="lb-cols"><div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="c-move">Move</th><th class="r c-ru">Realized</th><th class="r c-ru">Open</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings data-split="30"></tbody></table></div><div class="table-box" data-lb2 hidden><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="c-move">Move</th><th class="r c-ru">Realized</th><th class="r c-ru">Open</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings2></tbody></table></div></div>
+    <div class="sample">P&amp;L counts only trades opened after <span data-t="trade_start">4:30 PM</span> UAE. Realized = closed trades, Open = trades still running. Disqualified players are not ranked. <span data-stat="updated"></span></div>
+    <details class="dq-box" data-dq hidden><summary>Disqualified (<span data-dq-n>0</span>)</summary><div data-dq-list></div></details>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--surface2),var(--surface))"><b class="display" style="font-size:18px">Title fight</b><div class="duel" data-duel style="grid-template-columns:minmax(0,1fr)"></div></div>
+    <div class="card" data-prize-card hidden style="padding:20px;display:flex;flex-direction:column;gap:10px"><b class="display" style="font-size:18px" data-prize-title>Prize table</b><p class="muted2" style="font-size:13px;margin:0" data-prize-note></p><div data-prize-rows style="display:flex;flex-direction:column;gap:4px"></div></div>
+    <div class="card"><div class="card-h"><b>Battle feed</b></div><div data-feed data-limit="12"></div></div>
+    <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:10px"><b class="display" style="font-size:18px">Not in today’s battle?</b><p class="muted2" style="font-size:14px">Entry for the next battle opens at <span data-t="join_open">10:00 AM</span> UAE.</p><a class="btn" href="join.html" style="align-self:flex-start">Join the next battle</a></div>
   </div>
 </div></section>
 <div class="v2-you" data-v2-you hidden></div>
