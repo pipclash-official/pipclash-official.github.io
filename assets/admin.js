@@ -184,6 +184,7 @@
           pick + '<p class="muted2 a-sm">' + b.players + ' players · data from the laptop engine, updated ' + when(b.updated_at) +
           '. DQ / Publish are done by the engine within ~1 minute.</p>' +
           (owner() && b.status === 'review' ? '<button class="btn" data-publish="' + b.contest_id + '">Publish FINAL result now</button>' : '') +
+          (owner() && b.status !== 'ended' ? ' <button class="btn btn-ghost" data-cancel-battle="' + b.contest_id + '">Cancel battle + refund all</button>' : '') +
           table(['#', 'Player', '>P&L', 'Trades', 'Status / flags', ''], pl.map(function (p) {
             var dq = p.status === 'disqualified';
             return '<tr' + (p.flags ? ' class="a-flag"' : '') + '><td class="mono">' + (p.rank || '–') + '</td><td><b>' + esc(p.player) + '</b><div class="muted2 a-sm">' + esc(p.channel || '') + (p.prize ? ' · prize ' + usd(p.prize) : '') + '</div></td>' +
@@ -344,6 +345,10 @@
     }
     if (a('data-revoke')) { var wr = prompt('Take back the $' + a('data-prize') + ' prize of ' + a('data-revoke') + ' (cheating found after the result)? It is NOT given to anyone else. Reason:'); if (wr && confirm('Sure? The player is told and marked disqualified.')) call('pc_admin_request', { k: 'revoke_prize', cid: BID, pl: a('data-revoke'), why: wr }, b); }
     if (a('data-dep-rev')) { var wd = prompt('Reverse this approved deposit of $' + a('data-amt') + '? The amount is taken back from the player wallet (fails if they spent it). Reason:'); if (wd) call('pc_admin_deposit_reverse', { did: +a('data-dep-rev'), why: wd }, b); }
+    if (a('data-cancel-battle')) {   // AA2: battle toot gayi – cancel, koi result nahi, sabki fee wapas
+      var wc = prompt('CANCEL battle #' + a('data-cancel-battle') + '? No result, no prizes – every paid entry fee goes back to the wallets. Reason (players see it):');
+      if (wc && confirm('Sure? This cannot be undone.')) call('pc_admin_request', { k: 'cancel_battle', cid: +a('data-cancel-battle'), pl: null, why: wc }, b);
+    }
     if (b.hasAttribute('data-csv')) csv();
     if (b.hasAttribute('data-closed-toggle')) { CLOSED = !CLOSED; render(); }
     if (b.hasAttribute('data-log-more')) { LOGN += 200; render(); }
