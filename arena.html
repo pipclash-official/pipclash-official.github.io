@@ -16,19 +16,19 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080B12">
-<link rel="icon" href="assets/favicon.svg?v=60" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=60" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=60" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=60">
+<link rel="icon" href="assets/favicon.svg?v=62" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=62" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=62" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=62">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=60">
-<script src="assets/demo.js?v=60"></script>
-<script src="assets/site.js?v=60" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=62">
+<script src="assets/demo.js?v=62"></script>
+<script src="assets/site.js?v=62" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/v2.js?v=60" defer></script>
+<script src="assets/v2.js?v=62" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -45,6 +45,7 @@
 <header class="tbar v2-tbar">
   <button class="mbtn" type="button" data-menu aria-label="Open menu" aria-controls="snav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <span class="v2-ttl">Live arena</span>
+  <a class="tb-cd" href="join.html" data-cd hidden><span data-cd-label>Entry</span> <b class="tn" data-cd-t>--:--:--</b></a>
   <span class="v2-tright" data-v2-chip><a class="v2-login" href="account.html#login">Log in</a></span>
 </header>
 <main>
@@ -71,11 +72,13 @@
     <div class="ar-tabs" data-ar-tabs hidden></div>
     <div class="card-h"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><b data-stand-title>Standings</b><span class="live-chip" data-live-chip hidden></span></div>
       <input id="find" class="v2-find" type="search" placeholder="Find your name" aria-label="Find your name"></div>
+    <div class="ar-cc" data-cc-filter hidden></div>
     <div class="lb-cols"><div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="c-move">Move</th><th class="r c-ru">Realized</th><th class="r c-ru">Open</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings data-split="30"></tbody></table></div><div class="table-box" data-lb2 hidden><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="c-move">Move</th><th class="r c-ru">Realized</th><th class="r c-ru">Open</th><th class="r">P&amp;L</th></tr></thead><tbody data-standings2></tbody></table></div></div>
     <div class="sample">P&amp;L counts only trades opened after <span data-t="trade_start">4:30 PM</span> UAE. Realized = closed trades, Open = trades still running. Disqualified players are not ranked. <span data-stat="updated"></span></div>
     <details class="dq-box" data-dq hidden><summary>Disqualified (<span data-dq-n>0</span>)</summary><div data-dq-list></div></details>
   </div>
   <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="card ar-climb" data-climbers hidden><b class="display" style="font-size:18px">Biggest climbers</b><p class="muted2" style="margin:2px 0 8px;font-size:13px">Most ranks gained in the last update</p><div data-climb-list></div></div>
     <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(160deg,var(--surface2),var(--surface))"><b class="display" style="font-size:18px">Title fight</b><div class="duel" data-duel style="grid-template-columns:minmax(0,1fr)"></div></div>
     <div class="card" data-prize-card hidden style="padding:20px;display:flex;flex-direction:column;gap:10px"><b class="display" style="font-size:18px" data-prize-title>Prize table</b><p class="muted2" style="font-size:13px;margin:0" data-prize-note></p><div data-prize-rows style="display:flex;flex-direction:column;gap:4px"></div></div>
     <div class="card"><div class="card-h"><b>Battle feed</b></div><div data-feed data-limit="12"></div></div>
