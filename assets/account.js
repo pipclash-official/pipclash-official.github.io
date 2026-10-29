@@ -249,6 +249,13 @@
       var cell = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
       $('[data-ref-stats]').innerHTML = cell(d.friends || 0, 'friends joined') + cell(d.played || 0, 'played a battle') + cell(usd(earned), 'earned', true) + cell(usd(todayAmt), 'earned today');
     });
+    sb.rpc('pc_my_referral_list').then(function (r) {   // #14: "Your friends" (SQL na chala ho to chupchaap kuch nahi)
+      var fl = $('[data-ref-friends]'), L = r.data || []; if (!fl || r.error || !L.length) return;
+      fl.hidden = false;
+      fl.innerHTML = '<div class="v2-lbl">Your friends</div>' + L.map(function (f) {
+        return '<div class="v2-row v2-erow"><span>' + esc(f.name) + '</span><span class="v2-mut">' + (f.battles || 0) + ' battles · <b class="gold">' + usd(Number(f.earned) || 0) + '</b></span></div>';
+      }).join('');
+    });
   }
 
   function refresh() {
