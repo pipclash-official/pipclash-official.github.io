@@ -915,3 +915,22 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .rk-v{font-size:22px;font-weight:900;line-height:1.15}.rk-s{font-size:12.5px;color:var(--muted)}
 .rk.gold{border-color:rgba(214,168,79,.5)}.rk.gold .rk-v{color:#F2C866}
 @media (max-width:760px){.rk-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rk-v{font-size:19px}}
+/* Trading calendar (prop firm jaisa) */
+.tc-top{display:flex;align-items:center;gap:8px;margin:6px 0 10px;flex-wrap:wrap}
+.tc-top b{font-size:16px;min-width:120px;text-align:center}
+.tc-nav{width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:var(--surface);color:var(--text);font-size:18px;line-height:1;cursor:pointer}
+.tc-nav:disabled{opacity:.35;cursor:default}
+.tc-sum{margin-left:auto;font-size:13px;font-weight:700}
+.tc{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.1fr);gap:6px}
+.tc-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;font-weight:700;padding-bottom:2px}
+.tc-d,.tc-w{position:relative;min-height:64px;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:6px 7px;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;overflow:hidden}
+.tc-n{position:absolute;top:5px;left:7px;font-size:11.5px;color:var(--muted);font-weight:600}
+.tc-d b,.tc-w b{font-size:13px;font-weight:800;white-space:nowrap}
+.tc-d small,.tc-w small{font-size:10.5px;color:var(--muted)}
+.tc-d.w{background:linear-gradient(160deg,rgba(34,197,94,.22),rgba(34,197,94,.06));border-color:rgba(34,197,94,.55)}.tc-d.w b{color:#22C55E}
+.tc-d.l{background:linear-gradient(160deg,rgba(239,68,68,.22),rgba(239,68,68,.06));border-color:rgba(239,68,68,.55)}.tc-d.l b{color:#EF4444}
+.tc-d.f{opacity:.35}.tc-d.x{background:transparent;border-style:dashed;opacity:.35}
+.tc-d.t{box-shadow:0 0 0 2px var(--accent) inset}.tc-d.t .tc-n{color:var(--text)}
+.tc-w{background:var(--surface2);align-items:flex-end;text-align:right}
+.tc-w.w b{color:#22C55E}.tc-w.l b{color:#EF4444}
+@media (max-width:480px){.tc{gap:4px}.tc-d,.tc-w{min-height:54px;padding:5px}.tc-d b,.tc-w b{font-size:10.5px}.tc-d small,.tc-w small{font-size:9px}.tc-n{font-size:10px;top:3px;left:5px}.tc-sum{width:100%;margin-left:0}}
