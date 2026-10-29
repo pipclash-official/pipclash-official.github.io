@@ -26,7 +26,7 @@
               BAD_TRC20: 'TRC20 address must start with T and have 34 characters.', BAD_BEP20: 'BEP20 address must start with 0x and have 42 characters.',
               ADDRESS_FIRST: 'Save both real USDT addresses before switching to LIVE.', NOT_APPROVED: 'Only an approved deposit can be reversed.', NO_KYC: 'This player has not uploaded an ID.',
               REQUEST_WAITING: 'A request for this player is already waiting for the engine – wait a minute.', ALREADY_REPLYING: 'Another admin is already sending a reply.',
-              BAD_REQUEST: 'Unknown request.', TXID_USED: 'This TXID was already used.' };
+              BAD_REQUEST: 'Unknown request.', TXID_USED: 'This TXID was already used.', TOO_OLD: 'This request is older than 24 hours – ask for it again.' };
   function errText(e) { var m = String((e && e.message) || e || ''); for (var k in ERR) if (m.indexOf(k) >= 0) return ERR[k]; return m; }
   function call(fn, args, btn, done) {
     if (btn) btn.disabled = true;
@@ -285,9 +285,17 @@
 
   /* ---------- Settings (owner) ---------- */
   function settings() {
-    if (!owner()) { pane().innerHTML = card('Settings', '<p class="muted2">Only the owner can change settings.</p>'); return; }
+    sb.from('setting_changes').select('*').eq('status', 'pending').order('id', { ascending: false }).then(function (r) {
+      var pend = r.data || [], box = $('[data-set-pending]');
+      if (!box) return;
+      box.innerHTML = pend.length ? card('Waiting for a second admin', table(['Setting', 'New value', 'By', ''], pend.map(function (c) {
+        return '<tr><td><b>' + esc(c.key) + '</b></td><td class="w-mono">' + esc(JSON.stringify(c.value)) + '</td><td>' + esc(c.requested_name || '') + '<div class="muted2 a-sm">' + when(c.created_at) + '</div></td>' +
+          '<td class="a-act"><button class="btn btn-sm" data-set-ok="' + c.id + '">Confirm</button><button class="btn btn-ghost btn-sm" data-set-no="' + c.id + '">Reject</button></td></tr>';
+      }), ''), 'Money settings (USDT address, big amounts) need a DIFFERENT admin to confirm. Check the address carefully before you confirm.') : '';
+    });
+    if (!owner()) { pane().innerHTML = '<div data-set-pending></div>' + card('Settings', '<p class="muted2">Only the owner can change settings. Pending money settings from the owner appear above for you to confirm.</p>'); return; }
     var f = function (k, lab, type) { return '<label>' + lab + '</label><input type="' + (type || 'text') + '" data-set="' + k + '" value="' + esc(S[k] == null ? '' : S[k]) + '">'; };
-    pane().innerHTML = card('Settings', '<form data-settings class="a-form">' +
+    pane().innerHTML = '<div data-set-pending></div>' + card('Settings', '<form data-settings class="a-form">' +
       '<label>Mode</label><select data-set="mode"><option value="test"' + (S.mode === 'test' ? ' selected' : '') + '>TEST – no real money</option><option value="live"' + (S.mode === 'live' ? ' selected' : '') + '>LIVE – real money</option></select>' +
       '<label class="acc-check"><input type="checkbox" data-set="paid_entry"' + (S.paid_entry === true ? ' checked' : '') + '> Paid entry ON (players pay the entry fee from their wallet)</label>' +
       f('entry_fee', 'Entry fee (USD)', 'number') + f('min_deposit', 'Minimum deposit (USD)', 'number') + f('min_withdraw', 'Minimum withdrawal (USD)', 'number') +
@@ -349,6 +357,8 @@
       var wc = prompt('CANCEL battle #' + a('data-cancel-battle') + '? No result, no prizes – every paid entry fee goes back to the wallets. Reason (players see it):');
       if (wc && confirm('Sure? This cannot be undone.')) call('pc_admin_request', { k: 'cancel_battle', cid: +a('data-cancel-battle'), pl: null, why: wc }, b);
     }
+    if (a('data-set-ok') && confirm('Confirm this money setting? Check the value (USDT address) character by character.')) call('pc_admin_setting_decide', { cid: +a('data-set-ok'), ok: true }, b);
+    if (a('data-set-no')) call('pc_admin_setting_decide', { cid: +a('data-set-no'), ok: false }, b);
     if (b.hasAttribute('data-csv')) csv();
     if (b.hasAttribute('data-closed-toggle')) { CLOSED = !CLOSED; render(); }
     if (b.hasAttribute('data-log-more')) { LOGN += 200; render(); }
@@ -383,8 +393,9 @@
       if (!ch.length) { toast('Nothing changed'); return; }
       if (ch.some(function (c) { return c[0] === 'mode' && c[1] === 'live'; }) && !confirm('Switch to LIVE – REAL MONEY? Check the USDT addresses first.')) return;
       if (!confirm('Save: ' + ch.map(function (c) { return c[0] + ' = ' + c[1]; }).join(', ') + ' ?')) return;
-      ch.reduce(function (p, c) { return p.then(function (ok) { return ok === null ? null : sb.rpc('pc_admin_set', { k: c[0], v: c[1] }).then(function (r) { if (r.error) { alert(errText(r.error)); return null; } return true; }); }); }, Promise.resolve(true))
-        .then(function (ok) { if (ok) { toast('Saved ✅'); render(); } });
+      var waiting = 0;
+      ch.reduce(function (p, c) { return p.then(function (ok) { return ok === null ? null : sb.rpc('pc_admin_set', { k: c[0], v: c[1] }).then(function (r) { if (r.error) { alert(errText(r.error)); return null; } if (r.data === 'PENDING') waiting++; return true; }); }); }, Promise.resolve(true))
+        .then(function (ok) { if (ok) { if (waiting) alert(waiting + ' money setting(s) saved for approval – another admin must press Confirm in Settings.'); else toast('Saved ✅'); render(); } });
     }
   });
 
