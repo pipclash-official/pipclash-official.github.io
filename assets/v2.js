@@ -358,35 +358,32 @@
     var sgc = function (v) { var x = Math.abs(v); return (v > 0 ? '+' : v < 0 ? '−' : '') + '$' + (x >= 1000 ? (x / 1000).toFixed(1) + 'k' : Math.round(x)); };   // dabbe mein chhota
     var byDay = {}; rows.forEach(function (x) { var k = x.b.date, o = byDay[k] = byDay[k] || { p: 0, n: 0, rk: [] }; o.p += +x.r.pnl || 0; o.n++; o.rk.push(x.r.rank); });
     var names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var MONTH = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var now = new Date(Date.now() + 4 * 36e5), base = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + (S.calOff || 0), 1));
-    var y = base.getUTCFullYear(), m = base.getUTCMonth(), dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-    var todayKey = now.getUTCFullYear() + '-' + now.getUTCMonth() + '-' + now.getUTCDate();
-    var mp = 0, mb = 0, mw = 0, weeks = [], wk = null;
-    for (var dd = 1; dd <= dim; dd++) {
-      var d = new Date(Date.UTC(y, m, dd)), dw = d.getUTCDay(); if (dw === 0 || dw === 6) continue;
-      if (!wk || dw === 1) { wk = { cells: [null, null, null, null, null], p: 0, n: 0 }; weeks.push(wk); }
-      var key = names[dw] + ' ' + ('0' + dd).slice(-2) + ' ' + mon[m], v = byDay[key];
-      var future = d.getTime() > Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-      if (v) { wk.p += v.p; wk.n += v.n; mp += v.p; mb += v.n; if (v.p > 0) mw++; }
-      wk.cells[dw - 1] = '<div class="tc-d' + (v ? (v.p > 0 ? ' w' : v.p < 0 ? ' l' : ' z') : '') + (future ? ' f' : '') +
-        (y + '-' + m + '-' + dd === todayKey ? ' t' : '') + '"><span class="tc-n">' + dd + '</span>' +
-        (v ? '<b class="tn" title="' + sg(v.p) + '">' + sgc(v.p) + '</b><small>' + (v.n > 1 ? v.n + ' battles' : '#' + v.rk[0]) + '</small>' : '') + '</div>';
+    // Owner: mahina phone pe bhaari – sirf EK hafta (Mon–Fri), ‹ › se pichhle hafte
+    var now = new Date(Date.now() + 4 * 36e5), today0 = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    var dow = new Date(today0).getUTCDay(), mon0 = today0 - ((dow + 6) % 7) * 864e5 + (S.calOff || 0) * 7 * 864e5;
+    var wp = 0, wn = 0, ww = 0, cells = '';
+    for (var k = 0; k < 5; k++) {
+      var t = mon0 + k * 864e5, d = new Date(t), key = names[d.getUTCDay()] + ' ' + ('0' + d.getUTCDate()).slice(-2) + ' ' + mon[d.getUTCMonth()], v = byDay[key];
+      if (v) { wp += v.p; wn += v.n; if (v.p > 0) ww++; }
+      cells += '<div class="tc-d' + (v ? (v.p > 0 ? ' w' : v.p < 0 ? ' l' : ' z') : '') + (t > today0 ? ' f' : '') + (t === today0 ? ' t' : '') + '">' +
+        '<span class="tc-dn">' + names[d.getUTCDay()].toUpperCase() + '</span><span class="tc-n">' + d.getUTCDate() + '</span>' +
+        (v ? '<b class="tn" title="' + sg(v.p) + '">' + sgc(v.p) + '</b><small>' + (v.n > 1 ? v.n + ' battles' : 'Rank #' + v.rk[0]) + '</small>' : '<small class="tc-no">' + (t > today0 ? '' : t === today0 ? 'Today' : 'No battle') + '</small>') + '</div>';
     }
-    var cal = '<div class="tc-top"><button type="button" class="tc-nav" data-cal="-1" aria-label="Previous month">‹</button><b>' + MONTH[m] + ' ' + y + '</b>' +
-      '<button type="button" class="tc-nav" data-cal="1" aria-label="Next month"' + ((S.calOff || 0) >= 0 ? ' disabled' : '') + '>›</button>' +
-      '<span class="tc-sum tn ' + (mp > 0 ? 'up' : mp < 0 ? 'down' : '') + '">' + (mb ? sg(mp) + ' · ' + mb + (mb > 1 ? ' battles' : ' battle') + ' · ' + mw + ' in profit' : 'No battles') + '</span></div>' +
-      '<div class="tc"><div class="tc-h">Mon</div><div class="tc-h">Tue</div><div class="tc-h">Wed</div><div class="tc-h">Thu</div><div class="tc-h">Fri</div><div class="tc-h">Week</div>' +
-      weeks.map(function (w) {
-        return w.cells.map(function (c) { return c || '<div class="tc-d x"></div>'; }).join('') +
-          '<div class="tc-w' + (w.n ? (w.p > 0 ? ' w' : w.p < 0 ? ' l' : '') : '') + '">' + (w.n ? '<b class="tn" title="' + sg(w.p) + '">' + sgc(w.p) + '</b><small>' + w.n + (w.n > 1 ? ' battles' : ' battle') + '</small>' : '<small>–</small>') + '</div>';
-      }).join('') + '</div>';
+    var a0 = new Date(mon0), a1 = new Date(mon0 + 4 * 864e5);
+    var range = a0.getUTCDate() + (a0.getUTCMonth() !== a1.getUTCMonth() ? ' ' + mon[a0.getUTCMonth()] : '') + ' – ' + a1.getUTCDate() + ' ' + mon[a1.getUTCMonth()] + ' ' + a1.getUTCFullYear();
+    var label = !S.calOff ? 'This week' : S.calOff === -1 ? 'Last week' : (-S.calOff) + ' weeks ago';
+    var cal = '<div class="tc-top"><button type="button" class="tc-nav" data-cal="-1" aria-label="Previous week">‹</button>' +
+      '<div class="tc-ttl"><b>' + range + '</b><span class="v2-mut">' + label + '</span></div>' +
+      '<button type="button" class="tc-nav" data-cal="1" aria-label="Next week"' + ((S.calOff || 0) >= 0 ? ' disabled' : '') + '>›</button></div>' +
+      '<div class="tc wk">' + cells + '</div>' +
+      '<div class="tc-wsum' + (wn ? (wp > 0 ? ' w' : wp < 0 ? ' l' : '') : '') + '"><span>Week total</span><b class="tn">' + (wn ? sg(wp) : '–') + '</b>' +
+      '<span class="v2-mut">' + (wn ? wn + (wn > 1 ? ' battles' : ' battle') + ' · ' + ww + ' in profit' : 'No battles this week') + '</span></div>';
     box.innerHTML = '<div class="v2-lbl">Your stats</div><div class="v2-grid2">' +
       cell('Battles', rows.length) + cell('Win rate', Math.round(wins.length / rows.length * 100) + '%') +
       cell('Total P&amp;L', sg(sum), sum > 0 ? 'up' : sum < 0 ? 'down' : '') + cell('Avg per battle', sg(sum / rows.length), sum > 0 ? 'up' : sum < 0 ? 'down' : '') +
       cell('Best day', best ? sg(best.r.pnl) : '–', best && best.r.pnl > 0 ? 'up' : '') + cell('Prizes won', usd(prize), prize ? 'gold' : '') + '</div>' +
       '<div class="v2-lbl" style="margin-top:14px">Trading calendar</div>' + cal +
-      '<div class="v2-mut" style="font-size:12px;margin-top:8px">Final P&amp;L of each battle day (UAE). Tap a battle in Past battles for details.</div>';
+      '<div class="v2-mut" style="font-size:12px;margin-top:8px">Final P&amp;L of each battle day (UAE). Use ‹ › to see older weeks.</div>';
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-cal]'); if (!b) return;
