@@ -856,3 +856,7 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 #find.v2-find{max-width:200px}
 @media (max-width:960px){.ar-grid{grid-template-columns:minmax(0,1fr)}.ar-chart{min-height:380px}.ar-tv{min-height:340px}}
 @media (max-width:600px){.ar-stats .stat .v{font-size:22px}.ar-chart{min-height:330px}.ar-tv{min-height:290px}#find.v2-find{max-width:none;width:100%}}
+.ar-tabs{display:flex;gap:8px;padding:16px 20px 0;flex-wrap:wrap}
+.ar-tab{flex:1;min-width:90px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--bg);color:var(--text);font:inherit;cursor:pointer;text-align:left}
+.ar-tab small{color:var(--muted);font-size:12px}
+.ar-tab.on{border-color:var(--accent);background:var(--surface2);box-shadow:0 0 0 1px var(--accent) inset}
