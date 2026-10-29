@@ -839,3 +839,5 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .w-filt button{font:inherit;font-size:13px;color:var(--muted2);background:#0D1424;border:1px solid var(--line2);border-radius:999px;padding:6px 12px;cursor:pointer;min-height:36px}
 .w-filt button[aria-pressed="true"]{background:#2F80FF;border-color:#2F80FF;color:#fff}
 .w-pager{margin-top:10px}.w-pager button[disabled]{opacity:.4}
+
+.w-auto{margin:8px 0 4px;padding:10px 12px;border-radius:12px;background:rgba(47,128,255,.08);border:1px solid #1E3A6E;font-size:13.5px;color:var(--muted2)}
