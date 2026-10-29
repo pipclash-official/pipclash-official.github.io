@@ -372,8 +372,9 @@
       var t = RAW && RAW.tables; box.hidden = !(t && t.length > 1); if (box.hidden) return;
       box.innerHTML = t.map(function (x) {
         var b = x.battle || {};
-        return '<button type="button" class="ar-tab' + (D && D._tier === x.tier ? ' on' : '') + '" data-tier="' + x.tier + '"><b>$' + x.tier + ' table</b><small>' +
-          (b.players || 0) + ' traders</small></button>';
+        var k = x.tier >= 50 ? 'g' : x.tier >= 25 ? 'b' : 's', nm = x.tier >= 50 ? 'ELITE' : x.tier >= 25 ? 'PRO' : 'STARTER';
+        return '<button type="button" class="ar-tab ' + k + (D && D._tier === x.tier ? ' on' : '') + '" data-tier="' + x.tier + '"><span class="v2-tier ' + k + ' sm" aria-hidden="true"><i>' + x.tier + '</i></span>' +
+          '<span><b>' + nm + ' $' + x.tier + '</b><small>' + (b.players || 0) + ' traders</small></span></button>';
       }).join('');
     });
   }
