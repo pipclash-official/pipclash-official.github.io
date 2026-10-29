@@ -934,3 +934,14 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .tc-w{background:var(--surface2);align-items:flex-end;text-align:right}
 .tc-w.w b{color:#22C55E}.tc-w.l b{color:#EF4444}
 @media (max-width:480px){.tc{gap:4px}.tc-d,.tc-w{min-height:54px;padding:5px}.tc-d b,.tc-w b{font-size:10.5px}.tc-d small,.tc-w small{font-size:9px}.tc-n{font-size:10px;top:3px;left:5px}.tc-sum{width:100%;margin-left:0}}
+/* Trading calendar – hafta view */
+.tc-ttl{display:flex;flex-direction:column;align-items:center;flex:1;line-height:1.2}.tc-ttl b{min-width:0;font-size:16px}.tc-ttl span{font-size:12px}
+.tc.wk{grid-template-columns:repeat(5,minmax(0,1fr))}
+.tc.wk .tc-d{min-height:96px;padding:8px}
+.tc-dn{position:absolute;top:7px;right:8px;font-size:10px;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.tc.wk .tc-n{font-size:17px;font-weight:800;color:var(--text);top:6px;left:8px}
+.tc.wk .tc-d b{font-size:15px}.tc-no{opacity:.6}
+.tc-wsum{display:flex;align-items:center;gap:10px;margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--surface2);flex-wrap:wrap}
+.tc-wsum b{font-size:18px;font-weight:900}.tc-wsum>span:first-child{font-weight:700}.tc-wsum .v2-mut{margin-left:auto;font-size:12.5px}
+.tc-wsum.w{border-color:rgba(34,197,94,.5)}.tc-wsum.w b{color:#22C55E}.tc-wsum.l{border-color:rgba(239,68,68,.5)}.tc-wsum.l b{color:#EF4444}
+@media (max-width:480px){.tc.wk{gap:5px}.tc.wk .tc-d{min-height:82px;padding:6px}.tc.wk .tc-n{font-size:15px}.tc.wk .tc-d b{font-size:12px}.tc-dn{font-size:8.5px;top:5px;right:5px}.tc-no{font-size:9px}}
