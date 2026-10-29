@@ -92,6 +92,9 @@
   function chip(label, kind) { return '<span class="v2-chip v2-' + kind + '">' + label + '</span>'; }
   function bar(pct, gold) { return '<div class="v2-bar"><i style="width:' + Math.min(100, pct) + '%' + (gold ? ';background:linear-gradient(90deg,#B8862F,#F2C866)' : '') + '"></i></div>'; }
   function coin(t) { return '<span class="v2-coin" aria-hidden="true">' + t + '</span>'; }
+  function tierCoin(fee, sm) {   // table ka premium sikka: $10 silver · $25 sapphire · $50 gold
+    return '<span class="v2-tier ' + (fee >= 50 ? 'g' : fee >= 25 ? 'b' : 's') + (sm ? ' sm' : '') + '" aria-hidden="true"><i>' + fee + '</i></span>';
+  }
 
   /* ---------- Supabase (fetch – library sirf login ke liye) ---------- */
   function rest(path, body) {
@@ -195,7 +198,7 @@
       cta = '<a class="btn btn-lg v2-btn" href="' + (final ? 'winners.html' : 'arena.html') + '">' + (final ? 'SEE RESULTS' : 'SEE STANDINGS') + ' →</a><div class="v2-mut" style="text-align:center;margin-top:8px">Next battle: ' + dayName(ph.next) + ' · ' + hm12(s.trade_start) + ' UAE · <a href="join.html">book a seat</a></div>';
     }
     box.className = 'v2-hero' + (elite ? ' v2-elite' : '');
-    box.innerHTML = '<div class="v2-row">' + head + '</div><div class="v2-row" style="margin:12px 0 10px">' + '<div>' + label + '</div>' + coin(t.free ? '$' : t.fee) + '</div>' + body + '<div style="height:12px"></div>' + cta;
+    box.innerHTML = '<div class="v2-row">' + head + '</div><div class="v2-row" style="margin:12px 0 10px">' + '<div>' + label + '</div>' + (t.free ? coin('$') : tierCoin(t.fee)) + '</div>' + body + '<div style="height:12px"></div>' + cta;
   }
 
   /* ---------- HOME: battles list ---------- */
@@ -208,7 +211,7 @@
       return;
     }
     box.innerHTML = list.map(function (t) {
-      return '<a class="v2-trow' + (t.fee >= 50 ? ' gold' : '') + '" href="join.html#t' + t.fee + '"><div style="width:74px"><div class="v2-eyebrow' + (t.fee >= 50 ? ' gold' : '') + '">' + t.name + '</div><b class="tn">' + usd(t.fee) + '</b></div>' +
+      return '<a class="v2-trow' + (t.fee >= 50 ? ' gold' : '') + '" href="join.html#t' + t.fee + '">' + tierCoin(t.fee, true) + '<div style="width:64px"><div class="v2-eyebrow' + (t.fee >= 50 ? ' gold' : '') + '">' + t.name + '</div><b class="tn">' + usd(t.fee) + '</b></div>' +
         '<div style="flex:1;min-width:0">' + bar(t.taken / t.max * 100, t.fee >= 50) + '<div class="v2-mut tn" style="margin-top:4px">' + t.taken + '/' + t.max + ' · pool ' + usd(t.pool) + (t.day !== list[0].day ? ' · ' + dayName(t.day) : '') + '</div></div><svg class="v2-tk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 0 0-4V4H3z"/><path d="M9 4v16"/></svg></a>';
     }).join('');
   }
@@ -259,7 +262,7 @@
       else if ((S.bal || 0) < t.fee) btn = '<a class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" href="deposit.html">ADD ' + usd(t.fee - (S.bal || 0), true) + ' TO JOIN</a><div class="v2-mut" style="text-align:center">Balance ' + usd(S.bal || 0, true) + ' · entry ' + usd(t.fee) + '</div>';
       else btn = '<button class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" data-enter="' + t.fee + '">' + (t.day === uaeNow().date ? 'JOIN BATTLE' : 'BOOK ' + dayName(t.day).toUpperCase()) + ' · ' + usd(t.fee) + '</button>';
       return '<div class="v2-card v2-tcard' + (elite ? ' gold' : pro ? ' pro' : '') + '" id="t' + t.fee + '">' +
-        '<div class="v2-row"><div><div class="v2-eyebrow' + (elite ? ' gold' : pro ? ' acc' : '') + '">' + t.name + '</div><b class="tn" style="font-size:22px">' + (t.free ? 'Free' : usd(t.fee)) + ' <span class="v2-mut" style="font-weight:500">entry</span></b></div>' + badge + '</div>' +
+        '<div class="v2-row"><div style="display:flex;align-items:center;gap:12px">' + (t.free ? '' : tierCoin(t.fee)) + '<div><div class="v2-eyebrow' + (elite ? ' gold' : pro ? ' acc' : '') + '">' + t.name + '</div><b class="tn" style="font-size:22px">' + (t.free ? 'Free' : usd(t.fee)) + ' <span class="v2-mut" style="font-weight:500">entry</span></b></div></div>' + badge + '</div>' +
         '<div class="v2-grid3"><div><div class="v2-mut">' + (t.free ? 'Prizes' : 'Prize pool') + '</div><b class="tn gold">' + usd(t.pool) + '</b></div><div><div class="v2-mut">Players</div><b class="tn">' + t.taken + '</b></div><div><div class="v2-mut">' + (t.max ? 'Seats left' : 'Day') + '</div><b class="tn">' + (t.max ? Math.max(0, t.max - t.taken) : dayName(t.day)) + '</b></div></div>' +
         (t.max ? bar(t.taken / t.max * 100, elite) : '') + '<div class="v2-mut tn" style="margin:8px 0 12px">' + prizes + '</div>' + btn + '<p class="v2-msg" data-msg="' + t.fee + '" role="status"></p></div>';
     }).join('');
