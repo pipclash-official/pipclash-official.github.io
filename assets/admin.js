@@ -11,7 +11,7 @@
   var $ = function (s, el) { return (el || root).querySelector(s); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var usd = function (v) { v = Number(v) || 0; return (v < 0 ? '−' : '') + '$' + Math.abs(v).toFixed(2); };
-  var when = function (iso) { return iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '–'; };
+  var when = function (iso) { return iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' }) : '–'; };   // WEB-11: UAE
   var TX = { TRC20: 'https://tronscan.org/#/transaction/', BEP20: 'https://bscscan.com/tx/' };
   var ROLE = null, ME = '', P = {}, S = {}, TAB = 'dash', BID = null, PB = null, LOGN = 100, CLOSED = false;
   var owner = function () { return ROLE === 'owner'; };
@@ -26,7 +26,8 @@
               BAD_TRC20: 'TRC20 address must start with T and have 34 characters.', BAD_BEP20: 'BEP20 address must start with 0x and have 42 characters.',
               ADDRESS_FIRST: 'Save both real USDT addresses before switching to LIVE.', NOT_APPROVED: 'Only an approved deposit can be reversed.', NO_KYC: 'This player has not uploaded an ID.',
               REQUEST_WAITING: 'A request for this player is already waiting for the engine – wait a minute.', ALREADY_REPLYING: 'Another admin is already sending a reply.',
-              BAD_REQUEST: 'Unknown request.', TXID_USED: 'This TXID was already used.', TOO_OLD: 'This request is older than 24 hours – ask for it again.' };
+              BAD_REQUEST: 'Unknown request.', TXID_USED: 'This TXID was already used.', TOO_OLD: 'This request is older than 24 hours – ask for it again.', KEEP_TWO_ADMINS: 'The team must keep at least 2 admins.',
+              DOC_CHANGED: 'The player uploaded a new ID photo – open it again before you decide.', BAD_TXID: 'This TXID does not look like a real transaction hash.' };
   function errText(e) { var m = String((e && e.message) || e || ''); for (var k in ERR) if (m.indexOf(k) >= 0) return ERR[k]; return m; }
   function call(fn, args, btn, done) {
     if (btn) btn.disabled = true;
@@ -36,6 +37,7 @@
       toast('Done ✅'); (done || render)(); return r;
     }).catch(function (e) { if (btn) btn.disabled = false; alert('No connection – nothing was saved. Try again. (' + ((e && e.message) || e) + ')'); return null; });
   }
+  function pendingNote(r) { if (r && r.data === 'PENDING') alert('Saved for approval – another admin must press Confirm in Settings.'); }
   function toast(t) { var el = $('[data-a-toast]'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 1800); }
   function who(uid) { var p = P[uid]; return p ? '<b>' + esc(p.name) + '</b><div class="muted2 a-sm">' + esc(p.phone) + '</div>' : '<span class="muted2">' + esc(String(uid).slice(0, 8)) + '</span>'; }
   function people(ids) {
@@ -156,7 +158,7 @@
           }), 'No prizes waiting ✅'), 'Winners from Telegram send their ID photo and USDT address in the bot. Only the owner sees the address. Send the USDT, then Mark paid with the TXID.') +
           card('IDs to check', table(['Player', 'Sent', 'ID', ''], (x[2].data || []).map(function (k) {
             return '<tr><td>' + who(k.user_id) + '</td><td class="muted2">' + when(k.updated_at) + '</td><td><button class="btn btn-ghost btn-sm" data-kyc-view="' + esc(k.doc_path) + '">View ID</button></td>' +
-              '<td class="a-act"><button class="btn btn-sm" data-kyc-ok="' + k.user_id + '">Approve</button><button class="btn btn-ghost btn-sm" data-kyc-no="' + k.user_id + '">Reject</button></td></tr>';
+              '<td class="a-act"><button class="btn btn-sm" data-kyc-ok="' + k.user_id + '" data-doc="' + esc(k.doc_path) + '">Approve</button><button class="btn btn-ghost btn-sm" data-kyc-no="' + k.user_id + '" data-doc="' + esc(k.doc_path) + '">Reject</button></td></tr>';
           }), 'No IDs waiting ✅'), 'The name on the ID must match the account name.') +
           card('Recently decided', table(['Type', 'Player', 'Amount', 'Status', 'By'], [].concat(
             (x[3].data || []).map(function (d) { return '<tr><td>Deposit</td><td>' + who(d.user_id) + '</td><td class="mono">' + usd(d.amount) + '</td><td>' + esc(d.status) + (d.note ? '<div class="muted2 a-sm">' + esc(d.note) + '</div>' : '') +
@@ -341,8 +343,8 @@
     if (a('data-wd-undo') && confirm('You did NOT send the USDT? The withdrawal goes back to waiting.')) call('pc_admin_withdraw_unstart', { wid: +a('data-wd-undo') }, b);
     if (a('data-wd-ok')) { var tx = prompt('You sent the USDT. Paste the payout TXID:'); if (tx) call('pc_admin_withdraw', { wid: +a('data-wd-ok'), paid: true, why: tx }, b); }
     if (a('data-wd-no')) { var w2 = prompt('Reason for rejecting (the amount goes back to the player):'); if (w2) call('pc_admin_withdraw', { wid: +a('data-wd-no'), paid: false, why: w2 }, b); }
-    if (a('data-kyc-ok') && confirm('Approve this ID? The name must match the account.')) call('pc_admin_kyc', { uid: a('data-kyc-ok'), ok: true, why: null }, b);
-    if (a('data-kyc-no')) { var w3 = prompt('Reason (shown to the player):'); if (w3) call('pc_admin_kyc', { uid: a('data-kyc-no'), ok: false, why: w3 }, b); }
+    if (a('data-kyc-ok') && confirm('Approve this ID? The name must match the account.')) call('pc_admin_kyc', { uid: a('data-kyc-ok'), ok: true, why: null, doc: a('data-doc') }, b);
+    if (a('data-kyc-no')) { var w3 = prompt('Reason (shown to the player):'); if (w3) call('pc_admin_kyc', { uid: a('data-kyc-no'), ok: false, why: w3, doc: a('data-doc') }, b); }
     if (a('data-kyc-view')) sb.storage.from('kyc').createSignedUrl(a('data-kyc-view'), 300).then(function (r) { if (r.data) window.open(r.data.signedUrl, '_blank', 'noopener'); else alert('Could not open the file.'); });
     if (a('data-copy')) navigator.clipboard && navigator.clipboard.writeText(a('data-copy')).then(function () { toast('Copied'); });
     if (a('data-dq')) { var w4 = prompt('Disqualify ' + a('data-dq') + ' – reason:'); if (w4) call('pc_admin_request', { k: 'dq', cid: BID, pl: a('data-dq'), why: w4 }, b); }
@@ -371,7 +373,7 @@
       if (raw != null && !isFinite(am)) { alert('That is not a number.'); return; }
       if (am) { var w6 = prompt('Reason (saved in the log):'); var nb = PB ? Number(PB.balance) + am : null;
         if (w6 && confirm((am > 0 ? 'ADD ' : 'TAKE ') + usd(Math.abs(am)) + (am > 0 ? ' to ' : ' from ') + (PB ? PB.name : 'this player') + '?' + (nb != null ? '\nNew balance: ' + usd(nb) : '')))
-          call('pc_admin_adjust', { u: a('data-adjust'), amt: am, why: w6 }, b, function () { player(a('data-adjust')); }); }
+          call('pc_admin_adjust', { u: a('data-adjust'), amt: am, why: w6 }, b, function () { player(a('data-adjust')); }).then(pendingNote); }
     }
     if (a('data-close') && confirm('Close this question? It moves to "closed".')) call('pc_admin_close', { sid: +a('data-close') }, b);
     if (a('data-team-rm') && confirm('Remove this admin?')) call('pc_admin_team_remove', { u: a('data-team-rm') }, b);
@@ -382,7 +384,7 @@
     var f = e.target;
     if (f.matches('[data-find]')) return players(f.querySelector('input').value.trim());
     if (f.matches('[data-reply]')) { var t = f.querySelector('input').value.trim(); if (t) call('pc_admin_reply', { sid: +f.getAttribute('data-reply'), txt: t }, f.querySelector('button')); return; }
-    if (f.matches('[data-team-add]')) { var i = f.querySelectorAll('input,select'); call('pc_admin_team_add', { em: i[0].value, nm: i[1].value, rl: i[2].value }, f.querySelector('button')); return; }
+    if (f.matches('[data-team-add]')) { var i = f.querySelectorAll('input,select'); call('pc_admin_team_add', { em: i[0].value, nm: i[1].value, rl: i[2].value }, f.querySelector('button')).then(pendingNote); return; }
     if (f.matches('[data-settings]')) {
       var ch = [];
       f.querySelectorAll('[data-set]').forEach(function (el) {
@@ -393,9 +395,9 @@
       if (!ch.length) { toast('Nothing changed'); return; }
       if (ch.some(function (c) { return c[0] === 'mode' && c[1] === 'live'; }) && !confirm('Switch to LIVE – REAL MONEY? Check the USDT addresses first.')) return;
       if (!confirm('Save: ' + ch.map(function (c) { return c[0] + ' = ' + c[1]; }).join(', ') + ' ?')) return;
-      var waiting = 0;
+      var waiting = 0, sbtn = f.querySelector('button[type=submit],button'); if (sbtn) sbtn.disabled = true;   // WEB-12
       ch.reduce(function (p, c) { return p.then(function (ok) { return ok === null ? null : sb.rpc('pc_admin_set', { k: c[0], v: c[1] }).then(function (r) { if (r.error) { alert(errText(r.error)); return null; } if (r.data === 'PENDING') waiting++; return true; }); }); }, Promise.resolve(true))
-        .then(function (ok) { if (ok) { if (waiting) alert(waiting + ' money setting(s) saved for approval – another admin must press Confirm in Settings.'); else toast('Saved ✅'); render(); } });
+        .then(function (ok) { if (sbtn) sbtn.disabled = false; if (ok) { if (waiting) alert(waiting + ' money setting(s) saved for approval – another admin must press Confirm in Settings.'); else toast('Saved ✅'); render(); } });
     }
   });
 
