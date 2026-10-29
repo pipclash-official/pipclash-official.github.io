@@ -860,3 +860,24 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .ar-tab{flex:1;min-width:90px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--bg);color:var(--text);font:inherit;cursor:pointer;text-align:left}
 .ar-tab small{color:var(--muted);font-size:12px}
 .ar-tab.on{border-color:var(--accent);background:var(--surface2);box-shadow:0 0 0 1px var(--accent) inset}
+/* Table ke premium sikke (PDF: Starter / Pro / Elite) – $10 silver · $25 sapphire · $50 gold */
+.v2-tier{position:relative;width:52px;height:52px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.28),inset 0 2px 0 rgba(255,255,255,.35),0 8px 18px -6px rgba(0,0,0,.6)}
+.v2-tier:before{content:"";position:absolute;inset:5px;border-radius:50%;border:1.5px solid rgba(255,255,255,.38);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.v2-tier i{position:relative;font-style:normal;font-weight:900;font-size:18px;letter-spacing:-.02em}
+.v2-tier i:before{content:"$";font-size:.62em;vertical-align:.38em;margin-right:1px;opacity:.85}
+.v2-tier.s{background:radial-gradient(circle at 32% 26%,#ffffff,#d5dbe6 38%,#8a94a6 78%,#5d6678);color:#1d2430}
+.v2-tier.b{background:radial-gradient(circle at 32% 26%,#d8ebff,#5aa8ff 38%,#2F80FF 66%,#163f8f);color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.35);
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.28),inset 0 2px 0 rgba(255,255,255,.35),0 8px 20px -6px rgba(47,128,255,.75)}
+.v2-tier.g{background:radial-gradient(circle at 32% 26%,#fff8d8,#F2C866 40%,#D6A84F 66%,#8a6420);color:#3d2a00;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.5),0 10px 24px -6px rgba(242,200,102,.7)}
+.v2-tier.g:after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);
+  background-size:250% 100%;animation:v2shine 3.2s ease-in-out infinite}
+@keyframes v2shine{0%,55%{background-position:150% 0}100%{background-position:-60% 0}}
+.v2-tier.sm{width:38px;height:38px}.v2-tier.sm i{font-size:13px}.v2-tier.sm:before{inset:4px}
+.v2-trow .v2-tier{margin-right:2px}
+.ar-tab{flex-direction:row;align-items:center;gap:10px}
+.ar-tab>span:last-child{display:flex;flex-direction:column;gap:1px}
+.ar-tab.g.on{border-color:#D6A84F;background:linear-gradient(165deg,#1d1a12,var(--surface2));box-shadow:0 0 0 1px #D6A84F inset,0 10px 22px -12px rgba(214,168,79,.6)}
+.ar-tab.g b{color:#F2C866}
+@media (prefers-reduced-motion:reduce){.v2-tier.g:after{animation:none}}
