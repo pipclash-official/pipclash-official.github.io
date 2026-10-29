@@ -65,8 +65,33 @@
       el.innerHTML = '<span class="dot' + (st === 'live' ? ' live' : '') + '"></span><b>' + (st === 'live' ? 'LIVE' : 'CHECKING') + '</b> · ' + n + ' traders · ' + ago(D.updated_utc);
     });
   }
+  function entryWindow(now) {   // #11: har page ke upar – entry kab band / kab khulegi / battle kab khatam (UAE)
+    var s = sched(), toUTC = function (hm) { var p = hm.split(':'); return (+p[0] - 4) * 60 + (+p[1]); };
+    var jo = toUTC(s.join_open), jc = toUTC(s.join_close), ts = toUTC(s.trade_start), te = toUTC(s.trade_end);
+    for (var i = 0; i < 8; i++) {
+      var d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i));
+      if ((s.days || [1, 2, 3, 4, 5]).indexOf(new Date(d.getTime() + 4 * 36e5).getUTCDay()) < 0) continue;
+      var at = function (m) { return new Date(d.getTime() + m * 60e3); };
+      if (now < at(jo)) return { k: 'opens', t: at(jo) };
+      if (now < at(jc)) return { k: 'closes', t: at(jc) };
+      if (now < at(ts)) return { k: 'starts', t: at(ts) };
+      if (now < at(te)) return { k: 'live', t: at(te) };
+    }
+    return null;
+  }
+  function tickCd(now) {
+    var w = entryWindow(now);
+    $$('[data-cd]').forEach(function (el) {
+      el.hidden = !w; if (!w) return;
+      var left = Math.max(0, Math.floor((w.t - now) / 1000)), h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), sec = left % 60;
+      el.className = 'tb-cd ' + w.k;
+      el.querySelector('[data-cd-label]').textContent = { opens: 'Entry opens in', closes: 'Entry closes in', starts: 'Battle starts in', live: 'LIVE · ends in' }[w.k];
+      el.querySelector('[data-cd-t]').textContent = (h > 47 ? Math.floor(h / 24) + 'd ' + pad(h % 24) : pad(h)) + ':' + pad(m) + ':' + pad(sec);
+    });
+  }
   function tickClock() {
     liveChip();
+    tickCd(new Date(window.PC_NOW ? window.PC_NOW() : Date.now()));
     var now = new Date(window.PC_NOW ? window.PC_NOW() : Date.now()), w = nextWindow(now), left = Math.max(0, Math.floor((w.target - now) / 1000));
     $$('[data-clock]').forEach(function (el) {
       var h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), s = left % 60;
@@ -101,7 +126,7 @@
     $$('[data-standings]').forEach(function (box) {
       var lim = +box.getAttribute('data-limit') || 999, compact = box.hasAttribute('data-compact');
       var q = (($('#find') || {}).value || '').trim().toLowerCase();
-      var rows = standings().filter(function (r) { return !q || r.name.toLowerCase().indexOf(q) >= 0; }).slice(0, lim);
+      var rows = standings().filter(function (r) { return (!q || r.name.toLowerCase().indexOf(q) >= 0) && (!CC || r.cc === CC); }).slice(0, lim);
       if (!rows.length) { box.innerHTML = '<tr><td colspan="7" class="empty">' + (q ? 'No trader with that name.' : 'Standings appear when the battle starts at ' + uaeHM(sched().trade_start) + ' UAE.') + '</td></tr>'; return; }
       var rowHtml = function (r) {
         var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
@@ -116,6 +141,52 @@
       if (wrap) { wrap.classList.toggle('two', two); var b2 = wrap.querySelector('[data-lb2]'); if (b2) b2.hidden = !two; }
       box.innerHTML = (two ? rows.slice(0, split) : rows).map(rowHtml).join('');
       if (two) wrap.querySelector('[data-standings2]').innerHTML = rows.slice(split, split * 2).map(rowHtml).join('');
+    });
+  }
+  var CC = '', CCN = { in: 'India', ae: 'UAE', pk: 'Pakistan', sa: 'Saudi', qa: 'Qatar', om: 'Oman', bh: 'Bahrain', kw: 'Kuwait', bd: 'Bangladesh', np: 'Nepal',
+    lk: 'Sri Lanka', eg: 'Egypt', jo: 'Jordan', ph: 'Philippines', id: 'Indonesia', my: 'Malaysia', ng: 'Nigeria', ke: 'Kenya', gb: 'UK', us: 'USA' };
+  function renderCountries() {   // #17: desh ke hisaab se – "India ka #1, UAE ka #1"
+    $$('[data-cc-filter]').forEach(function (box) {
+      var by = {}; standings().forEach(function (r) { if (r.cc) (by[r.cc] = by[r.cc] || []).push(r); });
+      var keys = Object.keys(by).sort(function (a, b) { return by[b].length - by[a].length; });
+      box.hidden = keys.length < 2; if (box.hidden) { CC = ''; return; }
+      if (CC && !by[CC]) CC = '';
+      box.innerHTML = '<button type="button" data-cc="" class="' + (CC ? '' : 'on') + '">All</button>' + keys.map(function (k) {
+        var top = by[k][0];
+        return '<button type="button" data-cc="' + k + '" class="' + (CC === k ? 'on' : '') + '" title="' + esc((CCN[k] || k.toUpperCase()) + ' #1: ' + top.name) + '">' + flag(k) + esc(CCN[k] || k.toUpperCase()) + ' <span class="muted2">' + by[k].length + '</span></button>';
+      }).join('') + (CC ? '<span class="ar-cc-top">' + esc(CCN[CC] || CC.toUpperCase()) + ' #1: <b>' + esc(by[CC][0].name) + '</b> ' + money(by[CC][0].pnl) + '</span>' : '');
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-cc]'); if (!b) return;
+    CC = b.getAttribute('data-cc'); renderCountries(); renderStandings();
+  });
+  function renderClimbers() {    // #17: is round sabse zyada upar chadhe
+    $$('[data-climbers]').forEach(function (box) {
+      var up = standings().filter(function (r) { return r.move > 0; }).sort(function (a, b) { return b.move - a.move || a.rank - b.rank; }).slice(0, 3);
+      box.hidden = !up.length || !(D && D.battle && D.battle.status === 'live'); if (box.hidden) return;
+      box.querySelector('[data-climb-list]').innerHTML = up.map(function (r) {
+        return '<div class="ar-cl"><span class="up mono">▲' + r.move + '</span><b>' + flag(r.cc) + esc(r.name) + '</b><span class="mono muted2">now #' + r.rank + '</span></div>';
+      }).join('');
+    });
+  }
+  function renderPayouts() {     // #20: sirf ASLI final results se – kisne kitna jeeta (naam aadha chhupa) + kul
+    var R = window.PC_RESULTS; if (!R || !R.list) return;
+    var wins = [], total = 0, people = {};
+    R.list.forEach(function (b) {
+      var d = R.detail[String(b.id)]; (d && d.rows || []).forEach(function (r) {
+        if (r.prize > 0) { wins.push({ b: b, r: r }); total += +r.prize; people[r.name] = 1; }
+      });
+    });
+    var mask = function (n) { var m = /^(.)(.*?)(-\d+)?$/.exec(n) || []; return (m[1] || '') + '•••' + (m[3] || ''); };
+    $$('[data-payouts]').forEach(function (box) {
+      box.hidden = !wins.length; if (!wins.length) return;
+      box.innerHTML = '<div class="pay-head"><div><div class="v2-lbl" style="margin:0">Recent prizes</div><div class="v2-mut">From final results only</div></div>' +
+        '<div class="pay-tot"><b class="tn gold">' + money(total).replace('+', '') + '</b><span class="v2-mut">won by ' + Object.keys(people).length + ' traders in ' + R.list.length + ' battles</span></div></div>' +
+        wins.slice(0, 6).map(function (w) {
+          return '<a class="pay-row" href="winners.html?id=' + w.b.id + '"><span class="pay-amt tn">' + money(w.r.prize).replace('+', '') + '</span><span>' + flag(w.r.cc) + esc(mask(w.r.name)) +
+            ' <span class="v2-mut">· #' + w.r.rank + '</span></span><span class="v2-mut tn">' + esc(w.b.date) + '</span></a>';
+        }).join('');
     });
   }
   function feedItems() { return (D && D.feed) || []; }
@@ -230,7 +301,7 @@
     $$('[data-free]').forEach(function (el) { el.hidden = paid; });
     $$('[data-paid]').forEach(function (el) { el.hidden = !paid; });
   }
-  function renderAll() { renderTabs(); renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); renderPrizeTable(); renderPaid(); tickClock(); }
+  function renderAll() { renderTabs(); renderCountries(); renderClimbers(); renderPayouts(); renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); renderPrizeTable(); renderPaid(); tickClock(); }
 
   /* ---------- decorative live chart (home) ---------- */
   function chart() {
@@ -342,10 +413,10 @@
     }).join('') + '</div>';
   }
   function loadArchive() {
-    if (!$('[data-res-main]')) return;
+    if (!$('[data-res-main]') && !$('[data-payouts]')) return;
     var s = document.createElement('script');
     s.src = DATA + 'results.js?t=' + Date.now();
-    s.onload = s.onerror = function () { s.remove(); renderArchive(); };
+    s.onload = s.onerror = function () { s.remove(); renderArchive(); renderPayouts(); };
     document.head.appendChild(s);
   }
 
