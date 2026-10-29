@@ -346,7 +346,31 @@
       '<div class="v2-steps">' + lab.map(function (l, i) { return '<div class="' + (done[i] ? 'on' : '') + '"><i></i><span>' + l + '</span></div>'; }).join('') + '</div>' +
       (ph.k === 'live' ? '<div class="v2-row" style="margin-top:8px">' + chip('● LIVE', 'down') + '<a href="arena.html">Watch your rank →</a></div>' : '');
   }
+  function myStats() {   // #19: trader dashboard – sirf apni asli final battles se
+    var box = $('[data-v2-stats]'); if (!box || window.PC_DEMO) return;
+    var rows = myRows().filter(function (x) { return !x.r.dq; }); box.hidden = !rows.length; if (!rows.length) return;
+    var pn = rows.map(function (x) { return +x.r.pnl || 0; }), wins = pn.filter(function (v) { return v > 0; });
+    var best = rows.reduce(function (a, x) { return !a || x.r.pnl > a.r.pnl ? x : a; }, null);
+    var prize = rows.reduce(function (a, x) { return a + (+x.r.prize || 0); }, 0), sum = pn.reduce(function (a, v) { return a + v; }, 0);
+    var sg = function (v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + usd(Math.abs(v), true); };
+    var cell = function (k, v, c) { return '<div class="v2-stat"><span>' + k + '</span><b class="tn ' + (c || '') + '">' + v + '</b></div>'; };
+    // roz ka P&L calendar – pichhle 5 hafte (Mon–Fri), har din ek dabba
+    var byDay = {}; rows.forEach(function (x) { var k = x.b.date; byDay[k] = (byDay[k] || 0) + (+x.r.pnl || 0); });
+    var cal = '', now = new Date(Date.now() + 4 * 36e5), names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    for (var i = 34; i >= 0; i--) {
+      var d = new Date(now.getTime() - i * 864e5), dw = d.getUTCDay(); if (dw === 0 || dw === 6) continue;
+      var key = names[dw] + ' ' + ('0' + d.getUTCDate()).slice(-2) + ' ' + mon[d.getUTCMonth()], v = byDay[key];
+      cal += '<i class="' + (v == null ? '' : v > 0 ? 'w' : v < 0 ? 'l' : 'z') + '" title="' + key + (v == null ? '' : ' · ' + sg(v)) + '"></i>';
+    }
+    box.innerHTML = '<div class="v2-lbl">Your stats</div><div class="v2-grid2">' +
+      cell('Battles', rows.length) + cell('Win rate', Math.round(wins.length / rows.length * 100) + '%') +
+      cell('Total P&amp;L', sg(sum), sum > 0 ? 'up' : sum < 0 ? 'down' : '') + cell('Avg per battle', sg(sum / rows.length), sum > 0 ? 'up' : sum < 0 ? 'down' : '') +
+      cell('Best day', best ? sg(best.r.pnl) : '–', best && best.r.pnl > 0 ? 'up' : '') + cell('Prizes won', usd(prize), prize ? 'gold' : '') + '</div>' +
+      '<div class="v2-lbl" style="margin-top:12px">Last 5 weeks</div><div class="v2-cal">' + cal + '</div>' +
+      '<div class="v2-mut" style="font-size:12px;margin-top:6px"><i class="v2-key w"></i> profit · <i class="v2-key l"></i> loss · <i class="v2-key"></i> no battle</div>';
+  }
   function past() {
+    myStats();
     var box = $('[data-v2-past]'); if (!box) return;
     if (window.PC_DEMO) { box.hidden = false;
       box.innerHTML = '<div class="v2-lbl">Past battles</div>' + window.PC_DEMO.past.map(function (p) {
