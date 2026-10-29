@@ -467,7 +467,7 @@
   }
   var last = '';
   function watch() {   // site.js har minute naya live.js laata hai – badla to dobara banao, aur phase badla to bhi
-    var k = (D().updated_utc || '') + phase().k;
+    var k = (D().updated_utc || '') + phase().k + (D()._tier || '');
     if (k !== last) { last = k; renderAll(); }
     tick();
   }
