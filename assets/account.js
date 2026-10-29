@@ -123,7 +123,7 @@
     if (!$('#acc-agree').checked) { msg('[data-profile-msg]', 'Please confirm you are 18+ and accept the rules.', true); return; }
     msg('[data-profile-msg]', 'Saving…');
     insertProfile({ id: user.id, name: name, phone: phone }).then(function (r) {
-      if (r.error) { msg('[data-profile-msg]', r.error.code === '23505' ? 'This phone number already has a PipClash account. One person = one account.' : 'Could not save: ' + r.error.message, true); return; }
+      if (r.error) { msg('[data-profile-msg]', r.error.code === '23505' ? 'This phone number already has a PipClash account. Joined on Telegram? Use “Log in with Telegram” – no email needed.' : 'Could not save: ' + r.error.message, true); return; }
       load();
     });
   });
@@ -141,11 +141,12 @@
     }
     var cb = e.target.closest('[data-cancel]');
     if (cb) {
-      if (!confirm('Cancel your entry and get ' + usd(PAY.fee) + ' back to your wallet?')) return;
+      var ct = +cb.getAttribute('data-cancel') || 0, cf = +cb.getAttribute('data-fee') || PAY.fee;
+      if (!confirm('Cancel your entry and get ' + usd(cf) + ' back to your wallet?')) return;
       cb.disabled = true;
-      sb.rpc('pc_cancel_entry').then(function (r) {
+      (ct ? sb.rpc('pc_cancel_table', { t: ct }) : sb.rpc('pc_cancel_entry')).then(function (r) {
         if (r.error) { cb.disabled = false; msg('[data-entry-msg]', payErr(r.error), true); return; }
-        msg('[data-entry-msg]', 'Cancelled ✅ ' + usd(PAY.fee) + ' is back in your wallet.'); refresh();
+        msg('[data-entry-msg]', 'Cancelled ✅ ' + usd(cf) + ' is back in your wallet.'); refresh();
       });
       return;
     }
@@ -166,9 +167,28 @@
     if (e.target.closest('[data-logout]')) sb.auth.signOut().then(function () { location.reload(); });
   });
 
-  function entryCard(en, cr, date) {
-    var s = sched(), w = windowState(), box = $('[data-entry]'), out = '', lab = dayLabel(date), today = date === w.date;
+  // WEB-1: paid mode mein ek din mein 3 tables tak – har entry ka apna block (apna MT5 login, apna cancel)
+  function entryCard(ens, crs, date) {
+    var w = windowState(), box = $('[data-entry]'), lab = dayLabel(date), today = date === w.date;
     var title = $('[data-entry-title]'); if (title) title.textContent = today ? 'Today’s battle' : 'Next battle · ' + lab.charAt(0).toUpperCase() + lab.slice(1);
+    ens = [].concat(ens || []); crs = [].concat(crs || []);
+    var crFor = function (en) {
+      var m = crs.filter(function (c) { return (c.tier || 0) === (en.tier || 0); });
+      return m[0] || (crs.length === 1 && ens.length === 1 ? crs[0] : null);
+    };
+    var bare = false;
+    box.innerHTML = ens.length < 2 ? entryHtml(ens[0] || null, ens[0] ? crFor(ens[0]) : null, date)
+      : ens.map(function (en) {
+        if (en.status === 'joined' && crFor(en)) bare = true;
+        return '<div class="v2-lbl">' + (en.tier ? usd(en.tier) + ' table' : 'Free battle') + (en.public_name ? ' · ' + esc(en.public_name) : '') + '</div>' + entryHtml(en, crFor(en), date);
+      }).join('<hr style="border:0;border-top:1px solid rgba(255,255,255,.08);margin:14px 0">');
+    if (ens.length < 2) bare = !!(ens[0] && ens[0].status === 'joined' && crFor(ens[0]));
+    var card = box.closest('.acc-card'); if (card) card.classList.toggle('v2-bare', bare);
+  }
+
+  function entryHtml(en, cr, date) {
+    var s = sched(), w = windowState(), out = '', lab = dayLabel(date), today = date === w.date;
+    var fee = en && en.paid_fee ? +en.paid_fee : PAY.fee, cx = en && en.tier ? ' data-fee="' + fee + '"' : '';
     var tnote = PAY.on && PAY.test ? '<p class="w-test"><b>TEST MODE</b> – no real money.</p>' : '';
     if (!en && PAY.on) {
       var can = PAY.bal >= PAY.fee, what = today && w.open ? 'today’s battle' : esc(lab);
@@ -181,10 +201,10 @@
       else out = '<p class="muted2">Book your seat now for <b>' + esc(lab) + '</b>. You are entered automatically when entry opens at ' + hm12(s.join_open) + ' UAE – nothing else to tap.</p><button class="btn btn-lg" type="button" data-join="' + date + '">Book my seat for ' + esc(lab) + '</button>';
     } else if (en.status === 'pending' && (!today || w.before)) {
       out = '<p><span class="tag-ok">BOOKED</span> Your seat for <b>' + esc(lab) + '</b> is booked. You are entered automatically at ' + hm12(s.join_open) + ' UAE, and your MT5 login appears here at ' + hm12(s.creds_at) + ' UAE.</p>';
-      if (PAY.on) out = tnote + out + '<button class="btn btn-ghost" type="button" data-cancel>Cancel & get ' + usd(PAY.fee) + ' back</button>';
+      if (PAY.on) out = tnote + out + '<button class="btn btn-ghost" type="button" data-cancel="' + (en.tier || '') + '"' + cx + '>Cancel & get ' + usd(fee) + ' back</button>';
     } else if (en.status === 'pending') {
       out = '<p><span class="tag-wait">CONFIRMING</span> We received your entry. Your seat is confirmed within about a minute.</p>';
-      if (PAY.on) out = tnote + out + '<button class="btn btn-ghost" type="button" data-cancel>Cancel & get ' + usd(PAY.fee) + ' back</button>';
+      if (PAY.on) out = tnote + out + '<button class="btn btn-ghost" type="button" data-cancel="' + (en.tier || '') + '"' + cx + '>Cancel & get ' + usd(fee) + ' back</button>';
     } else if (en.status === 'joining') {   // engine abhi battle mein jod raha hai (E8) – cancel nahi
       out = '<p><span class="tag-wait">CONFIRMING</span> You are being added to the battle right now. This takes about a minute.</p>';
     } else if (en.status === 'rejected') {
@@ -203,8 +223,7 @@
         out += '<p class="muted2">Your MT5 login appears here at <b>' + hm12(s.creds_at) + '</b> UAE. Keep this page open or come back then.</p>';
       }
     }
-    box.innerHTML = out;
-    var card = box.closest('.acc-card'); if (card) card.classList.toggle('v2-bare', !!(en && en.status === 'joined' && cr));
+    return out;
   }
 
   function refCard() {          // Invite friends: apna link + kitne dost aaye/khele
@@ -215,7 +234,7 @@
     box.hidden = false;
     $('[data-ref-link]').textContent = link;
     $('[data-ref-copy]').setAttribute('data-copy', link);
-    var wa = $('[data-ref-wa]'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent('Free daily trading battle – same $1,000 demo account, real prizes. Join with my link: ' + link);
+    var wa = $('[data-ref-wa]'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent((PAY.on ? 'Daily MT5 trading battle' : 'Free daily trading battle') + ' – same $1,000 demo account for everyone, top traders win. Join with my link: ' + link);
     var tg = $('[data-ref-tg]'); if (tg) tg.href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Daily MT5 trading battle – join with my link');
     var cellR = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
     if (RF) {
@@ -226,7 +245,7 @@
     Promise.all([sb.rpc('pc_my_referrals'), sb.from('ledger').select('amount,created_at').eq('user_id', user.id).eq('kind', 'referral')]).then(function (x) {
       var d = x[0].data && (x[0].data[0] || x[0].data) || {}, rw = x[1].data || [], today = windowState().date;
       var earned = rw.reduce(function (a, r) { return a + Number(r.amount); }, 0);
-      var todayAmt = rw.filter(function (r) { return String(r.created_at).slice(0, 10) === today; }).reduce(function (a, r) { return a + Number(r.amount); }, 0);
+      var todayAmt = rw.filter(function (r) { return new Date(r.created_at).toLocaleDateString('en-CA', { timeZone: 'Asia/Dubai' }) === today; }).reduce(function (a, r) { return a + Number(r.amount); }, 0);
       var cell = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
       $('[data-ref-stats]').innerHTML = cell(d.friends || 0, 'friends joined') + cell(d.played || 0, 'played a battle') + cell(usd(earned), 'earned', true) + cell(usd(todayAmt), 'earned today');
     });
@@ -234,12 +253,15 @@
 
   function refresh() {
     var t = windowState().date, nb = nextBattle();
-    var q = function (tbl, cols, d) { return sb.from(tbl).select(cols).eq('contest_date', d).eq('user_id', user.id).maybeSingle(); };
+    // WEB-1: ek din mein 3 tables tak = kai rows – maybeSingle nahi (2+ rows pe error = login gayab)
+    var q = function (tbl, cols, d) { return sb.from(tbl).select(cols).eq('contest_date', d).eq('user_id', user.id).order('tier'); };
+    var E = 'status,reason,public_name,tier,paid_fee';
     loadPay().then(function () { return Promise.all([
-      q('web_entries', 'status,reason,public_name', t),
-      q('web_creds', 'server,login,password', t),
-      nb === t ? Promise.resolve({ data: null }) : q('web_entries', 'status,reason,public_name', nb)
+      q('web_entries', E, t),
+      q('web_creds', 'server,login,password,tier', t),
+      nb === t ? Promise.resolve({ data: null }) : q('web_entries', E, nb)
     ]).then(function (r) {
+      r.forEach(function (x) { if (x.data && !x.data.length) x.data = null; });
       // Aaj khel raha hai to result tak aaj ka card (MT5 login ke saath); warna agli battle ki booking
       if (nb !== t && r[0].data && uaeNow().hm <= (sched().result_at || '21:30')) entryCard(r[0].data, r[1].data, t);
       else entryCard(nb === t ? r[0].data : r[2].data, nb === t ? r[1].data : null, nb);
@@ -266,7 +288,7 @@
           if (md.name && md.phone && !load.tried) {
             load.tried = true;
             insertProfile({ id: user.id, name: cleanName(md.name), phone: md.phone }).then(function (x) {
-              if (x.error) { show('profile'); $('#acc-name').value = md.name; msg('[data-profile-msg]', x.error.code === '23505' ? 'This phone number already has a PipClash account. One person = one account.' : 'Please check your details.', true); return; }
+              if (x.error) { show('profile'); $('#acc-name').value = md.name; msg('[data-profile-msg]', x.error.code === '23505' ? 'This phone number already has a PipClash account. Joined on Telegram? Use “Log in with Telegram” – no email needed.' : 'Please check your details.', true); return; }
               load();
             });
             return;
