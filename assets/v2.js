@@ -68,7 +68,7 @@
   }
 
   /* ---------- money + prizes (prizes.py jaisa) ---------- */
-  function usd(v, cents) { v = Number(v) || 0; return '$' + v.toLocaleString('en-US', { minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : (v % 1 ? 2 : 0) }); }
+  function usd(v, cents) { v = Number(v) || 0; return '$' + v.toLocaleString('en-US', { minimumFractionDigits: cents || v % 1 ? 2 : 0, maximumFractionDigits: cents || v % 1 ? 2 : 0 }); }
   function r2(v) { return Math.round(v * 100) / 100; }
   function paidTable(n, fee) {
     var pool = r2(n * fee * 0.8), k = Math.max(3, Math.floor(n * 0.2));
@@ -160,6 +160,11 @@
               max: null, pool: ft.pool, rows: ft.rows, free: true, live: !booking && todayBattle ? (b.players || 0) : 0 }];
   }
 
+  function battlePool(t) {      // WEB-3: aaj ki chal rahi battle ka pool (pc_tables 4 PM ke baad kal ka deta)
+    var P = D().prize_table, b = D().battle || {};
+    return P && P.pool != null && b.start_utc && uaeDay(b.start_utc) === uaeNow().date ? +P.pool : t.pool;
+  }
+
   /* ---------- HOME: hero card ---------- */
   function hero() {
     var box = $('[data-v2-hero]'); if (!box) return;
@@ -179,7 +184,8 @@
       var live = ph.k === 'live';
       head = (live ? chip('● LIVE', 'down') : chip('ENTRY CLOSED', 'gold')) + '<span class="v2-mut">' + (live ? 'time left' : 'starts in') + ' <b class="tn" data-v2-left>' + left(ph.to) + '</b></span>';
       body = '<div class="v2-row v2-mut"><span class="tn">' + (b.players || t.taken) + ' traders</span><span class="tn">' + (live && b.update_no ? 'Round ' + b.update_no + ' / ' + (b.updates_total || 19) : (uaeNow().hm < s.creds_at ? 'Login at ' : 'Login sent ') + hm12(s.creds_at)) + '</span></div>' +
-        bar(live && b.updates_total ? (b.update_no || 0) / b.updates_total * 100 : 0) + poolBox(t.free ? 'Prize table' : 'Final prize pool');
+        bar(live && b.updates_total ? (b.update_no || 0) / b.updates_total * 100 : 0) + (t.free ? poolBox('Prize table')
+          : '<div class="v2-mut">Final prize pool</div><div class="v2-pool tn">' + usd(battlePool(t)) + '</div>');
       cta = '<a class="btn btn-lg v2-btn" href="arena.html">WATCH LIVE ARENA →</a>';
     } else {
       var top = st[0], final = b.status === 'ended';
@@ -245,7 +251,7 @@
     box.innerHTML = list.map(function (t) {
       var elite = t.fee >= 50, pro = t.fee === 25, mine = S.mine[t.fee];
       var badge = t.free ? chip('FREE', 'up') : (t.taken >= t.max ? chip('FULL', 'down') : elite ? '<span class="v2-chip v2-vip">VIP</span>' : pro ? '<span class="v2-chip v2-pop">POPULAR</span>' : chip('● ENTRY OPEN', 'up'));
-      var prizes = t.rows.length ? '1st ' + usd(t.rows[0], true) + (t.rows[1] ? ' · 2nd ' + usd(t.rows[1], true) : '') + (t.rows[2] ? ' · 3rd ' + usd(t.rows[2], true) : '') + ' · up to ' + t.rows.length + ' prizes' : 'Prizes start from 13 players';
+      var prizes = t.rows.length ? '1st ' + usd(t.rows[0], true) + (t.rows[1] ? ' · 2nd ' + usd(t.rows[1], true) : '') + (t.rows[2] ? ' · 3rd ' + usd(t.rows[2], true) : '') + ' · up to ' + t.rows.length + ' prizes' : 'Prizes start at 5 players (fewer = full refund)';
       var btn;
       if (t.free) btn = '<a class="btn v2-btn" href="account.html#signup">JOIN FREE</a><a class="btn btn-ghost v2-btn2" href="https://t.me/PipClashBot">or join on Telegram</a>';
       else if (mine) btn = '<div class="v2-row">' + chip('ENTERED · ' + dayName(mine.contest_date), 'acc') + (mine.status === 'pending' ? '<button class="btn btn-ghost btn-sm" data-cancel="' + t.fee + '">Cancel · refund ' + usd(t.fee) + '</button>' : '') + '</div>';
@@ -277,7 +283,7 @@
   }
   function arena() {
     var box = $('[data-v2-arena]'); if (!box) return;
-    var ph = phase(), b = D().battle || {}, s = sched(), t = tablesData(), pool = t[t.length - 1].pool;
+    var ph = phase(), b = D().battle || {}, s = sched(), t = tablesData(), pool = battlePool(t[t.length - 1]);
     var today = b.start_utc && uaeDay(b.start_utc) === uaeNow().date, st = b.status;
     var chipH, lab, big, foot = '';
     var nxt = b.next_update_utc ? new Date(b.next_update_utc) : null, waiting = nxt && now() > nxt.getTime() + 60e3;
