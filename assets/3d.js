@@ -55,9 +55,11 @@ export function coin(r = .34) {
   return new THREE.Mesh(new THREE.CylinderGeometry(r, r, .07, 48), new THREE.MeshStandardMaterial({ color: 0xE9B53F, metalness: 1, roughness: .32 }));
 }
 
-function prizeText() {
-  const p = window.PC_DATA && window.PC_DATA.prizes && window.PC_DATA.prizes['1'];
-  return p ? '$' + p : '$200';
+function prizeText() {     // paid = aaj ke pool ka #1 (fixed $200 ka vaada nahi); data na ho to '#1'
+  const d = window.PC_DATA || {};
+  if (d.paid_entry) { const r = d.prize_table && d.prize_table.rows && d.prize_table.rows[0]; return r && r.usd ? '$' + Math.round(r.usd) : '#1'; }
+  const p = d.prizes && d.prizes['1'];
+  return p ? '$' + p : '#1';
 }
 
 function liveTrophy(cv) {
