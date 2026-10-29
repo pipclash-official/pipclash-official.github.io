@@ -18,7 +18,7 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var usd = function (v) { v = Number(v) || 0; return (v < 0 ? '−' : '') + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };   // $1,250.00 (WW12)
   var when = function (iso) { return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' }) + ' UAE'; };   // UAE time (WW12)
-  var S = {}, user = null, kyc = null, BAL = 0, D = { ledger: [], dep: [], wd: [] };
+  var S = {}, user = null, kyc = null, BAL = 0, D = { ledger: [], dep: [], wd: [] }, DONE = null;
 
   var ERR = {
     INSUFFICIENT_BALANCE: 'Not enough balance.', MIN_DEPOSIT: 'Amount is below the minimum deposit.', MIN_WITHDRAW: 'Amount is below the minimum withdrawal.',
@@ -105,6 +105,9 @@
     renderReq('[data-w-deps]', D.dep, 'deposit');
     renderReq('[data-w-wds]', D.wd, 'withdraw');
     if ($('[data-w-quote-form]')) loadQuote();
+    var ok = D.dep.filter(function (d) { return d.status === 'approved'; }).length;   // AA13: auto credit hua? player ko turant batao
+    if (DONE != null && ok > DONE) msg('[data-w-quote-msg]', 'Received ✅ ' + usd(D.dep[0] && D.dep[0].amount) + ' was added to your wallet.');
+    DONE = ok;
     if ($('[data-w-kyc-state]')) renderKyc();
     recv();
     renderTx();
@@ -307,4 +310,6 @@
   // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
   sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
   loadSettings().then(load);
+  // AA13: deposit page pe exact amount dikh raha ho to har 20 sec dekho – blockchain se aaya to khud dikhe
+  if (PAGE === 'deposit' && !window.PC_DEMO) setInterval(function () { var s = $('[data-w-send]'); if (s && !s.hidden && !document.hidden) load(); }, 20000);
 })();
