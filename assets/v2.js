@@ -250,7 +250,7 @@
       if (t.free) btn = '<a class="btn v2-btn" href="account.html#signup">JOIN FREE</a><a class="btn btn-ghost v2-btn2" href="https://t.me/PipClashBot">or join on Telegram</a>';
       else if (mine) btn = '<div class="v2-row">' + chip('ENTERED · ' + dayName(mine.contest_date), 'acc') + (mine.status === 'pending' ? '<button class="btn btn-ghost btn-sm" data-cancel="' + t.fee + '">Cancel · refund ' + usd(t.fee) + '</button>' : '') + '</div>';
       else if (!S.user) btn = '<a class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" href="account.html#login">LOG IN TO JOIN · ' + usd(t.fee) + '</a>';
-      else if ((S.bal || 0) < t.fee) btn = '<a class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" href="wallet.html">ADD ' + usd(t.fee - (S.bal || 0), true) + ' TO JOIN</a><div class="v2-mut" style="text-align:center">Balance ' + usd(S.bal || 0, true) + ' · entry ' + usd(t.fee) + '</div>';
+      else if ((S.bal || 0) < t.fee) btn = '<a class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" href="deposit.html">ADD ' + usd(t.fee - (S.bal || 0), true) + ' TO JOIN</a><div class="v2-mut" style="text-align:center">Balance ' + usd(S.bal || 0, true) + ' · entry ' + usd(t.fee) + '</div>';
       else btn = '<button class="btn v2-btn' + (elite ? ' v2-goldbtn' : '') + '" data-enter="' + t.fee + '">' + (t.day === uaeNow().date ? 'JOIN BATTLE' : 'BOOK ' + dayName(t.day).toUpperCase()) + ' · ' + usd(t.fee) + '</button>';
       return '<div class="v2-card v2-tcard' + (elite ? ' gold' : pro ? ' pro' : '') + '" id="t' + t.fee + '">' +
         '<div class="v2-row"><div><div class="v2-eyebrow' + (elite ? ' gold' : pro ? ' acc' : '') + '">' + t.name + '</div><b class="tn" style="font-size:22px">' + (t.free ? 'Free' : usd(t.fee)) + ' <span class="v2-mut" style="font-weight:500">entry</span></b></div>' + badge + '</div>' +
@@ -426,7 +426,7 @@
     if (chipBox) chipBox.innerHTML = '<a class="v2-balchip" href="wallet.html" aria-label="Wallet balance">' + coin('₮') + '<b class="tn">' + usd(S.bal || 0, true) + '</b></a>';
     if (me) me.innerHTML = '<div class="v2-av">' + esc(nm.charAt(0).toUpperCase()) + '</div><div><b>' + esc(nm) + '</b><div class="v2-mut">' +
       (S.kyc === 'approved' ? 'ID verified <span class="up">✓</span>' : '<a href="wallet.html">Verify ID</a>') + '</div></div>';
-    if (mb) { mb.hidden = false; mb.innerHTML = '<div class="v2-row"><div><div style="font-size:11px;letter-spacing:.14em;color:#cfe0ff">AVAILABLE</div><b class="tn" style="font-size:20px">' + usd(S.bal || 0, true) + '</b></div><a class="v2-depbtn" href="wallet.html#deposit">+ DEPOSIT</a></div>'; }
+    if (mb) { mb.hidden = false; mb.innerHTML = '<div class="v2-row"><div><div style="font-size:11px;letter-spacing:.14em;color:#cfe0ff">AVAILABLE</div><b class="tn" style="font-size:20px">' + usd(S.bal || 0, true) + '</b></div><a class="v2-depbtn" href="deposit.html">+ DEPOSIT</a></div>'; }
     if (lo && !lo.innerHTML) { lo.innerHTML = ' · <button type="button" class="v2-lo">Log out</button>'; lo.firstElementChild.addEventListener('click', function () { S.sb.auth.signOut().then(function () { location.href = 'index.html'; }); }); }
   }
 
