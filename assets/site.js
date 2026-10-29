@@ -351,10 +351,26 @@
 
   /* ---------- data loading ---------- */
   var DATA = location.pathname.indexOf('/v2/') === 0 ? '/data/' : 'data/';   // /v2/ preview = main site ka live data
-  function load() {
+  var LIVE_URL = 'https://vrcjgxnafmuxfkybtkbz.supabase.co/rest/v1/pc_live?id=eq.live&select=data';
+  var LIVE_KEY = 'sb_publishable_hJfAzBCqJKrJkNmLNEsndA_UuFCLH6f';
+  function load() {      // pehle Supabase (turant update), na mile to GitHub ki live.js (5-10 min der)
+    if (!window.fetch) return loadFile();
+    fetch(LIVE_URL, { headers: { apikey: LIVE_KEY }, cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var d = rows && rows[0] && rows[0].data;
+        if (!d) return loadFile();
+        if (!(D && D.updated_utc > d.updated_utc)) { window.PC_DATA = D = d; }
+        renderAll();
+      }).catch(loadFile);
+  }
+  function loadFile() {
     var s = document.createElement('script');
     s.src = DATA + 'live.js?t=' + Date.now();
-    s.onload = function () { D = window.PC_DATA || D; renderAll(); s.remove(); };
+    s.onload = function () {   // live.js purani ho (Supabase wala naya) to naya hi rakho
+      var n = window.PC_DATA;
+      if (D && n && D.updated_utc > n.updated_utc) window.PC_DATA = D; else D = n || D;
+      renderAll(); s.remove();
+    };
     s.onerror = function () { s.remove(); renderAll(); };
     document.head.appendChild(s);
   }
@@ -382,9 +398,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     if (ios && !standalone()) showInstall(true);     // iPhone pe browser event nahi aata – button khud dikhao (guide ke liye)
     var f = $('#find'); if (f) f.addEventListener('input', renderStandings);
-    chart(); sky(); renderAll(); load(); loadArchive();
+    chart(); sky(); renderAll(); loadFile(); load(); loadArchive();
     setInterval(tickClock, 1000);
-    setInterval(load, 60000);
+    setInterval(load, 30000);
     var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(renderStandings, 200); });
   });
 })();
