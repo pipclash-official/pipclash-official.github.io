@@ -92,12 +92,14 @@
       sb.from('withdrawals').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       sb.from('kyc').select('user_id', { count: 'exact', head: true }).eq('status', 'pending'),
       sb.from('support').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-      sb.from('web_entries').select('paid_fee,refunded').gte('contest_date', today),
-      sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(1),
+      sb.from('web_entries').select('*').gte('contest_date', today),
+      sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(3),
       sb.rpc('pc_admin_claims', { cid: null })
     ]).then(function (x) {
       var ents = x[6].data || [], paid = ents.filter(function (e) { return Number(e.paid_fee) > 0 && !e.refunded; }), fees = paid.reduce(function (a, e) { return a + Number(e.paid_fee); }, 0);
-      var b = (x[7].data || [])[0];
+      var bl = x[7].data || [], b = bl[0];
+      var day0 = bl.length && String(bl[0].name || '').match(/\d{4}-\d{2}-\d{2}/), sameDay = bl.filter(function (o) { return day0 && String(o.name || '').indexOf(day0[0]) >= 0; });
+      var byTier = {}; paid.forEach(function (e) { var t = e.tier || 0; byTier[t] = byTier[t] || { n: 0, f: 0 }; byTier[t].n++; byTier[t].f += Number(e.paid_fee); });
       var st = function (lab, v, t) { return '<button class="card a-stat" type="button"' + (t ? ' data-go="' + t + '"' : '') + '><span class="muted2">' + lab + '</span><b>' + v + '</b></button>'; };
       pane().innerHTML = '<div class="a-stats">' +
         st('Deposits waiting', x[2].count || 0, 'money') + st('Withdrawals waiting', x[3].count || 0, 'money') + st('IDs waiting', x[4].count || 0, 'money') +
@@ -105,7 +107,8 @@
         st('In wallets', usd((x[1].data || []).reduce(function (a, w) { return a + Number(w.balance); }, 0))) +
         st('Website entries (next battle)', ents.length + (paid.length ? ' · ' + paid.length + ' paid' : '')) +
         st('Prize pool 80% · platform 20%', usd(fees * 0.8) + ' · ' + usd(fees * 0.2)) +
-        (b ? st('Battle #' + b.contest_id + ' – ' + b.status, b.players + ' players', 'battle') : '') +
+        (sameDay.length > 1 ? sameDay : (b ? [b] : [])).map(function (o) { return st('Battle #' + o.contest_id + ' – ' + o.status + (/\$\d+/.test(o.name || '') ? ' · ' + o.name.match(/\$\d+/)[0] + ' table' : ''), o.players + ' players', 'battle'); }).join('') +
+        Object.keys(byTier).filter(function (t) { return +t; }).map(function (t) { return st('$' + t + ' table – paid entries', byTier[t].n + ' · pool ' + usd(byTier[t].f * 0.8)); }).join('') +
         st('Telegram prizes waiting', (x[8].data || []).length, 'money') + '</div>' +
         // A13: engine har minute data bhejta hai – 5 min se chup = laptop/engine band
         (b && Date.now() - new Date(b.updated_at) > 5 * 60e3 ? '<div class="card acc-card a-flag"><b>⚠️ Engine offline</b><p class="muted2">The laptop engine has not sent data since ' + when(b.updated_at) + '. DQ, publish and support replies will wait until it is back. Check the laptop.</p></div>' : '');
@@ -170,7 +173,7 @@
 
   /* ---------- Battle ---------- */
   function battle() {
-    sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(5).then(function (r) {
+    sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(9).then(function (r) {
       var bs = r.data || [];
       if (!bs.length) { pane().innerHTML = card('Battle', '<p class="muted2">No battle data yet. The laptop engine sends it every minute.</p>'); return; }
       if (!BID || !bs.some(function (b) { return b.contest_id === BID; })) BID = bs[0].contest_id;
