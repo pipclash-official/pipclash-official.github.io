@@ -230,7 +230,7 @@
     $$('[data-free]').forEach(function (el) { el.hidden = paid; });
     $$('[data-paid]').forEach(function (el) { el.hidden = !paid; });
   }
-  function renderAll() { renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); renderPrizeTable(); renderPaid(); tickClock(); }
+  function renderAll() { renderTabs(); renderToasts(); renderStats(); renderStandings(); renderDQ(); renderFeed(); renderDuel(); renderResult(); renderPast(); renderSchedule(); renderHeroDay(); renderPrizeTable(); renderPaid(); tickClock(); }
 
   /* ---------- decorative live chart (home) ---------- */
   function chart() {
@@ -353,24 +353,48 @@
   var DATA = location.pathname.indexOf('/v2/') === 0 ? '/data/' : 'data/';   // /v2/ preview = main site ka live data
   var LIVE_URL = 'https://vrcjgxnafmuxfkybtkbz.supabase.co/rest/v1/pc_live?id=eq.live&select=data';
   var LIVE_KEY = 'sb_publishable_hJfAzBCqJKrJkNmLNEsndA_UuFCLH6f';
+  var RAW = null;          // engine ka poora data (3 tables ho to sab); PC_DATA = chuni hui table
+  function tierPick() { try { return +localStorage.getItem('pc_tier') || 0; } catch (e) { return 0; } }
+  function pickTable(d) {  // ENG-3: $10 / $25 / $50 – jo table chuni, uska battle/standings/feed/inaam upar
+    if (!d || !d.tables || !d.tables.length) return d;
+    var want = tierPick(), t = d.tables.filter(function (x) { return x.tier === want; })[0] || d.tables[0], o = {};
+    for (var k in d) o[k] = d[k];
+    for (var j in t) o[j] = t[j];
+    o._tier = t.tier;
+    return o;
+  }
+  function useData(d) {    // naya data (Supabase ya live.js) – purana ho to chhod do
+    if (!d || (RAW && RAW.updated_utc > d.updated_utc)) { window.PC_DATA = D; return; }
+    RAW = d; window.PC_DATA = D = pickTable(d);
+  }
+  function renderTabs() {
+    $$('[data-ar-tabs]').forEach(function (box) {
+      var t = RAW && RAW.tables; box.hidden = !(t && t.length > 1); if (box.hidden) return;
+      box.innerHTML = t.map(function (x) {
+        var b = x.battle || {};
+        return '<button type="button" class="ar-tab' + (D && D._tier === x.tier ? ' on' : '') + '" data-tier="' + x.tier + '"><b>$' + x.tier + ' table</b><small>' +
+          (b.players || 0) + ' traders</small></button>';
+      }).join('');
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-tier]'); if (!b || !RAW) return;
+    try { localStorage.setItem('pc_tier', b.getAttribute('data-tier')); } catch (x) {}
+    window.PC_DATA = D = pickTable(RAW); renderAll();
+  });
   function load() {      // pehle Supabase (turant update), na mile to GitHub ki live.js (5-10 min der)
     if (!window.fetch) return loadFile();
     fetch(LIVE_URL, { headers: { apikey: LIVE_KEY }, cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) {
         var d = rows && rows[0] && rows[0].data;
         if (!d) return loadFile();
-        if (!(D && D.updated_utc > d.updated_utc)) { window.PC_DATA = D = d; }
-        renderAll();
+        useData(d); renderAll();
       }).catch(loadFile);
   }
   function loadFile() {
     var s = document.createElement('script');
     s.src = DATA + 'live.js?t=' + Date.now();
-    s.onload = function () {   // live.js purani ho (Supabase wala naya) to naya hi rakho
-      var n = window.PC_DATA;
-      if (D && n && D.updated_utc > n.updated_utc) window.PC_DATA = D; else D = n || D;
-      renderAll(); s.remove();
-    };
+    s.onload = function () { useData(window.PC_DATA); renderAll(); s.remove(); };
     s.onerror = function () { s.remove(); renderAll(); };
     document.head.appendChild(s);
   }
