@@ -69,7 +69,7 @@
       Promise.all([
         sb.from('wallets').select('balance').eq('user_id', user.id).maybeSingle(),
         sb.from('ledger').select('amount,kind,note,balance_after,created_at').eq('user_id', user.id).order('id', { ascending: false }).limit(big ? 1000 : 50),
-        sb.from('deposits').select('amount,network,txid,status,note,created_at').eq('user_id', user.id).order('id', { ascending: false }).limit(big ? 200 : 10),
+        sb.from('deposits').select('id,amount,network,txid,status,note,created_at').eq('user_id', user.id).order('id', { ascending: false }).limit(big ? 200 : 10),
         sb.from('withdrawals').select('amount,network,address,status,note,created_at').eq('user_id', user.id).order('id', { ascending: false }).limit(big ? 200 : 10),
         sb.from('kyc').select('status,note').eq('user_id', user.id).maybeSingle(),
         myEntries()
@@ -77,11 +77,18 @@
         BAL = x[0].data ? Number(x[0].data.balance) : 0;
         D = { ledger: x[1].data || [], dep: x[2].data || [], wd: x[3].data || [] };
         kyc = x[4].data;
-        var ents = (x[5].data || []).filter(function (e) { return Number(e.paid_fee) > 0 && !e.refunded; });
+        var over = uaeHM() >= '19:30', today = uaeDate();
+        var ents = (x[5].data || []).filter(function (e) { return Number(e.paid_fee) > 0 && !e.refunded && !(over && e.contest_date === today && e.status === 'joined'); });
         render(ents);
-      });
-    });
+      }).catch(loadFail);
+    }).catch(loadFail);
   }
+  function loadFail() {     // WEB-8: net gaya / Supabase down – "Loading…" pe hamesha na atke
+    show('loading');
+    var l = root.querySelector('[data-w-view="loading"]');
+    if (l) l.innerHTML = '<p class="muted2">Could not load your wallet – check your internet. <a href="' + location.pathname.split('/').pop() + '">Tap to retry</a></p>';
+  }
+  function uaeHM() { return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Dubai', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()); }
   function render(ents) {
     // Phone pe saaf hisaab: Available (wallet) + battles mein laga + withdraw hold = Total
     var inb = ents.reduce(function (a, e) { return a + Number(e.paid_fee); }, 0);
@@ -105,9 +112,11 @@
     renderReq('[data-w-deps]', D.dep, 'deposit');
     renderReq('[data-w-wds]', D.wd, 'withdraw');
     if ($('[data-w-quote-form]')) loadQuote();
-    var ok = D.dep.filter(function (d) { return d.status === 'approved'; }).length;   // AA13: auto credit hua? player ko turant batao
-    if (DONE != null && ok > DONE) msg('[data-w-quote-msg]', 'Received ✅ ' + usd(D.dep[0] && D.dep[0].amount) + ' was added to your wallet.');
-    DONE = ok;
+    // AA13: auto credit hua? player ko turant batao (WEB-13: id se – jo deposit ABHI approve hua usi ki amount)
+    var okIds = {}, fresh = null;
+    D.dep.forEach(function (d) { if (d.status === 'approved') { okIds[d.id] = 1; if (DONE && !DONE[d.id] && !fresh) fresh = d; } });
+    if (fresh) msg('[data-w-quote-msg]', 'Received ✅ ' + usd(fresh.amount) + ' was added to your wallet.');
+    DONE = okIds;
     if ($('[data-w-kyc-state]')) renderKyc();
     recv();
     renderTx();
@@ -309,7 +318,11 @@
 
   // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
   sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
-  loadSettings().then(load);
+  loadSettings().then(load, load);
+  setTimeout(function () {   // WEB-8: 15 sec baad bhi Loading… = retry ka rasta
+    var l = root.querySelector('[data-w-view="loading"]');
+    if (l && !l.hidden && !/retry/.test(l.textContent)) l.innerHTML = '<p class="muted2">This is taking long. <a href="' + location.pathname.split('/').pop() + '">Tap to refresh</a></p>';
+  }, 15000);
   // AA13: deposit page pe exact amount dikh raha ho to har 20 sec dekho – blockchain se aaya to khud dikhe
   if (PAGE === 'deposit' && !window.PC_DEMO) setInterval(function () { var s = $('[data-w-send]'); if (s && !s.hidden && !document.hidden) load(); }, 20000);
 })();
