@@ -173,7 +173,7 @@
     if (!en && PAY.on) {
       var can = PAY.bal >= PAY.fee, what = today && w.open ? 'today’s battle' : esc(lab);
       out = tnote + '<p class="muted2">Entry fee <b>' + usd(PAY.fee) + '</b> · your wallet <b>' + usd(PAY.bal) + '</b>. 80% of all entry fees go to the winners – the more traders, the bigger the prizes.</p>' +
-        (can ? '<button class="btn btn-lg" type="button" data-pay>Pay ' + usd(PAY.fee) + ' & join ' + what + '</button>'
+        (can ? '<a class="btn btn-lg" href="join.html">Choose a table & join ' + what + '</a>'
              : '<a class="btn btn-lg" href="deposit.html">Add money to your wallet</a>') +
         '<p class="muted2" style="font-size:13px">You can cancel and get the fee back until you are entered into the battle at ' + hm12(s.join_open) + ' UAE.</p>';
     } else if (!en) {
