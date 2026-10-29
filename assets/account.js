@@ -57,8 +57,14 @@
   function insertProfile(row) {
     var ref = REF || ((user && user.user_metadata) || {}).ref || '';
     var full = ref ? Object.assign({ ref_by: ref }, row) : row;
-    return sb.from('profiles').insert(full).then(function (r) {
-      return (r.error && full !== row && /ref_by|column|schema/i.test(r.error.message || '')) ? sb.from('profiles').insert(row) : r;
+    var once = function () {
+      return sb.from('profiles').insert(full).then(function (r) {
+        return (r.error && full !== row && /ref_by|column|schema/i.test(r.error.message || '')) ? sb.from('profiles').insert(row) : r;
+      });
+    };
+    return once().then(function (r) {   // phone engine ke khaali Telegram placeholder pe hai = use chhudao, phir dobara
+      if (!r.error || r.error.code !== '23505') return r;
+      return sb.rpc('pc_release_tg_phone', { ph: row.phone }).then(function (x) { return x.data === true ? once() : r; }, function () { return r; });
     });
   }
 
