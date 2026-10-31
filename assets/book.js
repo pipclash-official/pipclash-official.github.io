@@ -162,7 +162,9 @@
       '<div class="v2-mut">' + (left === null ? '' : left + ' seats left in ' + t.name + ' · ') + (counts ? total() + ' traders booked so far' : '') + '</div>' +
       '<p class="bk-p">Launch Mon 9 Nov, 4:30 PM UAE. We will remind you before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
       (bk.waitlist ? ' If a booked seat is not used by 4 PM, it goes to the waitlist in order.' : '') + '</p>' +
-      '<div class="cs-lbl" style="margin:4px 0 0">Invite friends – your link</div>' +
+      '<div class="cs-earn"><b>Invite friends – earn <span class="gold">1%</span> of every entry they pay, forever.</b>' +
+      '<span>Friends who book with your link stay linked to you. When they play paid battles, 1% of each entry goes to your PipClash wallet.</span></div>' +
+      '<div class="cs-lbl" style="margin:4px 0 0">Your invite link</div>' +
       '<div class="bk-link"><input readonly value="' + esc(url) + '" aria-label="Your invite link"><button class="btn btn-sm" type="button" data-copy>Copy</button></div>' +
       '<div class="cs-share"><a class="btn cs-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
       '<a class="btn cs-tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Book your free PipClash seat – Battle #001, only 100 per arena') + '">Telegram</a></div>' +
