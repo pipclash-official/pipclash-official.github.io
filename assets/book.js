@@ -146,7 +146,7 @@
       if (!r) { err.textContent = 'Could not book right now – check your internet and try again.'; return; }
       if (!r.ok) { err.textContent = r.err === 'limit' ? 'Too many bookings from this network today.' : 'Please check your details and try again.'; return; }
       var bk = { tier: r.tier, code: r.code, seat: r.seat, waitlist: r.waitlist, name: name };
-      saveMine(bk); form.hidden = true; pick = null;
+      saveMine(bk); form.hidden = true; pick = null; drawMine();
       loadCounts().then(function () { showDone(bk, r.already); });
       loadTop(); loadRecent();
     });
@@ -176,6 +176,30 @@
   done.addEventListener('click', function (e) {
     if (!e.target.closest('[data-copy]')) return;
     var i = done.querySelector('.bk-link input'); i.select();
+    (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).catch(function () { document.execCommand('copy'); });
+    e.target.textContent = 'Copied ✓'; setTimeout(function () { e.target.textContent = 'Copy'; }, 1800);
+  });
+
+  /* ---------- meri seat + invite link (hamesha upar, jab is phone se booking ho) ---------- */
+  var mineBox = root.querySelector('[data-bk-mine]'), mineWrap = root.querySelector('[data-bk-mine-wrap]');
+  function drawMine() {
+    var my = mine();
+    if (!my.length) { mineWrap.hidden = true; return; }
+    var url = link(my[0].code);
+    var msg = 'Book your free seat for PipClash Battle #001 – daily MT5 trading battle, same $1,000 demo account for everyone, top traders win. Only 100 seats per arena: ' + url;
+    mineBox.innerHTML = my.map(function (b) {
+      var t = tier(b.tier);
+      return '<div class="cs-mrow">' + coin(t) + '<div><b>' + t.name + ' · ' + (b.waitlist ? 'waitlist #' : 'seat #') + b.seat + '</b><div class="v2-mut">Booking code <b class="gold">' + esc(b.code) + '</b></div></div></div>';
+    }).join('') +
+      '<div class="bk-link"><input readonly value="' + esc(url) + '" aria-label="Your invite link"><button class="btn btn-sm" type="button" data-copy>Copy</button></div>' +
+      '<div class="cs-share"><a class="btn cs-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
+      '<a class="btn cs-tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Book your free PipClash seat – Battle #001, only 100 per arena') + '">Telegram</a></div>' +
+      '<div class="v2-mut" style="font-size:12.5px">Earn <b class="gold">1%</b> of every entry your friends pay, forever.</div>';
+    mineWrap.hidden = false;
+  }
+  mineBox.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-copy]')) return;
+    var i = mineBox.querySelector('.bk-link input'); i.select();
     (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).catch(function () { document.execCommand('copy'); });
     e.target.textContent = 'Copied ✓'; setTimeout(function () { e.target.textContent = 'Copy'; }, 1800);
   });
@@ -210,6 +234,6 @@
   }
 
   if (ref) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – pick your arena below.'; }
-  drawTables(); drawLadder(); loadCounts(); loadTop(); loadRecent();
+  drawTables(); drawLadder(); drawMine(); loadCounts(); loadTop(); loadRecent();
   setInterval(function () { loadCounts(); loadRecent(); }, 30000);
 })();
