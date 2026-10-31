@@ -1,13 +1,13 @@
-/* PipClash Coming Soon – free seat booking (launch Mon 9 Nov 2026).
-   Supabase RPC: pc_booking_counts, pc_book, pc_booking_top_ref (supabase_prelaunch_booking.sql). Account nahi chahiye. */
+/* PipClash Coming Soon – Battle #001 free seat booking (launch Mon 9 Nov 2026).
+   Supabase RPC: pc_booking_counts, pc_book, pc_booking_top_ref (supabase_prelaunch_booking.sql), pc_booking_recent (supabase_prelaunch_recent.sql).
+   Account nahi chahiye. Inaam (window.PC_BOOK_PRIZES) = prizes.py, agar arena mein 100 log khelein. */
 (function () {
   var SB_URL = 'https://vrcjgxnafmuxfkybtkbz.supabase.co';
   var SB_KEY = 'sb_publishable_hJfAzBCqJKrJkNmLNEsndA_UuFCLH6f';   // public key – website ke liye hi hai
   var LAUNCH = Date.UTC(2026, 10, 9, 12, 30);                      // Mon 9 Nov 2026, 4:30 PM UAE
   var MAX = 100;
-  var TIERS = [{ fee: 10, name: 'STARTER', c: 's', note: 'Best to start' },
-               { fee: 25, name: 'PRO', c: 'b', note: 'Bigger pool' },
-               { fee: 50, name: 'ELITE', c: 'g', note: 'Serious traders' }];
+  var TIERS = [{ fee: 10, name: 'STARTER', c: 's' }, { fee: 25, name: 'PRO', c: 'b' }, { fee: 50, name: 'ELITE', c: 'g' }];
+  var PRZ = window.PC_BOOK_PRIZES || {};
   var KEY = 'pc_bookings_v1';
   var root = document.querySelector('[data-book]');
   if (!root) return;
@@ -21,56 +21,71 @@
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]; }); }
+  function usd(n) { return '$' + Number(n).toLocaleString('en-US'); }
   function mine() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
   function saveMine(b) {
     var a = mine().filter(function (x) { return x.tier !== b.tier; }); a.push(b);
     try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {}
   }
+  function tier(fee) { return TIERS.filter(function (x) { return x.fee === fee; })[0]; }
   function coin(t) { return '<span class="v2-tier ' + t.c + '" aria-hidden="true"><i>' + t.fee + '</i></span>'; }
   function link(code) { return location.origin + location.pathname + '?ref=' + code; }
+  function total() { return counts ? (counts['10'] || 0) + (counts['25'] || 0) + (counts['50'] || 0) : 0; }
 
   /* ---------- countdown ---------- */
   var cd = root.querySelector('[data-bk-cd]');
   function tick() {
     var s = Math.max(0, Math.floor((LAUNCH - Date.now()) / 1000));
     var d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
-    cd.innerHTML = [[d, 'days'], [h, 'hrs'], [m, 'min'], [x, 'sec']].map(function (p) {
-      return '<div class="bk-cdu"><b class="tn">' + (p[0] < 10 ? '0' : '') + p[0] + '</b><span>' + p[1] + '</span></div>';
+    cd.innerHTML = [[d, 'DAYS'], [h, 'HRS'], [m, 'MIN'], [x, 'SEC']].map(function (p) {
+      return '<div><b class="tn">' + (p[0] < 10 ? '0' : '') + p[0] + '</b><span>' + p[1] + '</span></div>';
     }).join('');
   }
   tick(); setInterval(tick, 1000);
 
-  /* ---------- 3 table cards ---------- */
+  /* ---------- 3 arenas ---------- */
   var grid = root.querySelector('[data-bk-tables]');
   function drawTables() {
     var my = mine();
     grid.innerHTML = TIERS.map(function (t) {
       var n = counts ? Math.min(MAX, counts[t.fee] || 0) : null, full = n !== null && n >= MAX;
       var have = my.filter(function (b) { return b.tier === t.fee; })[0];
-      var left = n === null ? '' : full ? 'Full – join the waitlist' : (MAX - n) + ' seats left';
-      var btn = have ? '<button class="btn btn-ghost bk-btn" type="button" data-show="' + t.fee + '">✅ Booked – see my seat</button>'
-        : '<button class="btn bk-btn" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Book free seat') + '</button>';
-      return '<div class="v2-card bk-t' + (pick === t.fee ? ' on' : '') + '">' +
-        '<div class="bk-th">' + coin(t) + '<div><b class="bk-tn">' + t.name + '</b><div class="v2-mut">$' + t.fee + ' entry · ' + t.note + '</div></div></div>' +
-        '<div class="bk-cnt"><b class="tn">' + (n === null ? '–' : n) + '</b><span> / ' + MAX + ' booked</span></div>' +
-        '<div class="bk-bar"><i style="width:' + (n === null ? 0 : n) + '%"></i></div>' +
-        '<div class="v2-mut bk-left">' + left + '</div>' + btn + '</div>';
+      var top1 = (PRZ[t.fee] || [])[0];
+      var btn = have ? '<button class="btn btn-ghost cs-abtn" type="button" data-show="' + t.fee + '">✅ Booked · see my seat</button>'
+        : '<button class="btn cs-abtn' + (t.c === 'g' ? ' cs-gold' : '') + '" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Book free seat · ' + usd(t.fee)) + '</button>';
+      return '<div class="cs-arena ' + t.c + (pick === t.fee ? ' on' : '') + '">' +
+        '<div class="cs-arow">' + coin(t) + '<div class="cs-ainfo"><b class="cs-aname">' + t.name + '</b>' +
+        '<div class="cs-seat">' + (n === null ? '–' : '<b>' + n + '</b>') + '/' + MAX + ' booked · ' + (n === null ? '' : full ? 'full – waitlist' : (MAX - n) + ' left') + '</div>' +
+        '<div class="bar' + (t.c === 'g' ? ' g' : '') + '"><i style="width:' + (n || 0) + '%"></i></div></div>' +
+        (top1 ? '<div class="cs-p1"><span>#1 PRIZE</span><b class="gold">' + usd(top1) + '</b><span>if 100 play</span></div>' : '') + '</div>' + btn + '</div>';
     }).join('');
   }
   function loadCounts() {
     return rpc('pc_booking_counts').then(function (c) { if (c) { counts = c; drawTables(); } });
   }
 
+  /* ---------- prize ladder (tabs) ---------- */
+  var ptabs = root.querySelector('[data-bk-ptabs]'), ladder = root.querySelector('[data-bk-ladder]'), ptier = 25;
+  function drawLadder() {
+    ptabs.innerHTML = TIERS.map(function (t) { return '<button type="button" class="' + (t.fee === ptier ? 'on' : '') + '" data-pt="' + t.fee + '">' + t.name + '</button>'; }).join('');
+    var p = PRZ[ptier] || [], cells = '';
+    for (var r = 1; r <= 20; r++) cells += '<div class="' + (r <= 3 ? 't1' : '') + '"><span>#' + r + '</span><b>' + (p[r - 1] ? usd(p[r - 1]) : '–') + '</b></div>';
+    var pool = ptier * MAX * 0.8;                                 // 100 entries ka 80%
+    ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats play: pool ' + usd(pool) + ' (80% of entries) · top ' + p.length + ' in profit win' +
+      (p.length < 20 ? ' · smallest prize is $10, so #' + (p.length + 1) + '–20 get none' : '') + '. No fixed prize – real prizes are 80% of the real entries.</p>';
+  }
+  ptabs.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) { ptier = +b.getAttribute('data-pt'); drawLadder(); } });
+
   /* ---------- form ---------- */
   var form = root.querySelector('[data-bk-form]'), done = root.querySelector('[data-bk-done]');
   var err = form.querySelector('[data-bk-err]');
   function openForm(fee) {
     pick = fee; drawTables();
-    var t = TIERS.filter(function (x) { return x.fee === fee; })[0];
-    form.querySelector('[data-bk-ft]').innerHTML = coin(t) + '<span>Book a free seat – <b>' + t.name + ' $' + t.fee + '</b></span>';
+    var t = tier(fee);
+    form.querySelector('[data-bk-ft]').innerHTML = coin(t) + '<span>Book a free seat – <b>' + t.name + ' ' + usd(t.fee) + '</b></span>';
     form.hidden = false; done.hidden = true; err.textContent = '';
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(function () { form.querySelector('#bk-name').focus(); }, 350);
+    setTimeout(function () { form.querySelector('#bk-name').focus({ preventScroll: true }); }, 450);
   }
   grid.addEventListener('click', function (e) {
     var p = e.target.closest('[data-pick]'), s = e.target.closest('[data-show]');
@@ -90,25 +105,27 @@
       if (!r) { err.textContent = 'Could not book right now – check your internet and try again.'; return; }
       if (!r.ok) { err.textContent = r.err === 'limit' ? 'Too many bookings from this network today.' : 'Please check your details and try again.'; return; }
       var bk = { tier: r.tier, code: r.code, seat: r.seat, waitlist: r.waitlist, name: name };
-      saveMine(bk); form.hidden = true; pick = null; showDone(bk, r.already);
-      loadCounts(); loadTop();
+      saveMine(bk); form.hidden = true; pick = null;
+      loadCounts().then(function () { showDone(bk, r.already); });
+      loadTop(); loadRecent();
     });
   });
 
   function showDone(bk, already) {
     if (!bk) return;
-    var t = TIERS.filter(function (x) { return x.fee === bk.tier; })[0], url = link(bk.code);
-    var msg = 'I booked my seat for PipClash – daily MT5 trading battle, same $1,000 demo account for everyone, top traders win. Only 100 seats per table, booking is free: ' + url;
-    done.innerHTML = '<div class="bk-ok">' + coin(t) + '<div><b>' + (bk.waitlist ? 'You are on the waitlist' : already ? 'You already have this seat' : 'Seat booked!') + ' ✅</b>' +
-      '<div class="v2-mut">' + t.name + ' $' + t.fee + ' · ' + (bk.waitlist ? 'waitlist #' : 'seat #') + bk.seat + ' of ' + MAX + ' · Launch Mon 9 Nov, 4:30 PM UAE</div></div></div>' +
-      '<p class="bk-p">We will remind you on Telegram/WhatsApp before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
-      (bk.waitlist ? ' If a booked seat is not used by 4 PM, it goes to the waitlist.' : '') + '</p>' +
-      '<div class="v2-lbl">Invite friends – your link</div>' +
+    var t = tier(bk.tier), url = link(bk.code);
+    var left = counts ? Math.max(0, MAX - (counts[t.fee] || 0)) : null;
+    var msg = 'I booked my seat for PipClash Battle #001 – daily MT5 trading battle, same $1,000 demo account for everyone, top traders win. Only 100 seats per arena, booking is free: ' + url;
+    done.innerHTML = '<span class="cs-pill u">' + (bk.waitlist ? 'ON THE WAITLIST' : already ? 'YOUR SEAT' : 'SEAT BOOKED ✓') + '</span>' +
+      '<div class="cs-seatno">' + (bk.waitlist ? 'Waitlist #' : 'Seat #') + bk.seat + ' <span>of ' + MAX + ' · ' + t.name + '</span></div>' +
+      '<div class="v2-mut">' + (left === null ? '' : left + ' seats left in ' + t.name + ' · ') + (counts ? total() + ' traders booked so far' : '') + '</div>' +
+      '<p class="bk-p">Launch Mon 9 Nov, 4:30 PM UAE. We will remind you before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
+      (bk.waitlist ? ' If a booked seat is not used by 4 PM, it goes to the waitlist in order.' : '') + '</p>' +
+      '<div class="cs-lbl" style="margin:4px 0 0">Invite friends – your link</div>' +
       '<div class="bk-link"><input readonly value="' + esc(url) + '" aria-label="Your invite link"><button class="btn btn-sm" type="button" data-copy>Copy</button></div>' +
-      '<div class="bk-share"><a class="btn btn-ghost" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
-      '<a class="btn btn-ghost" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Book your free PipClash seat – only 100 per table') + '">Telegram</a>' +
-      '<a class="btn btn-ghost" target="_blank" rel="noopener" href="https://t.me/pipclash_official">Join our channel</a></div>' +
-      '<div class="v2-mut" style="font-size:13px">Top inviters are shown below. Want another table too? Book it above.</div>';
+      '<div class="cs-share"><a class="btn cs-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
+      '<a class="btn cs-tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Book your free PipClash seat – Battle #001, only 100 per arena') + '">Telegram</a></div>' +
+      '<a class="v2-mut" href="https://t.me/pipclash_official" target="_blank" rel="noopener" style="text-align:center">Join our Telegram channel →</a>';
     done.hidden = false;
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -119,18 +136,36 @@
     e.target.textContent = 'Copied ✓'; setTimeout(function () { e.target.textContent = 'Copy'; }, 1800);
   });
 
+  /* ---------- just booked (asli, naam chhupa) ---------- */
+  var feed = root.querySelector('[data-bk-recent]'), feedWrap = root.querySelector('[data-bk-recent-wrap]');
+  function ago(ts) {
+    var m = Math.max(0, Math.round((Date.now() - new Date(ts).getTime()) / 60000));
+    return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago';
+  }
+  function loadRecent() {
+    rpc('pc_booking_recent').then(function (rows) {
+      if (!rows || !rows.length) { feedWrap.hidden = true; return; }
+      feed.innerHTML = rows.map(function (r) {
+        var t = tier(r.tier) || TIERS[0];
+        return '<div class="cs-fi"><i></i><b>' + esc(r.who) + '</b>' + (r.country ? '<span class="v2-mut">(' + esc(r.country) + ')</span>' : '') +
+          '<span class="v2-mut">booked</span><b class="cs-t-' + t.c + '">' + t.name + '</b><span class="v2-mut cs-ago">' + ago(r.at) + '</span></div>';
+      }).join('');
+      feedWrap.hidden = false;
+    });
+  }
+
   /* ---------- top inviters ---------- */
   var top = root.querySelector('[data-bk-top]');
   function loadTop() {
     rpc('pc_booking_top_ref').then(function (rows) {
-      if (!rows || !rows.length) { top.innerHTML = '<div class="v2-mut">No invites yet – be the first. Share your link after booking.</div>'; return; }
+      if (!rows || !rows.length) { top.innerHTML = '<div class="v2-mut">No invites yet – book a seat and share your link to be first.</div>'; return; }
       top.innerHTML = rows.map(function (r, i) {
         return '<div class="bk-tr"><span class="bk-rk">' + (i + 1) + '</span><span>' + esc(r.who) + '</span><b class="tn">' + r.n + ' friend' + (r.n === 1 ? '' : 's') + '</b></div>';
       }).join('');
     });
   }
 
-  if (ref) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – pick a table below.'; }
-  drawTables(); loadCounts(); loadTop();
-  setInterval(loadCounts, 30000);
+  if (ref) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – pick your arena below.'; }
+  drawTables(); drawLadder(); loadCounts(); loadTop(); loadRecent();
+  setInterval(function () { loadCounts(); loadRecent(); }, 30000);
 })();
