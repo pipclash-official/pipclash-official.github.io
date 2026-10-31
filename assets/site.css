@@ -1054,3 +1054,19 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .cs .bk-refbar{text-align:center}
 @media (min-width:700px){.cs-body{background:radial-gradient(60% 40% at 50% 0%,#0B1834,#05070C 70%)}.cs{padding-top:12px}.cs-hero{border-radius:0 0 24px 24px}}
 @media (max-width:360px){.cs-big{font-size:44px}.cs-logo{width:180px;right:-40px}.cs-cd{gap:12px}.cs-cd b{font-size:26px}}
+/* country picker (book.html) – saare desh + jhanda */
+.cs-cty{position:relative}
+.cs-ctyb{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--bg);color:var(--text);font:inherit;font-size:16px;font-weight:500;cursor:pointer;text-align:left}
+.cs-ctyb img{border-radius:3px;flex:none;object-fit:cover}.cs-ctyb span{flex:1}
+.cs-ctyb svg{width:18px;height:18px;fill:none;stroke:#9AA8BD;stroke-width:2}
+.cs-ctyb:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.cs-ctyp{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;background:#0D121C;border:1px solid #34446A;border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.6);padding:8px;display:flex;flex-direction:column;gap:6px}
+.cs-ctyp[hidden]{display:none}
+.cs-ctyp input{padding:11px 12px;border-radius:9px;border:1px solid var(--line2);background:#05070C;color:var(--text);font:inherit;font-size:16px}
+.cs-ctyl{max-height:280px;overflow-y:auto;display:flex;flex-direction:column}
+.cs-ctyl button{display:flex;align-items:center;gap:10px;padding:10px 8px;border:0;border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:15px;text-align:left;cursor:pointer}
+.cs-ctyl button:hover,.cs-ctyl button:focus-visible{background:#172033;outline:none}
+.cs-ctyh{font-size:10.5px;font-weight:800;letter-spacing:.18em;color:#7F8BA3;padding:8px 8px 4px;text-transform:uppercase}
+.cs-ctyn{padding:12px 8px;color:#9AA8BD}
+.cs-flag{border-radius:3px;flex:none;object-fit:cover;vertical-align:middle}
+.cs-fi .cs-flag{width:18px;height:13.5px}
