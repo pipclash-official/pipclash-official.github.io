@@ -160,6 +160,7 @@
     done.innerHTML = '<span class="cs-pill u">' + (bk.waitlist ? 'ON THE WAITLIST' : already ? 'YOUR SEAT' : 'SEAT BOOKED ✓') + '</span>' +
       '<div class="cs-seatno">' + (bk.waitlist ? 'Waitlist #' : 'Seat #') + bk.seat + ' <span>of ' + MAX + ' · ' + t.name + '</span></div>' +
       '<div class="v2-mut">' + (left === null ? '' : left + ' seats left in ' + t.name + ' · ') + (counts ? total() + ' traders booked so far' : '') + '</div>' +
+      '<div class="cs-code"><span>Your booking code</span><b>' + esc(bk.code) + '</b><small>Keep it (take a screenshot). When you create your account on 7 Nov, enter this code – it keeps your seat and your invites linked to you.</small></div>' +
       '<p class="bk-p">Launch Mon 9 Nov, 4:30 PM UAE. We will remind you before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
       (bk.waitlist ? ' If a booked seat is not used by 4 PM, it goes to the waitlist in order.' : '') + '</p>' +
       '<div class="cs-earn"><b>Invite friends – earn <span class="gold">1%</span> of every entry they pay, forever.</b>' +
