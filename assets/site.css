@@ -1070,3 +1070,5 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .cs-ctyn{padding:12px 8px;color:#9AA8BD}
 .cs-flag{border-radius:3px;flex:none;object-fit:cover;vertical-align:middle}
 .cs-fi .cs-flag{width:18px;height:13.5px}
+.cs-earn{display:flex;flex-direction:column;gap:6px;text-align:left;padding:12px 14px;border-radius:12px;background:rgba(242,200,102,.07);border:1px solid rgba(242,200,102,.3)}
+.cs-earn b{font-size:15px}.cs-earn span{font-size:13px;color:#9AA8BD;line-height:1.5}
