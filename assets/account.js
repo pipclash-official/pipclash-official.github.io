@@ -56,7 +56,8 @@
   /* Coming Soon booking: apna booking code (account ka refer code banega) + booking ke waqt jisne bulaya (supabase_booking_refer_link.sql) */
   var BK = '';
   try {
-    BK = (JSON.parse(localStorage.getItem('pc_bookings_v1') || '[]')[0] || {}).code || '';
+    BK = (new URLSearchParams(location.search).get('bk') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12)   // reminder link: account.html?bk=CODE
+      || (JSON.parse(localStorage.getItem('pc_bookings_v1') || '[]')[0] || {}).code || '';
     if (!REF) REF = (localStorage.getItem('pc_book_ref') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
   } catch (e) { }
   (function () { var i = document.getElementById('su-bk'); if (i && BK && !i.value) i.value = BK; })();   // same phone: code khud bhar do
