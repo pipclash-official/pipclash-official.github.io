@@ -53,6 +53,12 @@
   /* Refer: ?ref=CODE wale link se aaya – code yaad rakho (signup ke baad profile mein ref_by) */
   var REF = (new URLSearchParams(location.search).get('ref') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
   try { if (REF) localStorage.setItem('pc_ref', REF); else REF = localStorage.getItem('pc_ref') || ''; } catch (e) { }
+  /* Coming Soon booking: apna booking code (account ka refer code banega) + booking ke waqt jisne bulaya (supabase_booking_refer_link.sql) */
+  var BK = '';
+  try {
+    BK = (JSON.parse(localStorage.getItem('pc_bookings_v1') || '[]')[0] || {}).code || '';
+    if (!REF) REF = (localStorage.getItem('pc_book_ref') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+  } catch (e) { }
   /* Profile banao – ref_by column abhi Supabase mein na ho (SQL nahi chala) to uske bina dobara */
   function insertProfile(row) {
     var ref = REF || ((user && user.user_metadata) || {}).ref || '';
@@ -100,7 +106,7 @@
     if (!/^\+\d{8,15}$/.test(phone)) { msg('[data-signup-msg]', 'Please enter your mobile number (without the country code).', true); return; }
     if (!$('#su-agree').checked) { msg('[data-signup-msg]', 'Please confirm you are 18+ and accept the Rules and Terms.', true); return; }
     var btn = $('[data-signup-btn]'); btn.disabled = true; msg('[data-signup-msg]', 'Creating your account…');
-    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: redirect, data: { name: name, phone: phone, ref: REF || undefined } } }).then(function (r) {
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: redirect, data: { name: name, phone: phone, ref: REF || undefined, bk: BK || undefined } } }).then(function (r) {
       btn.disabled = false;
       if (r.error) { msg('[data-signup-msg]', errText(r.error.message), true); return; }
       msg('[data-signup-msg]', ''); sent(email);
