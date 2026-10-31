@@ -43,6 +43,47 @@
   }
   tick(); setInterval(tick, 1000);
 
+  /* ---------- country picker: duniya ke saare desh + jhanda (flagcdn) + search ---------- */
+  var CODES = 'AF AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BQ BA BW BV BR IO BN BG BF BI CV KH CM CA KY CF TD CL CN CX CC CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF TF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM VA HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI KP KR KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA RE RO RU RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS SS ES LK SD SR SJ SE CH SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB US UM UY UZ VU VE VN VG VI WF EH YE ZM ZW XK'.split(' ');
+  var TOPC = ['IN', 'PK', 'AE', 'SA', 'BD', 'US', 'GB', 'NP', 'OM', 'QA', 'KW', 'BH', 'LK', 'MY', 'EG', 'NG'];
+  var dn = null; try { dn = new Intl.DisplayNames(['en'], { type: 'region' }); } catch (e) {}
+  function cname(c) { var n = dn ? dn.of(c) : c; return c === 'XK' && n === 'XK' ? 'Kosovo' : n; }
+  var NAME2CODE = {};
+  var ALLC = CODES.map(function (c) { var n = cname(c); NAME2CODE[n] = c; return { c: c, n: n }; })
+    .sort(function (a, b) { return a.n.localeCompare(b.n); });
+  function flag(c, w) { c = (c || '').toLowerCase(); return c ? '<img class="cs-flag" alt="" width="' + (w || 20) + '" height="' + Math.round((w || 20) * .75) + '" loading="lazy" src="https://flagcdn.com/w40/' + c + '.png" srcset="https://flagcdn.com/w80/' + c + '.png 2x">' : ''; }
+  function flagOf(name) { return flag(NAME2CODE[name] || ''); }
+  var cty = root.querySelector('[data-cty]');
+  if (cty) {
+    var cBtn = cty.querySelector('[data-cty-btn]'), cPop = cty.querySelector('[data-cty-pop]'), cQ = cty.querySelector('[data-cty-q]'),
+        cList = cty.querySelector('[data-cty-list]'), cVal = cty.querySelector('#bk-country');
+    var setC = function (c) {
+      var n = cname(c); cVal.value = n;
+      cty.querySelector('[data-cty-name]').textContent = n;
+      var im = cty.querySelector('[data-cty-flag]'); im.src = 'https://flagcdn.com/w40/' + c.toLowerCase() + '.png'; im.srcset = 'https://flagcdn.com/w80/' + c.toLowerCase() + '.png 2x';
+    };
+    var row = function (x) { return '<button type="button" role="option" data-c="' + x.c + '">' + flag(x.c) + '<span>' + esc(x.n) + '</span></button>'; };
+    var drawC = function () {
+      var q = cQ.value.trim().toLowerCase();
+      if (q) { var hit = ALLC.filter(function (x) { return x.n.toLowerCase().indexOf(q) >= 0 || x.c.toLowerCase() === q; });
+        cList.innerHTML = hit.length ? hit.map(row).join('') : '<div class="cs-ctyn">No match</div>'; return; }
+      cList.innerHTML = '<div class="cs-ctyh">Popular</div>' + TOPC.map(function (c) { return row({ c: c, n: cname(c) }); }).join('') +
+        '<div class="cs-ctyh">All countries</div>' + ALLC.map(row).join('');
+    };
+    var openC = function (o) { cPop.hidden = !o; cBtn.setAttribute('aria-expanded', o); if (o) { cQ.value = ''; drawC(); setTimeout(function () { cQ.focus(); }, 30); } };
+    cBtn.addEventListener('click', function () { openC(cPop.hidden); });
+    cQ.addEventListener('input', drawC);
+    cList.addEventListener('click', function (e) { var b = e.target.closest('[data-c]'); if (b) { setC(b.getAttribute('data-c')); openC(false); cBtn.focus(); } });
+    document.addEventListener('click', function (e) { if (!cPop.hidden && !cty.contains(e.target)) openC(false); });
+    cty.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !cPop.hidden) { openC(false); cBtn.focus(); } });
+    var TZ = { Kolkata: 'IN', Calcutta: 'IN', Karachi: 'PK', Dubai: 'AE', Riyadh: 'SA', Dhaka: 'BD', Kathmandu: 'NP', Katmandu: 'NP', Muscat: 'OM',
+               Qatar: 'QA', Kuwait: 'KW', Bahrain: 'BH', Colombo: 'LK', London: 'GB', Kuala_Lumpur: 'MY', Cairo: 'EG', Lagos: 'NG' };
+    var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    var guess = TZ[tz.split('/').pop()] || (/^America\//.test(tz) ? 'US' : '') ||                  // pehle phone ka time zone, phir language
+      ((navigator.language || '').split('-')[1] || '').toUpperCase();
+    setC(CODES.indexOf(guess) >= 0 ? guess : 'IN');
+  }
+
   /* ---------- 3 arenas ---------- */
   var grid = root.querySelector('[data-bk-tables]');
   function drawTables() {
@@ -147,7 +188,7 @@
       if (!rows || !rows.length) { feedWrap.hidden = true; return; }
       feed.innerHTML = rows.map(function (r) {
         var t = tier(r.tier) || TIERS[0];
-        return '<div class="cs-fi"><i></i><b>' + esc(r.who) + '</b>' + (r.country ? '<span class="v2-mut">(' + esc(r.country) + ')</span>' : '') +
+        return '<div class="cs-fi"><i></i><b>' + esc(r.who) + '</b>' + (r.country ? flagOf(r.country) + '<span class="v2-mut">' + esc(r.country) + '</span>' : '') +
           '<span class="v2-mut">booked</span><b class="cs-t-' + t.c + '">' + t.name + '</b><span class="v2-mut cs-ago">' + ago(r.at) + '</span></div>';
       }).join('');
       feedWrap.hidden = false;
