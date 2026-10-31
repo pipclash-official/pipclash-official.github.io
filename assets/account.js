@@ -59,6 +59,7 @@
     BK = (JSON.parse(localStorage.getItem('pc_bookings_v1') || '[]')[0] || {}).code || '';
     if (!REF) REF = (localStorage.getItem('pc_book_ref') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
   } catch (e) { }
+  (function () { var i = document.getElementById('su-bk'); if (i && BK && !i.value) i.value = BK; })();   // same phone: code khud bhar do
   /* Profile banao – ref_by column abhi Supabase mein na ho (SQL nahi chala) to uske bina dobara */
   function insertProfile(row) {
     var ref = REF || ((user && user.user_metadata) || {}).ref || '';
@@ -105,8 +106,9 @@
     if (!EMAIL_RE.test(email)) { msg('[data-signup-msg]', 'Please enter a valid email address.', true); return; }
     if (!/^\+\d{8,15}$/.test(phone)) { msg('[data-signup-msg]', 'Please enter your mobile number (without the country code).', true); return; }
     if (!$('#su-agree').checked) { msg('[data-signup-msg]', 'Please confirm you are 18+ and accept the Rules and Terms.', true); return; }
+    var bkIn = $('#su-bk'), bkv = ((bkIn && bkIn.value) || BK || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);   // booking code (alag phone pe bhi jode)
     var btn = $('[data-signup-btn]'); btn.disabled = true; msg('[data-signup-msg]', 'Creating your account…');
-    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: redirect, data: { name: name, phone: phone, ref: REF || undefined, bk: BK || undefined } } }).then(function (r) {
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: redirect, data: { name: name, phone: phone, ref: REF || undefined, bk: bkv || undefined } } }).then(function (r) {
       btn.disabled = false;
       if (r.error) { msg('[data-signup-msg]', errText(r.error.message), true); return; }
       msg('[data-signup-msg]', ''); sent(email);
