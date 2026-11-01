@@ -85,7 +85,10 @@
         }).then(function (e) {
           if (e.error) throw e.error;
           $('[data-mfa-help]').textContent = 'First time: open Google Authenticator → + → Scan QR code. Then type the 6-digit code.';
-          qr.innerHTML = e.data.totp.qr_code.indexOf('<svg') === 0 ? e.data.totp.qr_code : '<img alt="QR" style="width:200px" src="' + e.data.totp.qr_code + '">';
+          var q = e.data.totp.qr_code;       // '<svg…' ya 'data:image/svg+xml;…' – src property se (quote se HTML na toote)
+          qr.innerHTML = '';
+          if (q.indexOf('<svg') === 0) qr.innerHTML = q;
+          else { var im = document.createElement('img'); im.alt = 'QR'; im.style.width = '200px'; im.src = q; qr.appendChild(im); }
           qr.hidden = false; sec.hidden = false; sec.textContent = 'Or type this key: ' + e.data.totp.secret;
           return e.data.id;
         });
