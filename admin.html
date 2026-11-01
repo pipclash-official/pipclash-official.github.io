@@ -16,19 +16,19 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080B12">
-<link rel="icon" href="assets/favicon.svg?v=74" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=74" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=74" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=74">
+<link rel="icon" href="assets/favicon.svg?v=75" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=75" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=75" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=75">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=74">
-<script src="assets/demo.js?v=74"></script>
-<script src="assets/site.js?v=74" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=75">
+<script src="assets/demo.js?v=75"></script>
+<script src="assets/site.js?v=75" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/admin.js?v=74" defer></script>
+<script src="assets/admin.js?v=75" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -52,6 +52,14 @@
 
 <section class="section first"><div class="wrap acc adm" data-admin>
   <div class="card acc-card" data-a-view="login" hidden><h1>Admin</h1><p class="muted2">Please log in first.</p><a class="btn btn-lg" href="account.html#login">Log in</a></div>
+  <div class="card acc-card" data-a-view="mfa" hidden><h1>2-step security</h1>
+    <p class="muted2" data-mfa-help>Admin panel needs a 6-digit code from Google Authenticator.</p>
+    <div data-mfa-qr style="background:#fff;border-radius:12px;padding:10px;max-width:220px" hidden></div>
+    <p class="muted2 a-sm" data-mfa-secret hidden></p>
+    <label for="mfa-code">6-digit code</label>
+    <input id="mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+    <button class="btn btn-lg" type="button" data-mfa-go>Verify</button>
+    <p class="acc-msg" data-mfa-msg role="status"></p></div>
   <div class="card acc-card" data-a-view="denied" hidden><h1>Not allowed</h1><p class="muted2">This page is only for the PipClash team.</p></div>
   <div data-a-view="main" hidden class="w-main">
     <div class="acc-head"><div><h1>Admin</h1><p class="muted2" data-a-me></p></div><button class="btn btn-ghost" type="button" data-a-refresh>Refresh</button></div>
