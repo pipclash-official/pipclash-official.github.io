@@ -59,14 +59,56 @@
       sb.rpc('pc_role').then(function (a) {
         ROLE = a.data;
         if (!ROLE) { show('denied'); return; }
+        return mfaGate().then(function (ok) { if (ok) open(r); });
+      });
+    });
+  }
+  /* Admin 2FA (Google Authenticator) – pehli baar QR scan, phir har login pe 6 digit code. supabase_admin_2fa.sql = bina code admin kuch nahi kar sakta */
+  function mfaGate() {
+    return sb.auth.mfa.getAuthenticatorAssuranceLevel().then(function (l) {
+      if (l.data && l.data.currentLevel === 'aal2') return true;
+      return sb.auth.mfa.listFactors().then(function (f) {
+        var t = ((f.data && f.data.totp) || []).filter(function (x) { return x.status === 'verified'; })[0];
+        show('mfa');
+        var msg = $('[data-mfa-msg]'), btn = $('[data-mfa-go]'), qr = $('[data-mfa-qr]'), sec = $('[data-mfa-secret]');
+        var ready = t ? Promise.resolve(t.id) : sb.auth.mfa.listFactors().then(function (f2) {
+          var old = ((f2.data && f2.data.all) || []).filter(function (x) { return x.status !== 'verified'; });       // adhura enroll hatao
+          return Promise.all(old.map(function (x) { return sb.auth.mfa.unenroll({ factorId: x.id }); }));
+        }).then(function () { return sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'PipClash admin' }); }).then(function (e) {
+          if (e.error) throw e.error;
+          $('[data-mfa-help]').textContent = 'First time: open Google Authenticator → + → Scan QR code. Then type the 6-digit code.';
+          qr.innerHTML = e.data.totp.qr_code.indexOf('<svg') === 0 ? e.data.totp.qr_code : '<img alt="QR" style="width:200px" src="' + e.data.totp.qr_code + '">';
+          qr.hidden = false; sec.hidden = false; sec.textContent = 'Or type this key: ' + e.data.totp.secret;
+          return e.data.id;
+        });
+        return ready.then(function (fid) {
+          return new Promise(function (resolve) {
+            btn.onclick = function () {
+              var code = $('#mfa-code').value.replace(/\D/g, '');
+              if (code.length !== 6) { msg.textContent = 'Type the 6-digit code.'; return; }
+              btn.disabled = true; msg.textContent = 'Checking…';
+              sb.auth.mfa.challengeAndVerify({ factorId: fid, code: code }).then(function (v) {
+                btn.disabled = false;
+                if (v.error) { msg.textContent = 'Wrong or expired code – try the new one.'; return; }
+                msg.textContent = ''; resolve(true);
+              });
+            };
+          });
+        }, function (err) {     // MFA chalu nahi hua = panel band mat karo (asli rok SQL karti hai), bas batao
+          console.warn('2FA setup failed', err);
+          alert('2-step security could not start: ' + ((err && err.message) || err) + '\nPanel will open – tell the developer.');
+          return true;
+        });
+      });
+    });
+  }
+  function open(r) {
         sb.from('pc_admins').select('name').eq('user_id', r.data.user.id).maybeSingle().then(function (m) {
           ME = (m.data && m.data.name) || r.data.user.email;
           $('[data-a-me]').innerHTML = esc(ME) + ' · <span class="' + (owner() ? 'tag-ok' : 'tag-wait') + '">' + ROLE.toUpperCase() + '</span>';
           root.querySelectorAll('[data-owner]').forEach(function (el) { el.hidden = !owner(); });
           show('main'); go(location.hash.slice(1) || 'dash');
         });
-      });
-    });
   }
   function show(name) { root.querySelectorAll('[data-a-view]').forEach(function (v) { v.hidden = v.getAttribute('data-a-view') !== name; }); }
   function go(t) {
