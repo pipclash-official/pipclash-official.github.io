@@ -71,10 +71,13 @@
         var t = ((f.data && f.data.totp) || []).filter(function (x) { return x.status === 'verified'; })[0];
         show('mfa');
         var msg = $('[data-mfa-msg]'), btn = $('[data-mfa-go]'), qr = $('[data-mfa-qr]'), sec = $('[data-mfa-secret]');
-        var ready = t ? Promise.resolve(t.id) : sb.auth.mfa.listFactors().then(function (f2) {
-          var old = ((f2.data && f2.data.all) || []).filter(function (x) { return x.status !== 'verified'; });       // adhura enroll hatao
-          return Promise.all(old.map(function (x) { return sb.auth.mfa.unenroll({ factorId: x.id }); }));
-        }).then(function () { return sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'PipClash admin' }); }).then(function (e) {
+        var ready = t ? Promise.resolve(t.id) : sb.auth.getUser().then(function (u) {
+          var all = ((f.data && f.data.all) || []).concat((u.data && u.data.user && u.data.user.factors) || []);
+          var old = all.filter(function (x, i) { return x.status !== 'verified' && all.findIndex(function (y) { return y.id === x.id; }) === i; });   // adhura QR hatao
+          return Promise.all(old.map(function (x) { return sb.auth.mfa.unenroll({ factorId: x.id }).catch(function () {}); }));
+        }).then(function () {    // har baar alag naam – purana adhura bacha ho to bhi takraav nahi
+          return sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'PipClash admin ' + new Date().toISOString().slice(0, 16).replace('T', ' ') });
+        }).then(function (e) {
           if (e.error) throw e.error;
           $('[data-mfa-help]').textContent = 'First time: open Google Authenticator → + → Scan QR code. Then type the 6-digit code.';
           qr.innerHTML = e.data.totp.qr_code.indexOf('<svg') === 0 ? e.data.totp.qr_code : '<img alt="QR" style="width:200px" src="' + e.data.totp.qr_code + '">';
