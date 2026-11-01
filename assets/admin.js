@@ -116,6 +116,9 @@
   function open(r) {
         sb.from('pc_admins').select('name').eq('user_id', r.data.user.id).maybeSingle().then(function (m) {
           ME = (m.data && m.data.name) || r.data.user.email;
+          var side = document.querySelector('[data-v2-me]'), chip = document.querySelector('[data-v2-chip]');   // admin page pe v2.js nahi – menu mein bhi apna naam
+          if (side) side.innerHTML = '<div class="v2-av">' + esc(String(ME).charAt(0).toUpperCase()) + '</div><div><b>' + esc(ME) + '</b><div class="v2-mut">' + esc(ROLE.toUpperCase()) + ' · logged in</div></div>';
+          if (chip) chip.innerHTML = '<span class="v2-login">' + esc(ME) + '</span>';
           $('[data-a-me]').innerHTML = esc(ME) + ' · <span class="' + (owner() ? 'tag-ok' : 'tag-wait') + '">' + ROLE.toUpperCase() + '</span>';
           root.querySelectorAll('[data-owner]').forEach(function (el) { el.hidden = !owner(); });
           show('main'); go(location.hash.slice(1) || 'dash');
