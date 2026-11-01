@@ -64,7 +64,12 @@
     });
   }
   /* Admin 2FA (Google Authenticator) – pehli baar QR scan, phir har login pe 6 digit code. supabase_admin_2fa.sql = bina code admin kuch nahi kar sakta */
-  function mfaGate() {
+  var GATE = null;
+  function mfaGate() {     // page load + login event dono saath bulate – ek hi baar chalao (warna do QR, takraav)
+    if (!GATE) GATE = mfaGateOnce().then(function (ok) { if (!ok) GATE = null; return ok; }, function (e) { GATE = null; throw e; });
+    return GATE;
+  }
+  function mfaGateOnce() {
     return sb.auth.mfa.getAuthenticatorAssuranceLevel().then(function (l) {
       if (l.data && l.data.currentLevel === 'aal2') return true;
       return sb.auth.mfa.listFactors().then(function (f) {
@@ -76,7 +81,7 @@
           var old = all.filter(function (x, i) { return x.status !== 'verified' && all.findIndex(function (y) { return y.id === x.id; }) === i; });   // adhura QR hatao
           return Promise.all(old.map(function (x) { return sb.auth.mfa.unenroll({ factorId: x.id }).catch(function () {}); }));
         }).then(function () {    // har baar alag naam – purana adhura bacha ho to bhi takraav nahi
-          return sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'PipClash admin ' + new Date().toISOString().slice(0, 16).replace('T', ' ') });
+          return sb.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'PipClash admin ' + Date.now().toString(36) });
         }).then(function (e) {
           if (e.error) throw e.error;
           $('[data-mfa-help]').textContent = 'First time: open Google Authenticator → + → Scan QR code. Then type the 6-digit code.';
