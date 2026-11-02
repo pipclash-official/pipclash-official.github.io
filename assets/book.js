@@ -5,7 +5,8 @@
   var SB_URL = 'https://vrcjgxnafmuxfkybtkbz.supabase.co';
   var SB_KEY = 'sb_publishable_hJfAzBCqJKrJkNmLNEsndA_UuFCLH6f';   // public key – website ke liye hi hai
   var LAUNCH = Date.UTC(2026, 10, 9, 12, 30);                      // Mon 9 Nov 2026, 4:30 PM UAE
-  var MAX = 100;
+  var MAX = 100, SHOW_FROM = 30;
+  function totalBooked() { return counts ? (counts[10] || 0) + (counts[25] || 0) + (counts[50] || 0) : 0; }
   var TIERS = [{ fee: 10, name: 'STARTER', c: 's' }, { fee: 25, name: 'PRO', c: 'b' }, { fee: 50, name: 'ELITE', c: 'g' }];
   var PRZ = window.PC_BOOK_PRIZES || {};
   var KEY = 'pc_bookings_v1';
@@ -45,7 +46,7 @@
 
   /* ---------- country picker: duniya ke saare desh + jhanda (flagcdn) + search ---------- */
   var CODES = 'AF AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BQ BA BW BV BR IO BN BG BF BI CV KH CM CA KY CF TD CL CN CX CC CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF TF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM VA HN HK HU IS IN ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI KP KR KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA RE RO RU RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS SS ES LK SD SR SJ SE CH SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB US UM UY UZ VU VE VN VG VI WF EH YE ZM ZW XK'.split(' ');
-  var TOPC = ['IN', 'PK', 'AE', 'SA', 'BD', 'US', 'GB', 'NP', 'OM', 'QA', 'KW', 'BH', 'LK', 'MY', 'EG', 'NG'];
+  var TOPC = ['IN', 'PK', 'AE', 'NG', 'ZA', 'KE', 'GH', 'EG', 'MY', 'ID', 'PH', 'VN', 'TH', 'BD', 'GB', 'SA', 'US'];
   var dn = null; try { dn = new Intl.DisplayNames(['en'], { type: 'region' }); } catch (e) {}
   function cname(c) { var n = dn ? dn.of(c) : c; return c === 'XK' && n === 'XK' ? 'Kosovo' : n; }
   var NAME2CODE = {};
@@ -77,7 +78,8 @@
     document.addEventListener('click', function (e) { if (!cPop.hidden && !cty.contains(e.target)) openC(false); });
     cty.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !cPop.hidden) { openC(false); cBtn.focus(); } });
     var TZ = { Kolkata: 'IN', Calcutta: 'IN', Karachi: 'PK', Dubai: 'AE', Riyadh: 'SA', Dhaka: 'BD', Kathmandu: 'NP', Katmandu: 'NP', Muscat: 'OM',
-               Qatar: 'QA', Kuwait: 'KW', Bahrain: 'BH', Colombo: 'LK', London: 'GB', Kuala_Lumpur: 'MY', Cairo: 'EG', Lagos: 'NG' };
+               Qatar: 'QA', Kuwait: 'KW', Bahrain: 'BH', Colombo: 'LK', London: 'GB', Kuala_Lumpur: 'MY', Cairo: 'EG', Lagos: 'NG',
+               Nairobi: 'KE', Johannesburg: 'ZA', Accra: 'GH', Manila: 'PH', Jakarta: 'ID', Ho_Chi_Minh: 'VN', Saigon: 'VN', Bangkok: 'TH' };
     var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
     var guess = TZ[tz.split('/').pop()] || (/^America\//.test(tz) ? 'US' : '') ||                  // pehle phone ka time zone, phir language
       ((navigator.language || '').split('-')[1] || '').toUpperCase();
@@ -90,14 +92,17 @@
     var my = mine();
     grid.innerHTML = TIERS.map(function (t) {
       var n = counts ? Math.min(MAX, counts[t.fee] || 0) : null, full = n !== null && n >= MAX;
+      var shown = n !== null && totalBooked() >= SHOW_FROM;          // kam ginti dikhane se bharosa ghatta – 30+ pe hi number
       var have = my.filter(function (b) { return b.tier === t.fee; })[0];
       var top1 = (PRZ[t.fee] || [])[0];
       var btn = have ? '<button class="btn btn-ghost cs-abtn" type="button" data-show="' + t.fee + '">✅ Booked · see my seat</button>'
-        : '<button class="btn cs-abtn' + (t.c === 'g' ? ' cs-gold' : '') + '" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Book free seat · ' + usd(t.fee)) + '</button>';
+        : '<button class="btn cs-abtn' + (t.c === 'g' ? ' cs-gold' : '') + '" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Book FREE seat') + '</button>' +
+          '<div class="cs-afee">Entry ' + usd(t.fee) + ' only on battle day · nothing to pay now</div>';
       return '<div class="cs-arena ' + t.c + (pick === t.fee ? ' on' : '') + '">' +
         '<div class="cs-arow">' + coin(t) + '<div class="cs-ainfo"><b class="cs-aname">' + t.name + '</b>' +
-        '<div class="cs-seat">' + (n === null ? '–' : '<b>' + n + '</b>') + '/' + MAX + ' booked · ' + (n === null ? '' : full ? 'full – waitlist' : (MAX - n) + ' left') + '</div>' +
-        '<div class="bar' + (t.c === 'g' ? ' g' : '') + '"><i style="width:' + (n || 0) + '%"></i></div></div>' +
+        (shown ? '<div class="cs-seat"><b>' + n + '</b>/' + MAX + ' booked · ' + (full ? 'full – waitlist' : (MAX - n) + ' left') + '</div>' +
+          '<div class="bar' + (t.c === 'g' ? ' g' : '') + '"><i style="width:' + (n || 0) + '%"></i></div>'
+          : '<div class="cs-seat">100 seats · filling up</div>') + '</div>' +
         (top1 ? '<div class="cs-p1"><span>#1 PRIZE</span><b class="gold">' + usd(top1) + '</b><span>if 100 play</span></div>' : '') + '</div>' + btn + '</div>';
     }).join('');
   }
@@ -123,11 +128,17 @@
   function openForm(fee) {
     pick = fee; drawTables();
     var t = tier(fee);
-    form.querySelector('[data-bk-ft]').innerHTML = coin(t) + '<span>Book a free seat – <b>' + t.name + ' ' + usd(t.fee) + '</b></span>';
+    form.querySelector('[data-bk-ft]').innerHTML = coin(t) + '<span>Free seat · <b>' + t.name + '</b> arena<br><small>Entry ' + usd(t.fee) +
+      ' only on battle day · <a href="#arenas">change arena</a></small></span>';
     form.hidden = false; done.hidden = true; err.textContent = '';
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(function () { form.querySelector('#bk-name').focus({ preventScroll: true }); }, 450);
   }
+  var cta = root.querySelector('.cs-cta');
+  if (cta) cta.addEventListener('click', function (e) {             // bada button = seedha form (STARTER), arena baad mein badal sakte
+    if (mine().length) return;
+    e.preventDefault(); openForm(pick || 10);
+  });
   grid.addEventListener('click', function (e) {
     var p = e.target.closest('[data-pick]'), s = e.target.closest('[data-show]');
     if (p) openForm(+p.getAttribute('data-pick'));
