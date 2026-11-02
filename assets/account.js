@@ -127,6 +127,19 @@
     });
   });
   $('[data-change-email]').addEventListener('click', function () { $('[data-sent-step]').hidden = true; $('[data-login-step]').hidden = false; });
+  // Code se login (bade apps jaisa) – link alag device/in-app browser mein atakta, code kahin bhi chalta
+  var codeForm = $('[data-code-form]');
+  if (codeForm) codeForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = $('[data-sent-to]').textContent.trim(), code = $('#acc-code').value.replace(/\s/g, '');
+    if (code.length < 6) { msg('[data-code-msg]', 'Please enter the code from the email.', true); return; }
+    var btn = $('[data-code-btn]'); btn.disabled = true; msg('[data-code-msg]', 'Checking…');
+    sb.auth.verifyOtp({ email: email, token: code, type: 'email' }).then(function (r) {
+      btn.disabled = false;
+      if (r.error) { msg('[data-code-msg]', 'Wrong or expired code. Please check the latest email and try again.', true); return; }
+      msg('[data-code-msg]', ''); $('#acc-code').value = '';
+    });
+  });
 
   /* ---------- profile ---------- */
   $('[data-profile-form]').addEventListener('submit', function (e) {
