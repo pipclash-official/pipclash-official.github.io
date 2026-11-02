@@ -472,6 +472,8 @@ th{font-size:13px}
 .auth-tg{justify-content:center;gap:10px;height:54px}.auth-tg svg{width:20px;height:20px;fill:#2AABEE}
 .auth-fine{font-size:13px;color:var(--dim);line-height:1.55}
 .auth-sent{align-items:flex-start}
+.auth-code{display:flex;flex-direction:column;gap:10px;width:100%;margin:6px 0 4px}
+.auth-code input{font-size:24px;letter-spacing:8px;text-align:center;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:inherit}
 .auth-mail{width:64px;height:64px;border-radius:18px;background:rgba(47,128,255,.14);display:grid;place-items:center}
 .auth-mail svg{width:30px;height:30px;stroke:#4DA3FF;fill:none;stroke-width:1.8}
 @media (max-width:860px){
