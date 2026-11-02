@@ -24,7 +24,8 @@
     INSUFFICIENT_BALANCE: 'Not enough balance.', MIN_DEPOSIT: 'Amount is below the minimum deposit.', MIN_WITHDRAW: 'Amount is below the minimum withdrawal.',
     BAD_TXID: 'Please paste the full transaction ID (TXID / hash).', BAD_ADDRESS: 'Please paste your full USDT wallet address.',
     TOO_MANY_PENDING: 'You already have 3 deposits waiting. Please wait until they are checked.', ONE_PENDING: 'You already have a withdrawal waiting. Please wait until it is paid.',
-    KYC_REQUIRED: 'Please verify your ID first.', NO_PROFILE: 'Please complete your details on My account first.', BAD_NETWORK: 'Please choose TRC20 or BEP20.',
+    KYC_REQUIRED: 'Please verify your ID first.', OTP_REQUIRED: 'Please confirm with the email code first.',
+    ADDRESS_ON_HOLD: 'For your safety, a new withdrawal address unlocks 24 hours after it is added. Please try again later.', NO_PROFILE: 'Please complete your details on My account first.', BAD_NETWORK: 'Please choose TRC20 or BEP20.',
     ALREADY_APPROVED: 'Your ID is already verified.', BAD_PATH: 'Upload failed – please try again.',
     GET_AMOUNT_FIRST: 'Please tap “Get my exact amount” first.', AMOUNT_MISMATCH: 'Please send and enter exactly your amount – get a new one if you changed the network.',
     TXID_USED: 'This TXID was already submitted.', TRY_AGAIN: 'Please try again in a moment.', BEP20_ONLY: 'Withdrawals are paid only on BEP20 (BNB Smart Chain).'
@@ -307,14 +308,63 @@
     if (!(amt > 0)) { msg('[data-w-wd-msg]', 'Please enter an amount.', true); return; }
     if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { msg('[data-w-wd-msg]', 'This is not a BEP20 address. It must start with 0x and have 42 characters (choose “BSC / BEP20” in your wallet).', true); return; }
     if (!confirm('Withdraw ' + usd(amt) + ' USDT to ' + nt + ' address\n' + addr + ' ?\n\nPlease check the address – crypto transfers cannot be reversed.')) return;
-    b.disabled = true; msg('[data-w-wd-msg]', 'Sending…');
-    sb.rpc('pc_request_withdraw', { amt: amt, net: nt, addr: addr }).then(function (r) {
-      b.disabled = false;
-      if (r.error) { msg('[data-w-wd-msg]', errText(r.error), true); return; }
-      msg('[data-w-wd-msg]', 'Request received ✅ The amount is held from your balance and paid after a check.');
-      $('#w-wd-amt').value = ''; $('#w-wd-addr').value = ''; recv(); load();
+    withOtp(b, function () {
+      b.disabled = true; msg('[data-w-wd-msg]', 'Sending…');
+      sb.rpc('pc_request_withdraw', { amt: amt, net: nt, addr: addr }).then(function (r) {
+        b.disabled = false;
+        if (r.error) { msg('[data-w-wd-msg]', errText(r.error), true); return; }
+        if (r.data === -1) {                                   // naya address – 24h hold
+          var t = new Date(Date.now() + 864e5);
+          msg('[data-w-wd-msg]', 'New address saved 🔒 For your safety, withdrawals to a new address unlock after 24 hours (' +
+            t.toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '). Your balance is not touched. Please submit again then.');
+          return;
+        }
+        msg('[data-w-wd-msg]', 'Request received ✅ The amount is held from your balance and paid after a check.');
+        $('#w-wd-amt').value = ''; $('#w-wd-addr').value = ''; recv(); load();
+      });
     });
   });
+
+  /* Withdraw OTP: pichhle 10 min mein email code nahi = code bhejo, daalo, phir aage (server bhi check karta – pc_fresh_otp) */
+  function otpFresh(sess) {
+    try {
+      var p = JSON.parse(atob(sess.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return (p.amr || []).some(function (a) { return /otp|magiclink/.test(a.method) && a.timestamp > Date.now() / 1000 - 540; });
+    } catch (e) { return false; }
+  }
+  function withOtp(b, go) {
+    sb.auth.getSession().then(function (r) {
+      var sess = r.data && r.data.session;
+      if (sess && otpFresh(sess)) return go();
+      var email = user && user.email;
+      if (!email) { msg('[data-w-wd-msg]', 'Please log in again.', true); return; }
+      b.disabled = true; msg('[data-w-wd-msg]', 'Sending a code to ' + email + '…');
+      sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: false } }).then(function (s) {
+        b.disabled = false;
+        if (s.error) { msg('[data-w-wd-msg]', 'Could not send the code: ' + s.error.message, true); return; }
+        var box = $('[data-w-otp]');
+        if (!box) {
+          box = document.createElement('div'); box.setAttribute('data-w-otp', ''); box.className = 'w-otp';
+          box.innerHTML = '<label class="bk-f"><span>Email code</span><input id="w-otp-code" inputmode="numeric" maxlength="10" autocomplete="one-time-code" placeholder="6-digit code"></label>' +
+            '<button type="button" class="btn" data-w-otp-go>Confirm withdrawal</button>';
+          $('[data-w-wd-form]').appendChild(box);
+        }
+        box.hidden = false;
+        msg('[data-w-wd-msg]', '📧 We emailed a code to ' + email + '. Enter it below to confirm (check spam too).');
+        setTimeout(function () { $('#w-otp-code').focus(); }, 50);
+        box.querySelector('[data-w-otp-go]').onclick = function () {
+          var code = $('#w-otp-code').value.replace(/\s/g, '');
+          if (code.length < 6) { msg('[data-w-wd-msg]', 'Please enter the code from the email.', true); return; }
+          this.disabled = true; var me = this;
+          sb.auth.verifyOtp({ email: email, token: code, type: 'email' }).then(function (v) {
+            me.disabled = false;
+            if (v.error) { msg('[data-w-wd-msg]', 'Wrong or expired code. Please try again.', true); return; }
+            box.hidden = true; $('#w-otp-code').value = ''; go();
+          });
+        };
+      });
+    });
+  }
 
   // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
   sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
