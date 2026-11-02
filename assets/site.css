@@ -1086,3 +1086,9 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .cs-chat svg{width:20px;height:20px}
 .cs-chat:hover{background:#1F6FEB}
 @media (max-width:480px){.cs-chat span{display:none}.cs-chat{padding:14px}}
+
+/* book page: bharosa + arena fee note (3 Nov conversion fix) */
+.cs-trust{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 14px;margin-top:12px;font-size:14px;color:#9AE6B4;font-weight:600}
+.cs-afee{margin-top:8px;font-size:12.5px;color:var(--muted);text-align:center}
+.bk-ft small{display:block;font-size:12.5px;color:var(--muted);font-weight:400;margin-top:2px}
+.bk-ft small a{color:var(--accent2)}
