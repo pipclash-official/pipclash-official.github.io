@@ -137,7 +137,8 @@
       };
       // Laptop + 30 se zyada players: rank 1-30 baayein, 31-60 daayein (do column)
       var split = +box.getAttribute('data-split') || 0, wrap = box.closest('.lb-cols');
-      var two = !!(split && wrap && !q && rows.length > split && window.innerWidth >= 1280);
+      // do column sirf tab jab leaderboard box sach mein chauda ho (laptop pe side panel jagah le leta – P&L kat jaata tha)
+      var two = !!(split && wrap && !q && rows.length > split && window.innerWidth >= 1280 && wrap.getBoundingClientRect().width >= 860);
       if (wrap) { wrap.classList.toggle('two', two); var b2 = wrap.querySelector('[data-lb2]'); if (b2) b2.hidden = !two; }
       box.innerHTML = (two ? rows.slice(0, split) : rows).map(rowHtml).join('');
       if (two) wrap.querySelector('[data-standings2]').innerHTML = rows.slice(split, split * 2).map(rowHtml).join('');
