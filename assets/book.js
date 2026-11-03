@@ -158,6 +158,7 @@
       if (!r.ok) { err.textContent = r.err === 'limit' ? 'Too many bookings from this network today.' : 'Please check your details and try again.'; return; }
       var bk = { tier: r.tier, code: r.code, seat: r.seat, waitlist: r.waitlist, name: name };
       saveMine(bk); form.hidden = true; pick = null; drawMine();
+      if (!r.already && window.fbq) fbq('track', 'Lead', { content_name: 'seat_' + r.tier });   // Meta Pixel: booking hui
       loadCounts().then(function () { showDone(bk, r.already); });
       loadTop(); loadRecent();
     });
