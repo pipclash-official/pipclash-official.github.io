@@ -224,7 +224,7 @@
   }
   function loadRecent() {
     rpc('pc_booking_recent').then(function (rows) {
-      if (!rows || !rows.length) { feedWrap.hidden = true; return; }
+      if (!rows || !rows.length || total() < 20) { feedWrap.hidden = true; return; }   // 5 purane naam = "koi nahi aa raha" lagta
       feed.innerHTML = rows.map(function (r) {
         var t = tier(r.tier) || TIERS[0];
         return '<div class="cs-fi"><i></i><b>' + esc(r.who) + '</b>' + (r.country ? flagOf(r.country) + '<span class="v2-mut">' + esc(r.country) + '</span>' : '') +
@@ -246,6 +246,14 @@
   }
 
   if (ref) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – pick your arena below.'; }
+  /* Ad se aaya (3 Nov audit: 68 visit, 0 booking) – ad "FREE seat" bolta, upar fee/80% dekh ke log laut jaate.
+     Upar sirf free seat ki baat; fee/inaam ki poori baat neeche arena + ladder mein wahi rehti. */
+  if (!ref && /[?&](utm_source|fbclid)=/.test(location.search)) {
+    var hp = root.querySelector('.cs-hero .cs-p');
+    if (hp) hp.textContent = 'A daily MT5 battle. Everyone starts with the same $1,000 demo account – only your skill decides the leaderboard. Book your free seat for Battle #001.';
+    var f3 = root.querySelector('.cs-facts > div:last-child');
+    if (f3) f3.innerHTML = '<b class="gold">FREE</b><span>seat booking</span>';
+  }
   drawTables(); drawLadder(); drawMine(); loadCounts(); loadTop(); loadRecent();
   setInterval(function () { loadCounts(); loadRecent(); }, 30000);
 })();
