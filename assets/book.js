@@ -117,8 +117,8 @@
     var p = PRZ[ptier] || [], cells = '';
     for (var r = 1; r <= 20; r++) cells += '<div class="' + (r <= 3 ? 't1' : '') + '"><span>#' + r + '</span><b>' + (p[r - 1] ? usd(p[r - 1]) : '–') + '</b></div>';
     var pool = ptier * MAX * 0.8;                                 // 100 entries ka 80%
-    ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats play: pool ' + usd(pool) + ' (80% of entries) · top ' + p.length + ' in profit win' +
-      (p.length < 20 ? ' · smallest prize is $10, so #' + (p.length + 1) + '–20 get none' : '') + '. No fixed prize – real prizes are 80% of the real entries.</p>';
+    ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats play: pool ' + usd(pool) + ' (80% of entry fees) · top ' + p.length + ' in profit win' +
+      (p.length < 20 ? ' · smallest prize is $10, so #' + (p.length + 1) + '–20 get none' : '') + '. No fixed prize – real prizes are 80% of the entry fees actually paid.</p>';
   }
   ptabs.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) { ptier = +b.getAttribute('data-pt'); drawLadder(); } });
 
