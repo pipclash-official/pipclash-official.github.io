@@ -102,7 +102,7 @@
         '<div class="cs-arow">' + coin(t) + '<div class="cs-ainfo"><b class="cs-aname">' + t.name + '</b>' +
         (shown ? '<div class="cs-seat"><b>' + n + '</b>/' + MAX + ' booked · ' + (full ? 'full – waitlist' : (MAX - n) + ' left') + '</div>' +
           '<div class="bar' + (t.c === 'g' ? ' g' : '') + '"><i style="width:' + (n || 0) + '%"></i></div>'
-          : '<div class="cs-seat">100 seats · filling up</div>') + '</div>' +
+          : '<div class="cs-seat">100 seats · booking open</div>') + '</div>' +
         (top1 ? '<div class="cs-p1"><span>#1 PRIZE</span><b class="gold">' + usd(top1) + '</b><span>if 100 play</span></div>' : '') + '</div>' + btn + '</div>';
     }).join('');
   }
