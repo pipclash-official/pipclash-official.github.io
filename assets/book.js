@@ -170,18 +170,19 @@
     var left = counts ? Math.max(0, MAX - (counts[t.fee] || 0)) : null;
     var msg = 'I booked my seat for PipClash Battle #001 – daily MT5 trading battle, same $1,000 demo account for everyone, top traders win. Only 100 seats per arena, booking is free: ' + url;
     done.innerHTML = '<span class="cs-pill u">' + (bk.waitlist ? 'ON THE WAITLIST' : already ? 'YOUR SEAT' : 'SEAT BOOKED ✓') + '</span>' +
-      '<div class="cs-seatno">' + (bk.waitlist ? 'Waitlist #' : 'Seat #') + bk.seat + ' <span>of ' + MAX + ' · ' + t.name + '</span></div>' +
-      '<div class="v2-mut">' + (left === null ? '' : left + ' seats left in ' + t.name + ' · ') + (counts ? total() + ' traders booked so far' : '') + '</div>' +
+      '<div class="cs-seatno">' + t.name + ' <span>arena · Battle #001</span></div>' +          // 5 Nov owner: seat number / ginti nahi (abhi kam)
+      '<a class="btn cs-tgjoin" href="https://t.me/+tbQNpd3lWk9hM2Rl" target="_blank" rel="noopener" style="display:block;text-align:center;margin:10px 0 4px;font-weight:700">📢 Join Telegram – get battle news &amp; reminders</a>' +
+      '<div class="v2-mut" style="text-align:center;font-size:12.5px">One tap → our bot sends you a welcome message with all updates.</div>' +
       '<div class="cs-code"><span>Your booking code</span><b>' + esc(bk.code) + '</b><small>Keep it (take a screenshot). When you create your account on 7 Nov, enter this code – it keeps your seat and your invites linked to you.</small></div>' +
       '<p class="bk-p">Launch Mon 9 Nov, 4:30 PM UAE. We will remind you before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
       (bk.waitlist ? ' If a booked seat is not used by 4 PM, it goes to the waitlist in order.' : '') + '</p>' +
-      '<div class="cs-earn"><b>Invite friends – earn <span class="gold">1%</span> of every entry they pay, forever.</b>' +
+      '<div class="cs-earn"><b>Invite friends – get <span class="gold">1%</span> credit on every entry they pay, forever.</b>' +
       '<span>Friends who book with your link stay linked to you. When they play paid battles, 1% of each entry goes to your PipClash wallet.</span></div>' +
       '<div class="cs-lbl" style="margin:4px 0 0">Your invite link</div>' +
       '<div class="bk-link"><input readonly value="' + esc(url) + '" aria-label="Your invite link"><button class="btn btn-sm" type="button" data-copy>Copy</button></div>' +
       '<div class="cs-share"><a class="btn cs-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
       '<a class="btn cs-tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Book your free PipClash seat – Battle #001, only 100 per arena') + '">Telegram</a></div>' +
-      '<a class="v2-mut" href="https://t.me/pipclash_official" target="_blank" rel="noopener" style="text-align:center">Join our Telegram channel →</a>';
+      '<a class="v2-mut" href="https://t.me/+tbQNpd3lWk9hM2Rl" target="_blank" rel="noopener" style="text-align:center">Join our Telegram channel →</a>';
     done.hidden = false;
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
