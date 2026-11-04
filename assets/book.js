@@ -88,6 +88,7 @@
 
   /* ---------- 3 arenas ---------- */
   var grid = root.querySelector('[data-bk-tables]');
+  var FIRST_FEE = 10;   // 5 Nov owner: Battle #001 sirf STARTER $10 (5+ pakka) – PRO/ELITE Battle #002 se
   function drawTables() {
     var my = mine();
     grid.innerHTML = TIERS.map(function (t) {
@@ -97,12 +98,13 @@
       var top1 = (PRZ[t.fee] || [])[0];
       var btn = have ? '<button class="btn btn-ghost cs-abtn" type="button" data-show="' + t.fee + '">✅ Booked · see my seat</button>'
         : '<button class="btn cs-abtn' + (t.c === 'g' ? ' cs-gold' : '') + '" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Book FREE seat') + '</button>' +
-          '<div class="cs-afee">Entry ' + usd(t.fee) + ' only on battle day · nothing to pay now</div>';
+          '<div class="cs-afee">' + (t.fee === FIRST_FEE ? 'Entry ' + usd(t.fee) + ' only on battle day · nothing to pay now'
+            : 'Opens from Battle #002 (Tue 10 Nov) · entry ' + usd(t.fee) + ' · nothing to pay now') + '</div>';
       return '<div class="cs-arena ' + t.c + (pick === t.fee ? ' on' : '') + '">' +
         '<div class="cs-arow">' + coin(t) + '<div class="cs-ainfo"><b class="cs-aname">' + t.name + '</b>' +
         (shown ? '<div class="cs-seat"><b>' + n + '</b>/' + MAX + ' booked · ' + (full ? 'full – waitlist' : (MAX - n) + ' left') + '</div>' +
           '<div class="bar' + (t.c === 'g' ? ' g' : '') + '"><i style="width:' + (n || 0) + '%"></i></div>'
-          : '<div class="cs-seat">100 seats · booking open</div>') + '</div>' +
+          : '<div class="cs-seat">' + (t.fee === FIRST_FEE ? 'Battle #001 · Mon 9 Nov · booking open' : 'From Battle #002 · Tue 10 Nov') + '</div>') + '</div>' +
         (top1 ? '<div class="cs-p1"><span>#1 PRIZE</span><b class="gold">' + usd(top1) + '</b><span>if 100 play</span></div>' : '') + '</div>' + btn + '</div>';
     }).join('');
   }
