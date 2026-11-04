@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://pipclash.net/</loc></url>
-  <url><loc>https://pipclash.net/book.html</loc></url>
-  <url><loc>https://pipclash.net/join.html</loc></url>
-  <url><loc>https://pipclash.net/account.html</loc></url>
-  <url><loc>https://pipclash.net/arena.html</loc></url>
-  <url><loc>https://pipclash.net/winners.html</loc></url>
-  <url><loc>https://pipclash.net/rules.html</loc></url>
-  <url><loc>https://pipclash.net/guide.html</loc></url>
-  <url><loc>https://pipclash.net/legal.html</loc></url>
+  <url><loc>https://pipclash.net/</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://pipclash.net/rules.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://pipclash.net/guide.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://pipclash.net/arena.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://pipclash.net/winners.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://pipclash.net/legal.html</loc><lastmod>2026-11-05</lastmod></url>
 </urlset>
