@@ -171,7 +171,7 @@
     var msg = 'I booked my seat for PipClash Battle #001 – daily MT5 trading battle, same $1,000 demo account for everyone, top traders win. Only 100 seats per arena, booking is free: ' + url;
     done.innerHTML = '<span class="cs-pill u">' + (bk.waitlist ? 'ON THE WAITLIST' : already ? 'YOUR SEAT' : 'SEAT BOOKED ✓') + '</span>' +
       '<div class="cs-seatno">' + t.name + ' <span>arena · Battle #001</span></div>' +          // 5 Nov owner: seat number / ginti nahi (abhi kam)
-      '<a class="btn cs-tgjoin" href="https://t.me/+tbQNpd3lWk9hM2Rl" target="_blank" rel="noopener" style="display:block;text-align:center;margin:10px 0 4px;font-weight:700">📢 Join Telegram – get battle news &amp; reminders</a>' +
+      '<a class="btn cs-tgjoin" href="https://pipclash.net/tg" target="_blank" rel="noopener" style="display:block;text-align:center;margin:10px 0 4px;font-weight:700">📢 Join Telegram – get battle news &amp; reminders</a>' +
       '<div class="v2-mut" style="text-align:center;font-size:12.5px">One tap → our bot sends you a welcome message with all updates.</div>' +
       '<div class="cs-code"><span>Your booking code</span><b>' + esc(bk.code) + '</b><small>Keep it (take a screenshot). When you create your account on 7 Nov, enter this code – it keeps your seat and your invites linked to you.</small></div>' +
       '<p class="bk-p">Launch Mon 9 Nov, 4:30 PM UAE. We will remind you before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
@@ -182,7 +182,7 @@
       '<div class="bk-link"><input readonly value="' + esc(url) + '" aria-label="Your invite link"><button class="btn btn-sm" type="button" data-copy>Copy</button></div>' +
       '<div class="cs-share"><a class="btn cs-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
       '<a class="btn cs-tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Book your free PipClash seat – Battle #001, only 100 per arena') + '">Telegram</a></div>' +
-      '<a class="v2-mut" href="https://t.me/+tbQNpd3lWk9hM2Rl" target="_blank" rel="noopener" style="text-align:center">Join our Telegram channel →</a>';
+      '<a class="v2-mut" href="https://pipclash.net/tg" target="_blank" rel="noopener" style="text-align:center">Join our Telegram channel →</a>';
     done.hidden = false;
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
