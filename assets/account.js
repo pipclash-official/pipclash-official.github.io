@@ -152,6 +152,7 @@
     msg('[data-profile-msg]', 'Saving…');
     insertProfile({ id: user.id, name: name, phone: phone }).then(function (r) {
       if (r.error) { msg('[data-profile-msg]', r.error.code === '23505' ? 'This phone number already has a PipClash account. Joined on Telegram? Use “Log in with Telegram” – no email needed.' : 'Could not save: ' + r.error.message, true); return; }
+      if (window.fbq) fbq('track', 'CompleteRegistration');   // 5 Nov: Meta ko sign-up ki khabar (ads seekhein)
       load();
     });
   });
@@ -163,7 +164,7 @@
       pb.disabled = true; msg('[data-entry-msg]', 'Paying ' + usd(PAY.fee) + ' from your wallet…');
       sb.rpc('pc_enter_battle').then(function (r) {
         if (r.error) { pb.disabled = false; msg('[data-entry-msg]', payErr(r.error), true); return; }
-        msg('[data-entry-msg]', 'Paid ✅ Your seat is booked.'); refresh();
+        msg('[data-entry-msg]', 'Paid ✅ Your seat is booked.'); refresh(); if (window.fbq) fbq('track', 'Purchase', { value: PAY.fee, currency: 'USD' });
       });
       return;
     }
@@ -324,6 +325,7 @@
             load.tried = true;
             insertProfile({ id: user.id, name: cleanName(md.name), phone: md.phone }).then(function (x) {
               if (x.error) { show('profile'); $('#acc-name').value = md.name; msg('[data-profile-msg]', x.error.code === '23505' ? 'This phone number already has a PipClash account. Joined on Telegram? Use “Log in with Telegram” – no email needed.' : 'Please check your details.', true); return; }
+              if (window.fbq) fbq('track', 'CompleteRegistration');   // 5 Nov: Meta ko sign-up ki khabar (ads seekhein)
               load();
             });
             return;

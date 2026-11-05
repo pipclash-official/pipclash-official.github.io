@@ -274,6 +274,7 @@
     b.disabled = true;
     S.sb.rpc(enter ? 'pc_enter_table' : 'pc_cancel_table', { t: fee }).then(function (r) {
       if (r.error) { b.disabled = false; if (msg) { msg.textContent = errText(r.error); msg.className = 'v2-msg bad'; } return; }
+      if (enter && window.fbq) fbq('track', 'Purchase', { value: fee, currency: 'USD' });   // 5 Nov: Meta ko entry ki khabar
       return loadSettings().then(loadUser).then(function () { renderAll(); var m = $('[data-msg="' + fee + '"]'); if (m) { m.textContent = enter ? 'You’re in ✅ ' + usd(fee) + ' paid from your wallet.' : 'Cancelled – ' + usd(fee) + ' is back in your wallet.'; m.className = 'v2-msg'; } });
     });
   });
