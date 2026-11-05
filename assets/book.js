@@ -16,6 +16,26 @@
 
   var ref = (new URLSearchParams(location.search).get('ref') || '').replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 30), refInUrl = !!ref;
   try { if (ref) localStorage.setItem('pc_book_ref', ref); else ref = localStorage.getItem('pc_book_ref') || ''; } catch (e) {}
+  /* 6 Nov owner: booking kahan se aayi – pehli baar (first) + is baar (now). Sirf naam ka source, koi personal data nahi. */
+  function srcNow() {
+    var q = new URLSearchParams(location.search), us = q.get('utm_source'), host = '';
+    try { host = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
+    if (refInUrl) return 'invite:' + ref;
+    if (us) return [us, q.get('utm_medium'), q.get('utm_content') || q.get('utm_campaign')].filter(Boolean).join('/');
+    if (q.get('fbclid')) return /instagram/.test(host) ? 'meta_ad/instagram' : 'meta_ad';
+    if (/instagram\./.test(host)) return 'instagram';
+    if (/facebook\.|fb\./.test(host)) return 'facebook';
+    if (/t\.me|telegram/.test(host)) return 'telegram';
+    if (/whatsapp|wa\.me/.test(host)) return 'whatsapp';
+    if (/google\./.test(host)) return 'google';
+    if (/youtube\./.test(host)) return 'youtube';
+    if (/(^|\.)x\.com|twitter/.test(host)) return 'x';
+    if (host && !/pipclash\.net$/.test(host)) return 'site:' + host.replace(/^www\./, '');
+    return '';
+  }
+  var SRC_NOW = srcNow(), SRC_FIRST = '';
+  try { SRC_FIRST = localStorage.getItem('pc_src_first') || ''; if (!SRC_FIRST && SRC_NOW) { SRC_FIRST = SRC_NOW; localStorage.setItem('pc_src_first', SRC_NOW); } } catch (e) {}
+  function sourceTag() { var f = SRC_FIRST || SRC_NOW || 'direct', n = SRC_NOW || 'direct'; return (f === n ? f : f + '|now:' + n).slice(0, 80); }
   var counts = null, pick = null;
 
   function rpc(fn, body) {
@@ -191,6 +211,7 @@
       var bk = { tier: r.tier, code: r.code, seat: r.seat, waitlist: r.waitlist, name: name };
       saveMine(bk); form.hidden = true; pick = null; drawMine();
       if (!r.already && window.fbq) fbq('track', 'Lead', { content_name: 'seat_' + r.tier });   // Meta Pixel: booking hui
+      if (!r.already) rpc('pc_book_source', { p_code: r.code, p_source: sourceTag() });     // 6 Nov: kahan se aaya (SQL na chala ho to chupchaap kuch nahi)
       loadCounts().then(function () { showDone(bk, r.already); });
       loadTop(); loadRecent();
     });
