@@ -103,7 +103,7 @@
     $$('[data-status]').forEach(function (el) {
       var b = D && D.battle, st = b ? b.status : null;
       var txt = w.live ? 'LIVE' : (w.closing ? 'CLOSING' : (st === 'review' ? 'CHECKING' : 'NEXT'));
-      var desc = w.live ? (' Battle #' + (b ? b.id : '') + ' in progress · ends ' + uaeHM(sched().trade_end) + ' UAE')
+      var desc = w.live ? (' Battle ' + (b ? (b.no || '#' + b.id) : '') + ' in progress · ends ' + uaeHM(sched().trade_end) + ' UAE')
         : w.closing ? ' Time is up · closing all trades'
         : (st === 'review' ? ' Results are being checked · final ' + uaeHM(sched().result_at) + ' UAE'
           : ' Daily battle · ' + uaeHM(sched().trade_start) + ' UAE');
@@ -233,7 +233,7 @@
       el.textContent = done && st.length ? 'Last battle' + (b.end_utc ? ' · ' + new Date(b.end_utc).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Dubai' }) : '') : el.getAttribute('data-base');
     });
     set('next', b.status === 'live' && b.next_update_utc && new Date(b.next_update_utc) > Date.now() - 5 * 60e3 ? uae(b.next_update_utc) : (b.status === 'review' ? 'Final ' + uaeHM(sched().result_at) : uaeHM(sched().trade_start)));
-    set('battle', b.id ? '#' + b.id : '');
+    set('battle', b.id ? (b.no || '#' + b.id) : '');
     var late = D && D.updated_utc && b.status === 'live' && (Date.now() - new Date(D.updated_utc)) > 45 * 60e3;
     set('updated', D && D.updated_utc ? (late ? 'Last update ' + uae(D.updated_utc) + ' UAE · next one is late' : 'Updated ' + uae(D.updated_utc) + ' UAE') : 'Waiting for data');
   }
@@ -264,7 +264,7 @@
     $$('[data-past]').forEach(function (box) {
       var past = (D && D.past) || [];
       box.innerHTML = past.length ? past.map(function (p) {
-        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:13px 20px;border-bottom:1px solid var(--line)"><div style="display:flex;flex-direction:column"><span style="font-weight:700' + (p.winner ? '' : ';color:var(--muted)') + '">' + (p.winner ? esc(p.winner) : 'No winner') + '</span><span style="font-size:13px;color:var(--dim)">' + esc(p.date) + ' · Battle #' + p.id + '</span></div><span class="mono ' + (p.winner ? 'up' : 'muted') + '" style="font-weight:700;align-self:center">' + (p.winner ? money(p.pnl) : '–') + '</span></div>';
+        return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:13px 20px;border-bottom:1px solid var(--line)"><div style="display:flex;flex-direction:column"><span style="font-weight:700' + (p.winner ? '' : ';color:var(--muted)') + '">' + (p.winner ? esc(p.winner) : 'No winner') + '</span><span style="font-size:13px;color:var(--dim)">' + esc(p.date) + ' · Battle ' + (p.no || '#' + p.id) + '</span></div><span class="mono ' + (p.winner ? 'up' : 'muted') + '" style="font-weight:700;align-self:center">' + (p.winner ? money(p.pnl) : '–') + '</span></div>';
       }).join('') : '<div class="empty">Past champions appear here.</div>';
     });
   }
@@ -374,7 +374,7 @@
     var setT = function (sel, t) { $$(sel).forEach(function (el) { el.textContent = t; }); };
     if (id && R.detail[id]) {
       var d = R.detail[id], ranked = d.rows.filter(function (x) { return !x.dq; });
-      document.title = 'Battle #' + d.id + ' result – PipClash';
+      document.title = 'Battle ' + (d.no || '#' + d.id) + ' result – PipClash';
       setT('[data-res-eyebrow]', 'FINAL RESULT · BATTLE #' + d.id);
       setT('[data-res-title]', d.date);
       setT('[data-res-sub]', d.traders + ' traders · final standings');
@@ -409,7 +409,7 @@
       var top = b.top.map(function (t) {
         return '<div class="res-top">' + rk(t.rank, t.pnl) + '<span class="res-tn">' + esc(t.name) + '</span><span class="mono ' + cls(t.pnl) + '">' + money(t.pnl) + '</span></div>';
       }).join('') || '<div class="muted">No ranked traders</div>';
-      return '<a class="card res-item" href="winners.html?id=' + b.id + '"><div class="res-head"><div><b class="display" style="font-size:19px">' + esc(b.date) + '</b><div class="muted" style="font-size:13px">Battle #' + b.id + ' · ' + b.traders + ' traders</div></div>' +
+      return '<a class="card res-item" href="winners.html?id=' + b.id + '"><div class="res-head"><div><b class="display" style="font-size:19px">' + esc(b.date) + '</b><div class="muted" style="font-size:13px">Battle ' + (b.no || '#' + b.id) + ' · ' + b.traders + ' traders</div></div>' +
         (b.winner ? '' : '<span class="pill" style="font-size:13px;padding:4px 10px">No winner</span>') + '</div>' + top + '<span class="res-view">View full result →</span></a>';
     }).join('') + '</div>';
   }
