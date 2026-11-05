@@ -51,6 +51,11 @@
   }
   function card(title, inner, note) { return '<div class="card acc-card"><h2>' + title + '</h2>' + (note ? '<p class="muted2 a-sm">' + note + '</p>' : '') + inner + '</div>'; }
   var pane = function () { return $('[data-a-pane]'); };
+  // 5 Nov: naya ops panel (ops.html) apne sections yahan jodta (dashboard v2, bookings, marketing) – purana admin.html waisa hi
+  var EXTRA = {};
+  window.PC_ADMIN = { sb: sb, pane: pane, esc: esc, usd: usd, when: when, table: table, card: card, people: people, P: P, S: S,
+                      call: call, toast: toast, errText: errText, owner: function () { return ROLE === 'owner'; }, role: function () { return ROLE; },
+                      register: function (t, f) { EXTRA[t] = f; }, go: function (t) { go(t); }, render: function () { render(); } };
 
   /* ---------- start ---------- */
   function load() {
@@ -134,7 +139,7 @@
       (r.data || []).forEach(function (x) { S[x.key] = x.value; });
       $('[data-a-mode]').innerHTML = (S.mode === 'test' ? '<span class="tag-wait">TEST MODE</span>' : '<span class="tag-bad">LIVE – REAL MONEY</span>') +
         ' Paid entry <b>' + (S.paid_entry === true ? 'ON' : 'OFF') + '</b> · fee ' + usd(S.entry_fee || 10);
-      ({ dash: dash, money: money, battle: battle, players: players, support: support, reports: reports, settings: settings, team: team, log: logs }[TAB] || dash)();
+      (EXTRA[TAB] || { dash: dash, money: money, battle: battle, players: players, support: support, reports: reports, settings: settings, team: team, log: logs }[TAB] || dash)();
     });
   }
 
