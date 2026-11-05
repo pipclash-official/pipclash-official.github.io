@@ -303,3 +303,11 @@
   drawTables(); drawLadder(); drawMine(); loadCounts(); loadTop(); loadRecent();
   setInterval(function () { loadCounts(); loadRecent(); }, 30000);
 })();
+
+// 6 Nov: chat button scroll ke waqt chhupao (phone pe text dhakta tha)
+(function () {
+  var b = document.querySelector('.cs-chat'); if (!b || !window.matchMedia('(max-width:640px)').matches) return;
+  var t; window.addEventListener('scroll', function () {
+    b.classList.add('is-hide'); clearTimeout(t); t = setTimeout(function () { b.classList.remove('is-hide'); }, 900);
+  }, { passive: true });
+})();
