@@ -11,7 +11,8 @@
   var cls = function (v) { return Number(v) >= 0 ? 'up' : 'down'; };
   var BAL = 1000;   // har account ka start balance
   var arrow = function (v) { return v > 0 ? '▲ ' : (v < 0 ? '▼ ' : ''); };   // rang ke saath nishaan bhi (final design)
-  var pctOf = function (pnl) { var v = (Number(pnl) || 0) / BAL * 100; return arrow(v) + (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
+  var pctOf = function (pnl) { var v = (Number(pnl) || 0) / ((typeof D !== 'undefined' && D && D.battle && D.battle.bal) || BAL) * 100;   // 6 Nov: table ka balance ($10=1k,$25=2.5k,$50=5k)
+    return arrow(v) + (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
   var pad = function (n) { return String(n).padStart(2, '0'); };
   function uae(iso) { // UTC ISO -> "4:30 PM" UAE
     if (!iso) return '';
@@ -283,7 +284,7 @@
     box.hidden = false;
     $('[data-prize-title]').textContent = P.final ? 'Prize table' : 'Prize table so far';
     $('[data-prize-note]').textContent = (P.paid ? P.players + ' traders · prize pool $' + P.pool.toFixed(2) + ' · ' : '') +
-      (P.final ? 'Final – only traders above $1,000 with 3+ trades can win.' : 'Grows with every entry until ' + uaeHM(sched().join_close) + ' UAE.');
+      (P.final ? 'Final – only traders above their starting balance with 3+ trades can win.' : 'Grows with every entry until ' + uaeHM(sched().join_close) + ' UAE.');
     var m = function (v) { return '$' + (v % 1 ? v.toFixed(2) : v); };
     $('[data-prize-rows]').innerHTML = P.rows.map(function (r) {
       return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:14px"><span class="mono muted2">#' + r.rank + '</span><b class="mono' + (r.rank === 1 ? ' gold' : '') + '">' + m(r.usd) + '</b></div>';
@@ -393,7 +394,7 @@
           return '<tr' + (x.rank === 1 && x.pnl > 0 ? ' class="lb-row first"' : '') + '><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank, x.pnl) + '</td><td style="font-weight:600">' + esc(x.name) +
             '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '<span class="pct-sm">' + pct(x.pct) + '</span></td><td class="mono r c-pct ' + cls(x.pnl) + '">' + pct(x.pct) +
             '</td><td class="mono r" style="font-weight:700;color:' + (x.prize ? (x.rank === 1 ? 'var(--gold)' : 'var(--text)') : 'var(--dim)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
-        }).join('') + '</tbody></table></div><div class="sample">P&amp;L counts only trades opened in the battle window. % is profit on the $1,000 starting balance.</div></div>';
+        }).join('') + '</tbody></table></div><div class="sample">P&amp;L counts only trades opened in the battle window. % is gain on the table starting balance ($1,000 / $2,500 / $5,000).</div></div>';
       return;
     }
     if (id) {                 // ?id=99 – aisi battle nahi (WW12)
