@@ -146,7 +146,7 @@
     var p = PRZ[ptier] || [], cells = '';
     for (var r = 1; r <= 20; r++) cells += '<div class="' + (r <= 3 ? 't1' : '') + '"><span>#' + r + '</span><b>' + (p[r - 1] ? usd(p[r - 1]) : '–') + '</b></div>';
     var pool = ptier * MAX * 0.8;                                 // 100 entries ka 80%
-    ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats play: pool ' + usd(pool) + ' (80% of entry fees) · top ' + p.length + ' above $1,000 (3+ trades) win' +
+    ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats play: pool ' + usd(pool) + ' (80% of entry fees) · top ' + p.length + ' above their start (3+ trades) win' +
       (p.length < 20 ? ' · smallest prize is $10, so #' + (p.length + 1) + '–20 get none' : '') + '. No fixed prize – real prizes are 80% of the entry fees actually paid.</p>';
   }
   if (ptabs) ptabs.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) { ptier = +b.getAttribute('data-pt'); drawLadder(); } });
@@ -221,7 +221,7 @@
     if (!bk) return;
     var t = tier(bk.tier), url = link(bk.code);
     var left = counts ? Math.max(0, MAX - (counts[t.fee] || 0)) : null;
-    var msg = 'I booked my seat for PipClash Battle #001 – weekday (Mon–Fri) MT5 trading battle, same $1,000 demo account for everyone, top traders win. Only 100 seats per arena, booking is free: ' + url;
+    var msg = 'I booked my seat for PipClash Battle #001 – weekday (Mon–Fri) MT5 trading battle, same account for everyone in your table, top traders win. Only 100 seats per arena, booking is free: ' + url;
     done.innerHTML = '<span class="cs-pill u">' + (bk.waitlist ? 'ON THE WAITLIST' : already ? 'YOUR SEAT' : 'SEAT BOOKED ✓') + '</span>' +
       '<div class="cs-seatno">' + t.name + ' <span>arena · Battle #001</span></div>' +          // 5 Nov owner: seat number / ginti nahi (abhi kam)
       '<a class="btn cs-tgjoin" href="https://pipclash.net/tg" target="_blank" rel="noopener" style="display:block;text-align:center;margin:10px 0 4px;font-weight:700">📢 Join Telegram – get battle news &amp; reminders</a>' +
@@ -252,7 +252,7 @@
     var my = mine();
     if (!my.length) { mineWrap.hidden = true; return; }
     var url = link(my[0].code);
-    var msg = 'Book your free seat for PipClash Battle #001 – weekday (Mon–Fri) MT5 trading battle, same $1,000 demo account for everyone, top traders win. Only 100 seats per arena: ' + url;
+    var msg = 'Book your free seat for PipClash Battle #001 – weekday (Mon–Fri) MT5 trading battle, same account for everyone in your table, top traders win. Only 100 seats per arena: ' + url;
     mineBox.innerHTML = my.map(function (b) {
       var t = tier(b.tier);
       return '<div class="cs-mrow">' + coin(t) + '<div><b>' + t.name + ' · ' + (b.waitlist ? 'waitlist #' : 'seat #') + b.seat + '</b><div class="v2-mut">Booking code <b class="gold">' + esc(b.code) + '</b></div></div></div>';
