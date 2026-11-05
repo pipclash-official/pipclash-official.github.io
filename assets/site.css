@@ -1220,3 +1220,13 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .bk-strip svg{width:14px;height:14px}
 .bk-pill.s.on,.bk-pill.b.on,.bk-pill.g.on{border-color:#26A17B!important;box-shadow:0 0 0 1px #26A17B inset,0 8px 22px rgba(38,161,123,.28)!important}
 .bk-pill.on .bk-pt{background:linear-gradient(180deg,rgba(38,161,123,.14),transparent)}
+/* 5 Nov owner FINAL: saari website ke sikke = design 5 (bada $ amount + neeche hari USDT patti) */
+.v2-tier{width:56px!important;height:56px!important;border-radius:12px!important;flex-direction:column;justify-content:flex-start!important;overflow:hidden;
+  background:#0B1120!important;border:1.5px solid #24355E;color:#fff!important;text-shadow:none!important;box-shadow:0 6px 16px -6px rgba(0,0,0,.6)!important}
+.v2-tier:before{content:"USDT"!important;position:absolute;inset:auto 0 0 0!important;height:15px;border:0!important;border-radius:0!important;box-shadow:none!important;
+  background:#26A17B;color:#fff;font-size:8.5px;font-weight:800;letter-spacing:.08em;display:flex;align-items:center;justify-content:center}
+.v2-tier:after{display:none!important;animation:none!important}
+.v2-tier i{font-size:19px!important;margin-top:9px;color:#fff}
+.v2-tier i:before{color:#26A17B;opacity:1!important}
+.v2-tier.b{border-color:#2F80FF}.v2-tier.g{border-color:#F2C866}
+.v2-tier.sm{width:44px!important;height:46px!important}.v2-tier.sm i{font-size:15px!important;margin-top:6px}.v2-tier.sm:before{height:13px;font-size:7.5px}
