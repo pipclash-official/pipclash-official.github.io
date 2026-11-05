@@ -17,19 +17,19 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080B12">
-<link rel="icon" href="assets/favicon.svg?v=92" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png?v=92" type="image/png" sizes="32x32">
-<link rel="icon" href="assets/favicon-16.png?v=92" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=92">
+<link rel="icon" href="assets/favicon.svg?v=94" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png?v=94" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png?v=94" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=94">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=92">
-<script src="assets/site.js?v=92" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=94">
+<script src="assets/site.js?v=94" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/wallet.js?v=92" defer></script>
-<script src="assets/v2.js?v=92" defer></script>
+<script src="assets/wallet.js?v=94" defer></script>
+<script src="assets/v2.js?v=94" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -56,38 +56,53 @@
   <div class="w-test" data-w-test hidden><b>TEST MODE</b> – no real money. Deposits, entries and prizes here are for testing only.</div>
   <div class="card acc-card" data-w-view="login" hidden><h1>Deposit</h1><p class="muted2">Please log in to see your wallet.</p><a class="btn btn-lg" href="account.html#login">Log in</a></div>
   <div data-w-view="main" hidden class="w-main">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <div class="w-2col">
-      <div class="card acc-card"><h2><span class="w-step">1</span> Choose a network</h2>
+      <div class="card acc-card w-pay">
+        <div class="w-done" data-w-done hidden><div class="w-done-ic" aria-hidden="true">✓</div><h2>Payment received</h2>
+          <p><b data-w-done-amt>$0.00</b> was added to your PipClash wallet.</p>
+          <div class="w-done-btns"><a class="btn btn-lg" href="index.html">Join a battle</a><a class="btn btn-ghost" href="wallet.html">View wallet</a></div></div>
+        <div data-w-form-area>
+        <h2><span class="w-step">1</span> Choose coin and network</h2>
         <div class="w-nets" role="radiogroup" aria-label="Network">
-          <button type="button" class="w-net" role="radio" aria-checked="true" data-w-net="TRC20"><b>USDT · TRC20</b><span>Tron network</span><small>Added automatically – usually 1–3 minutes</small></button>
-          <button type="button" class="w-net" role="radio" aria-checked="false" data-w-net="BEP20"><b>USDT · BEP20</b><span>BNB Smart Chain</span><small>Added automatically – usually 1–3 minutes</small></button>
+          <button type="button" class="w-net" role="radio" aria-checked="true" data-w-net="TRC20"><span class="w-ico"><svg class="w-coin" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path d="M17.9 17.4v0c-.1 0-.7.1-1.9.1-1 0-1.7 0-1.9-.1-3.7-.2-6.5-.8-6.5-1.6s2.8-1.4 6.5-1.6v2.6c.2 0 .9.1 1.9.1 1.2 0 1.8-.1 1.9-.1v-2.6c3.7.2 6.4.8 6.4 1.6s-2.7 1.4-6.4 1.6m0-3.5v-2.3h5.2V8H8.9v3.6h5.2v2.3c-4.2.2-7.4 1-7.4 2s3.2 1.8 7.4 2v7.3h3.8v-7.3c4.2-.2 7.3-1 7.3-2s-3.1-1.8-7.3-2" fill="#fff"/></svg> <svg class="w-chain" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#EF0027"/><path d="M21.9 10.2 7.6 7.6l7.5 18.9 10.5-12.8-3.7-3.5zm-.2 1.2 2.2 2.1-6 1.1 3.8-3.2zm-5.1 2.9-6.3-5.2 10.3 1.9-4 3.3zm-.4.9-1 8.5-5.6-14 6.6 5.5zm1 .5 6.6-1.2-7.6 9.2 1-8z" fill="#fff"/></svg></span><span class="w-nt"><b>USDT · TRC20</b><span>TRON network · low fee</span></span></button>
+          <button type="button" class="w-net" role="radio" aria-checked="false" data-w-net="BEP20"><span class="w-ico"><svg class="w-coin" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path d="M17.9 17.4v0c-.1 0-.7.1-1.9.1-1 0-1.7 0-1.9-.1-3.7-.2-6.5-.8-6.5-1.6s2.8-1.4 6.5-1.6v2.6c.2 0 .9.1 1.9.1 1.2 0 1.8-.1 1.9-.1v-2.6c3.7.2 6.4.8 6.4 1.6s-2.7 1.4-6.4 1.6m0-3.5v-2.3h5.2V8H8.9v3.6h5.2v2.3c-4.2.2-7.4 1-7.4 2s3.2 1.8 7.4 2v7.3h3.8v-7.3c4.2-.2 7.3-1 7.3-2s-3.1-1.8-7.3-2" fill="#fff"/></svg> <svg class="w-chain" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#F3BA2F"/><path d="M12.1 14.1 16 10.2l3.9 3.9 2.3-2.3L16 5.6l-6.2 6.2 2.3 2.3zM5.6 16l2.3-2.3 2.3 2.3-2.3 2.3L5.6 16zm6.5 1.9L16 21.8l3.9-3.9 2.3 2.3-6.2 6.2-6.2-6.2 2.3-2.3zm9.7-1.9 2.3-2.3 2.3 2.3-2.3 2.3-2.3-2.3zm-3.4 0L16 13.6 13.6 16 16 18.4 18.4 16z" fill="#fff"/></svg></span><span class="w-nt"><b>USDT · BEP20</b><span>BNB Smart Chain</span></span></button>
         </div>
         <select id="w-dep-net" hidden><option value="TRC20">TRC20</option><option value="BEP20">BEP20</option></select>
-        <h2><span class="w-step">2</span> How much?</h2>
-        <form data-w-quote-form><label for="w-dep-want">Amount you want to add (USDT, minimum <b data-w-min-dep>$10</b>)</label><input id="w-dep-want" type="number" min="1" step="1" inputmode="numeric" placeholder="50">
-          <button class="btn" type="submit">Get my exact amount</button><p class="acc-msg" data-w-quote-msg role="status"></p></form>
-        <div data-w-send hidden>
-          <h2><span class="w-step">3</span> Send exactly this</h2>
-          <div class="cred w-addr"><span>Send exactly</span><b class="mono" data-w-quote-amt>–</b><button class="btn btn-ghost btn-sm" type="button" data-w-amt-copy data-copy="">Copy</button></div>
-          <div class="cred w-addr"><span>To</span><b class="mono" data-w-addr style="word-break:break-all">–</b><button class="btn btn-ghost btn-sm" type="button" data-w-addr-copy data-copy="">Copy</button></div>
-          <p class="muted2" style="font-size:13px">Send only USDT on <b data-w-net-name>TRON (TRC20)</b>, and exactly this amount – it is how we know the money is yours.</p>
-          <p class="w-auto" data-w-auto>⏳ After you send, stay on this page – we find your payment on the blockchain and add it to your wallet automatically (usually 1–3 minutes). Big deposits ($200+) are checked by our team first.</p>
+        <form data-w-quote-form><h2><span class="w-step">2</span> Amount</h2>
+          <div class="w-chips" role="group" aria-label="Quick amount"><button type="button" data-w-chip="10">$10</button><button type="button" data-w-chip="25">$25</button><button type="button" data-w-chip="50">$50</button><button type="button" data-w-chip="100">$100</button></div>
+          <label for="w-dep-want">Or type an amount (USDT, minimum <b data-w-min-dep>$10</b>)</label>
+          <div class="w-amt"><input id="w-dep-want" type="number" min="1" step="1" inputmode="numeric" placeholder="50"><button class="btn" type="submit">Continue</button></div>
+          <p class="acc-msg" data-w-quote-msg role="status"></p></form>
         </div>
-        <form data-w-dep-form hidden><h2><span class="w-step">4</span> Not added after 10 minutes? Paste the TXID</h2><label for="w-dep-amt">Amount sent (USDT)</label><input id="w-dep-amt" type="number" min="1" step="0.01" inputmode="decimal" placeholder="10" readonly>
-          <label for="w-dep-tx">Transaction ID (TXID / hash)</label><input id="w-dep-tx" type="text" autocomplete="off" placeholder="Paste the TXID from your exchange">
-          <button class="btn btn-lg" type="submit">I have sent it</button><p class="acc-msg" data-w-dep-msg role="status"></p></form>
+        <div class="w-inv" data-w-send hidden>
+          <div class="w-inv-top"><span class="w-ico"><svg class="w-coin" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path d="M17.9 17.4v0c-.1 0-.7.1-1.9.1-1 0-1.7 0-1.9-.1-3.7-.2-6.5-.8-6.5-1.6s2.8-1.4 6.5-1.6v2.6c.2 0 .9.1 1.9.1 1.2 0 1.8-.1 1.9-.1v-2.6c3.7.2 6.4.8 6.4 1.6s-2.7 1.4-6.4 1.6m0-3.5v-2.3h5.2V8H8.9v3.6h5.2v2.3c-4.2.2-7.4 1-7.4 2s3.2 1.8 7.4 2v7.3h3.8v-7.3c4.2-.2 7.3-1 7.3-2s-3.1-1.8-7.3-2" fill="#fff"/></svg> <span data-w-chain-ic></span></span><div><b>Send USDT</b><span class="w-badge" data-w-net-name>TRON (TRC20)</span></div>
+            <span class="w-exp" data-w-exp title="Your exact amount is reserved for you">24:00:00</span></div>
+          <div class="w-qr-row"><div class="w-qr" data-w-qr aria-label="QR code of the deposit address"></div>
+            <div class="w-qr-txt"><span class="w-lbl">Amount to send</span><div class="w-big"><b class="mono" data-w-quote-amt>–</b><button class="w-cp" type="button" data-w-amt-copy data-copy="">Copy</button></div>
+              <span class="w-lbl">Deposit address</span><div class="w-adr"><b class="mono" data-w-addr>–</b><button class="w-cp" type="button" data-w-addr-copy data-copy="">Copy</button></div></div></div>
+          <div class="w-warn"><b>Send exactly this amount.</b> The cents (like .37) show us the payment is yours. If your exchange takes a withdrawal fee, add it so that <b>exactly this amount arrives</b>. Only USDT on <b data-w-net-name>TRON (TRC20)</b> – other coins or networks are lost.</div>
+          <ol class="w-track" data-w-track><li class="on" data-w-st="wait"><i></i><span><b>Waiting for your payment</b><small>We check the blockchain every few seconds – keep this page open.</small></span></li>
+            <li data-w-st="check"><i></i><span><b>Payment found – checking</b><small>Big deposits ($200+) are checked by our team first.</small></span></li>
+            <li data-w-st="done"><i></i><span><b>Added to your wallet</b><small>Usually 1–3 minutes after you send.</small></span></li></ol>
+          <button class="w-link" type="button" data-w-new>Change amount or network</button>
+          <details class="w-help" data-w-help><summary>Sent it but nothing after 10 minutes?</summary>
+            <form data-w-dep-form hidden><label for="w-dep-amt">Amount sent (USDT)</label><input id="w-dep-amt" type="number" min="1" step="0.01" inputmode="decimal" placeholder="10" readonly>
+              <label for="w-dep-tx">Transaction ID (TXID / hash)</label><input id="w-dep-tx" type="text" autocomplete="off" placeholder="Paste the TXID from your exchange or wallet">
+              <button class="btn" type="submit">Check my payment</button><p class="acc-msg" data-w-dep-msg role="status"></p></form></details>
+        </div>
       </div>
       <div class="w-side">
         <div class="v2-card"><div class="v2-lbl">Recent deposits</div><div data-w-deps class="w-reqs"><p class="v2-mut">No deposits yet.</p></div></div>
-        <div class="v2-card"><div class="v2-lbl">Good to know</div><ul class="w-know">
-          <li>Deposits go to your PipClash wallet in USDT.</li><li>Use the wallet to pay entry fees – prizes are paid back to it.</li>
-          <li>Send only USDT, only on the network you chose. Other coins or networks are lost.</li><li>Your own exact amount (like $50.37) is valid for 24 hours – send exactly that, then it is added automatically.</li></ul></div>
+        <div class="v2-card"><div class="v2-lbl">How it works</div><ol class="w-know">
+          <li>Pick the network and amount – you get your own exact amount (like $50.37).</li><li>Send it from any exchange or wallet (Binance, OKX, Bybit, Trust Wallet…).</li>
+          <li>It is added to your wallet automatically, usually in 1–3 minutes.</li><li>Your exact amount is reserved for 24 hours.</li></ol></div>
       </div>
     </div></div>
 </div></section>
 </main>
 <footer class="foot v2-foot"><div class="wrap">
-  <span>Trading is on demo MT5 accounts – not financial advice. 18+. <a href="legal.html#terms">Terms</a> · <a href="legal.html#privacy">Privacy</a> · <a href="rules.html">Rules</a> · <a href="https://pipclash.net/tg">Telegram channel</a><br>PipClash team · Dubai, UAE · <a href="mailto:support@pipclash.net">support@pipclash.net</a></span>
+  <span>Trading is on demo MT5 accounts – not financial advice. 18+. <a href="legal.html#terms">Terms</a> · <a href="legal.html#privacy">Privacy</a> · <a href="rules.html">Rules</a> · <a href="https://pipclash.net/tg">Telegram channel</a><br>PipClash team · United Arab Emirates · <a href="mailto:support@pipclash.net">support@pipclash.net</a></span>
 </div></footer>
 </div></div>
 <script>(function(){var b=document.querySelector('[data-menu]'),n=document.getElementById('snav'),s=document.querySelector('[data-scrim]');
