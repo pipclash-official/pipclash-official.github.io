@@ -57,6 +57,19 @@
     $('[data-w-addr-copy]').setAttribute('data-copy', a || '');
     setText('[data-w-net-name]', net() === 'BEP20' ? 'BNB Smart Chain (BEP20)' : 'TRON (TRC20)');
     $$('[data-w-net]').forEach(function (b) { b.setAttribute('aria-checked', String(b.getAttribute('data-w-net') === net())); });
+    // 5 Nov: gateway jaisa – chain ka logo, rang wala badge, QR
+    var nb = root.querySelector('[data-w-net="' + net() + '"] .w-chain'), ci = $('[data-w-chain-ic]');
+    if (ci) ci.innerHTML = nb ? nb.outerHTML : '';
+    $$('.w-badge').forEach(function (x) { x.classList.toggle('bnb', net() === 'BEP20'); });
+    drawQR(a);
+  }
+  var QR_FOR = null;
+  function drawQR(a) {
+    var box = $('[data-w-qr]'); if (!box || !a || a === QR_FOR) return;
+    if (!window.QRCode) { setTimeout(function () { drawQR(a); }, 400); return; }   // qrcode.min.js abhi load ho raha
+    box.innerHTML = ''; QR_FOR = a;
+    try { new window.QRCode(box, { text: a, width: 144, height: 144, colorDark: '#0B1020', colorLight: '#ffffff', correctLevel: window.QRCode.CorrectLevel.M }); }
+    catch (e) { box.textContent = ''; }
   }
 
   /* ---------- data ---------- */
@@ -116,14 +129,16 @@
     // AA13: auto credit hua? player ko turant batao (WEB-13: id se – jo deposit ABHI approve hua usi ki amount)
     var okIds = {}, fresh = null;
     D.dep.forEach(function (d) { if (d.status === 'approved') { okIds[d.id] = 1; if (DONE && !DONE[d.id] && !fresh) fresh = d; } });
-    if (fresh) msg('[data-w-quote-msg]', 'Received ✅ ' + usd(fresh.amount) + ' was added to your wallet.');
+    if (fresh) { msg('[data-w-quote-msg]', 'Received ✅ ' + usd(fresh.amount) + ' was added to your wallet.'); if ($('[data-w-done]')) showDone(fresh.amount); }
     DONE = okIds;
+    // 5 Nov: status line – team check wala (pending) deposit pichle 24 ghante mein = "checking"
+    if ($('[data-w-track]')) track(depOpen.some(function (d) { return Date.now() - new Date(d.created_at) < 864e5; }) ? 'check' : 'wait');
     if ($('[data-w-kyc-state]')) renderKyc();
     recv();
     renderTx();
   }
   function demo() {
-    var W = window.PC_DEMO.wallet; show('main'); var t = $('[data-w-test]'); if (t) t.hidden = true;
+    var W = window.PC_DEMO.wallet; show('main'); S.usdt_trc20 = S.usdt_trc20 || 'TDemo0000PipClash0000Preview0000x'; S.usdt_bep20 = S.usdt_bep20 || '0xDemo0000PipClash0000Preview0000000000000'; var t = $('[data-w-test]'); if (t) t.hidden = true;
     BAL = W.avail; kyc = { status: 'approved' };
     D = { ledger: W.tx.filter(function (x) { return !x[3]; }).map(function (x) { var k = /deposit/i.test(x[0]) ? 'deposit' : /withdraw/i.test(x[0]) ? 'withdraw' : 'entry'; return { kind: k, note: x[0].split('· ')[1] || '', amount: x[1], balance_after: x[2], created_at: new Date().toISOString() }; }),
           dep: [{ amount: 50, network: 'TRC20', txid: 'demo…', status: 'approved', created_at: new Date().toISOString() }],
@@ -235,17 +250,48 @@
   });
   // S5: har player ka apna exact amount ($50.37) – usi se pata chalta hai ki TXID usi ka hai
   var QUOTE_OK = true;     // false = supabase_paid_round2.sql abhi nahi chala – purana form
+  var Q = null, DONE_SHOWN = false, EXP_T = null;
   function quote(q) {
     if (!$('[data-w-send]')) return;
     var on2 = !!q || !QUOTE_OK;
-    $('[data-w-send]').hidden = !on2; $('[data-w-dep-form]').hidden = !on2;
+    Q = q;
+    $('[data-w-send]').hidden = !on2 || DONE_SHOWN; $('[data-w-dep-form]').hidden = !on2;
+    var fa = $('[data-w-form-area]'); if (fa) fa.hidden = (!!q && QUOTE_OK) || DONE_SHOWN;   // invoice dikhe to form chhupao
     $('#w-dep-amt').readOnly = QUOTE_OK;
     if (q) {
-      setText('[data-w-quote-amt]', usd(q.amount) + ' USDT'); $('[data-w-amt-copy]').setAttribute('data-copy', Number(q.amount).toFixed(2));
+      setText('[data-w-quote-amt]', Number(q.amount).toFixed(2) + ' USDT'); $('[data-w-amt-copy]').setAttribute('data-copy', Number(q.amount).toFixed(2));
       $('#w-dep-amt').value = Number(q.amount).toFixed(2);
-      if (q.network && net() !== q.network) { $('#w-dep-net').value = q.network; setAddr(); }
+      if (q.network && net() !== q.network) { $('#w-dep-net').value = q.network; }
+      setAddr();
+      expTick();
     } else if (QUOTE_OK) $('#w-dep-amt').value = '';
   }
+  function expTick() {     // exact amount 24 ghante tak reserved – ulti ginti
+    clearTimeout(EXP_T);
+    var el = $('[data-w-exp]'); if (!el || !Q) return;
+    var end = new Date(Q.created_at || Date.now()).getTime() + 864e5, s = Math.max(0, Math.floor((end - Date.now()) / 1000));
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    el.textContent = s ? '⏱ ' + p(Math.floor(s / 3600)) + ':' + p(Math.floor(s % 3600 / 60)) + ':' + p(s % 60) : 'Expired – get a new amount';
+    if (s) EXP_T = setTimeout(expTick, 1000);
+  }
+  function track(st) {     // wait → check → done
+    var order = ['wait', 'check', 'done'], k = order.indexOf(st);
+    $$('[data-w-st]').forEach(function (li) {
+      var i = order.indexOf(li.getAttribute('data-w-st'));
+      li.className = i < k ? 'ok' : i === k ? (st === 'done' ? 'ok' : 'on') : '';
+    });
+  }
+  function showDone(amount) {
+    DONE_SHOWN = true; setText('[data-w-done-amt]', usd(amount));
+    var d = $('[data-w-done]'); if (d) d.hidden = false;
+    var s = $('[data-w-send]'); if (s) s.hidden = true;
+    var fa = $('[data-w-form-area]'); if (fa) fa.hidden = true;
+  }
+  root.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-w-chip]');
+    if (c) { $('#w-dep-want').value = c.getAttribute('data-w-chip'); var f = $('[data-w-quote-form]'); if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { cancelable: true })); return; }
+    if (e.target.closest('[data-w-new]')) { DONE_SHOWN = false; quote(null); var fa = $('[data-w-form-area]'); if (fa) fa.hidden = false; }
+  });
   function loadQuote() {
     if (!user) return;
     sb.from('deposit_quotes').select('amount,network,created_at').eq('user_id', user.id).maybeSingle().then(function (r) {
@@ -257,11 +303,12 @@
     e.preventDefault();
     var want = parseFloat($('#w-dep-want').value), b = e.submitter || $('[data-w-quote-form] button');
     if (!(want > 0)) { msg('[data-w-quote-msg]', 'Please type how much you want to add.', true); return; }
+    if (window.PC_DEMO) { quote({ amount: Math.floor(want) + 0.37, network: net(), created_at: new Date().toISOString() }); return; }   // preview demo
     b.disabled = true;
     sb.rpc('pc_deposit_amount', { base: want, net: net() }).then(function (r) {
       b.disabled = false;
       if (r.error) { msg('[data-w-quote-msg]', errText(r.error), true); return; }
-      msg('[data-w-quote-msg]', ''); quote({ amount: r.data, network: net() });
+      msg('[data-w-quote-msg]', ''); quote({ amount: r.data, network: net(), created_at: new Date().toISOString() });
     });
   });
   root.addEventListener('click', function (e) {
