@@ -11,6 +11,8 @@
   var cls = function (v) { return Number(v) >= 0 ? 'up' : 'down'; };
   var BAL = 1000;   // har account ka start balance
   var arrow = function (v) { return v > 0 ? '▲ ' : (v < 0 ? '▼ ' : ''); };   // rang ke saath nishaan bhi (final design)
+  // 6 Nov owner: 3 se kam (1 min+) trade = '2/3' peela – inaam ke liye 3 chahiye
+  var trd = function (n) { n = Number(n) || 0; return n >= 3 ? String(n) : '<span class="gold" title="3 trades (each open 1+ min) needed for a prize">' + n + '/3</span>'; };
   var pctOf = function (pnl) { var v = (Number(pnl) || 0) / ((typeof D !== 'undefined' && D && D.battle && D.battle.bal) || BAL) * 100;   // 6 Nov: table ka balance ($10=1k,$25=2.5k,$50=5k)
     return arrow(v) + (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; };
   var pad = function (n) { return String(n).padStart(2, '0'); };
@@ -133,7 +135,7 @@
         var rc = r.rank === 1 ? 'gold' : (r.rank <= 3 ? 'acc' : 'muted');
         var mv = r.move > 0 ? '<span class="up">▲' + r.move + '</span>' : (r.move < 0 ? '<span class="down">▼' + (-r.move) + '</span>' : '');
         return '<tr class="lb-row' + (r.rank === 1 ? ' first' : '') + '"><td class="mono ' + rc + '" style="font-weight:700">' + rk(r.rank, r.pnl) + '</td><td style="font-weight:600">' + flag(r.cc) + esc(r.name) +
-          (compact ? ' <span class="mono" style="font-size:13px">' + mv + '</span>' : ' <span class="mono" style="font-size:13px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + (r.trades || 0) + '</td>' +
+          (compact ? ' <span class="mono" style="font-size:13px">' + mv + '</span>' : ' <span class="mono" style="font-size:13px" data-mv>' + mv + '</span>') + '</td><td class="mono muted2 c-trades">' + trd(r.trades) + '</td>' +
           (compact ? '' : '<td class="mono c-move" style="font-size:13px">' + mv + '</td><td class="mono r c-ru ' + cls(r.real || 0) + '">' + money(r.real || 0) + '</td><td class="mono r c-ru ' + cls(r.unreal || 0) + '">' + money(r.unreal || 0) + '</td>') + '<td class="mono r ' + cls(r.pnl) + '" style="font-weight:700">' + money(r.pnl) + '<span class="pct-line">' + pctOf(r.pnl) + '</span></td></tr>';
       };
       // Laptop + 30 se zyada players: rank 1-30 baayein, 31-60 daayein (do column)
@@ -253,12 +255,12 @@
           'background:linear-gradient(170deg,#182440,var(--surface));transform:rotateY(8deg) translateY(20px)',
           'background:linear-gradient(170deg,#1E1A16,var(--surface));transform:rotateY(-8deg) translateY(34px)'][i];
         var col = ['var(--gold)', '#D8DEE9', '#D7B48C'][i];
-        return '<div class="card" style="padding:26px;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 60px rgba(0,0,0,.45);order:' + [2, 1, 3][i] + ';' + styles + '"><span class="display" style="font-size:44px;font-weight:700;color:' + col + '">' + x.rank + '</span><span style="font-size:21px;font-weight:700">' + esc(x.name) + '</span><span class="mono up" style="font-size:26px;font-weight:700">' + money(x.pnl) + '</span><span class="muted" style="font-size:14px">' + (x.trades || 0) + ' trades' + (x.prize ? ' · prize <b style="color:' + (i ? 'var(--text)' : 'var(--gold)') + '">$' + x.prize + '</b>' : '') + '</span></div>';
+        return '<div class="card" style="padding:26px;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 60px rgba(0,0,0,.45);order:' + [2, 1, 3][i] + ';' + styles + '"><span class="display" style="font-size:44px;font-weight:700;color:' + col + '">' + x.rank + '</span><span style="font-size:21px;font-weight:700">' + esc(x.name) + '</span><span class="mono up" style="font-size:26px;font-weight:700">' + money(x.pnl) + '</span><span class="muted" style="font-size:14px">' + trd(x.trades) + ' trades' + (x.prize ? ' · prize <b style="color:' + (i ? 'var(--text)' : 'var(--gold)') + '">$' + x.prize + '</b>' : '') + '</span></div>';
       };
       pod.innerHTML = p.length ? p.map(card).join('') : '<p class="muted" style="grid-column:1/-1">No winner in this battle – nobody finished in profit.</p>';
     }
     if (body) body.innerHTML = r.rows.map(function (x) {
-      return '<tr><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank, x.pnl) + '</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '</td><td class="mono r" style="font-weight:700;color:' + (x.rank === 1 ? 'var(--gold)' : 'var(--text)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
+      return '<tr><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank, x.pnl) + '</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + trd(x.trades) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '</td><td class="mono r" style="font-weight:700;color:' + (x.rank === 1 ? 'var(--gold)' : 'var(--text)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
     }).join('');
   }
   function renderPast() {
@@ -390,9 +392,9 @@
       }).join('') : '<p class="muted" style="grid-column:1/-1">No winner in this battle – nobody finished in profit.</p>';
       main.innerHTML = '<div class="card"><div class="table-box"><table><thead><tr><th>Rank</th><th>Trader</th><th class="c-trades">Trades</th><th class="r">P&amp;L</th><th class="r c-pct">%</th><th class="r">Prize</th></tr></thead><tbody>' +
         d.rows.map(function (x) {
-          if (x.dq) return '<tr class="dq-row"><td class="mono muted">–</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td colspan="3" class="r"><span class="dq-badge">DISQUALIFIED</span></td></tr>';
+          if (x.dq) return '<tr class="dq-row"><td class="mono muted">–</td><td style="font-weight:600">' + esc(x.name) + '</td><td class="mono muted2 c-trades">' + trd(x.trades) + '</td><td colspan="3" class="r"><span class="dq-badge">DISQUALIFIED</span></td></tr>';
           return '<tr' + (x.rank === 1 && x.pnl > 0 ? ' class="lb-row first"' : '') + '><td class="mono ' + (x.rank === 1 ? 'gold' : (x.rank <= 3 ? 'acc' : 'muted')) + '" style="font-weight:700">' + rk(x.rank, x.pnl) + '</td><td style="font-weight:600">' + esc(x.name) +
-            '</td><td class="mono muted2 c-trades">' + (x.trades || 0) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '<span class="pct-sm">' + pct(x.pct) + '</span></td><td class="mono r c-pct ' + cls(x.pnl) + '">' + pct(x.pct) +
+            '</td><td class="mono muted2 c-trades">' + trd(x.trades) + '</td><td class="mono r ' + cls(x.pnl) + '" style="font-weight:700">' + money(x.pnl) + '<span class="pct-sm">' + pct(x.pct) + '</span></td><td class="mono r c-pct ' + cls(x.pnl) + '">' + pct(x.pct) +
             '</td><td class="mono r" style="font-weight:700;color:' + (x.prize ? (x.rank === 1 ? 'var(--gold)' : 'var(--text)') : 'var(--dim)') + '">' + (x.prize ? '$' + x.prize : '–') + (x.cert ? '<a class="cert-link" href="' + x.cert + '" target="_blank" rel="noopener">Certificate</a>' : '') + '</td></tr>';
         }).join('') + '</tbody></table></div><div class="sample">P&amp;L counts only trades opened in the battle window. % is gain on the table starting balance ($1,000 / $2,500 / $5,000).</div></div>';
       return;
