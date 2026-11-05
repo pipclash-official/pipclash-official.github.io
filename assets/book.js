@@ -10,10 +10,11 @@
   var TIERS = [{ fee: 10, name: 'STARTER', c: 's' }, { fee: 25, name: 'PRO', c: 'b' }, { fee: 50, name: 'ELITE', c: 'g' }];
   var PRZ = window.PC_BOOK_PRIZES || {};
   var KEY = 'pc_bookings_v1';
+  var USDT_SVG = '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#fff"/><path d="M17.9 17.4c-.1 0-.7.1-1.9.1-1 0-1.7 0-1.9-.1-3.7-.2-6.5-.8-6.5-1.6s2.8-1.4 6.5-1.6v2.6c.2 0 .9.1 1.9.1 1.2 0 1.8-.1 1.9-.1v-2.6c3.7.2 6.4.8 6.4 1.6s-2.7 1.4-6.4 1.6m0-3.5v-2.3h5.2V8H8.9v3.6h5.2v2.3c-4.2.2-7.4 1-7.4 2s3.2 1.8 7.4 2v7.3h3.8v-7.3c4.2-.2 7.3-1 7.3-2s-3.1-1.8-7.3-2" fill="#26A17B"/></svg>';
   var root = document.querySelector('[data-book]');
   if (!root) return;
 
-  var ref = (new URLSearchParams(location.search).get('ref') || '').replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 30);
+  var ref = (new URLSearchParams(location.search).get('ref') || '').replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 30), refInUrl = !!ref;
   try { if (ref) localStorage.setItem('pc_book_ref', ref); else ref = localStorage.getItem('pc_book_ref') || ''; } catch (e) {}
   var counts = null, pick = null;
 
@@ -139,8 +140,9 @@
     // 5 Nov owner: teeno table form ke andar hi dikhen ($10 / $25 / $50) – chhupe nahi
     var pills = TIERS.map(function (x) {
       var have = my.some(function (b) { return b.tier === x.fee; });
-      return '<button type="button" class="bk-pill ' + x.c + (x.fee === fee ? ' on' : '') + '" data-tp="' + x.fee + '"' + (have ? ' disabled' : '') + '>' +
-        '<b>' + usd(x.fee) + '</b><span>' + x.name + '</span><small>' + (have ? 'booked ✓' : x.fee === FIRST_FEE ? 'Mon 9 Nov' : 'Tue 10 Nov') + '</small></button>';
+      return '<button type="button" class="bk-pill ' + x.c + (x.fee === fee ? ' on' : '') + '" data-tp="' + x.fee + '" aria-pressed="' + (x.fee === fee) + '"' + (have ? ' disabled' : '') + '>' +
+        '<span class="bk-pt"><b><sup>$</sup>' + x.fee + '</b><span class="bk-pn">' + x.name + '</span><small>' + (have ? 'Booked ✓' : x.fee === FIRST_FEE ? 'Mon 9 Nov' : 'Tue 10 Nov') + '</small></span>' +
+        '<span class="bk-strip">' + USDT_SVG + 'USDT</span></button>';   // 5 Nov owner: design 5 ($ + hari USDT patti)
     }).join('');
     form.querySelector('[data-bk-ft]').innerHTML = '<div class="bk-pills" role="group" aria-label="Choose your table">' + pills + '</div>' +
       '<small class="bk-ftn">Free seat · ' + t.name + ' · entry ' + usd(t.fee) + ' only on battle day</small>';
@@ -237,7 +239,7 @@
       '<div class="bk-link"><input readonly value="' + esc(url) + '" aria-label="Your invite link"><button class="btn btn-sm" type="button" data-copy>Copy</button></div>' +
       '<div class="cs-share"><a class="btn cs-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
       '<a class="btn cs-tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Book your free PipClash seat – Battle #001, only 100 per arena') + '">Telegram</a></div>' +
-      '<div class="v2-mut" style="font-size:12.5px">Earn <b class="gold">1%</b> of every entry your friends pay, forever.</div>';
+      '<div class="v2-mut" style="font-size:12.5px">Get <b class="gold">1%</b> credit on every entry your friends pay.</div>';
     mineWrap.hidden = false;
   }
   mineBox.addEventListener('click', function (e) {
@@ -276,7 +278,7 @@
     });
   }
 
-  if (ref) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – pick your arena below.'; }
+  if (refInUrl) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – your seat booking is free.'; }   // 5 Nov: sirf asli invite link pe (purana yaad wala ref nahi)
   drawTables(); drawLadder(); drawMine(); loadCounts(); loadTop(); loadRecent();
   setInterval(function () { loadCounts(); loadRecent(); }, 30000);
 })();

@@ -1198,3 +1198,25 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .bk-pill.g.on{border-color:#F2C866;box-shadow:0 0 0 1px #F2C866 inset}
 .bk-pill[disabled]{opacity:.5;cursor:default}
 .bk-ftn{font-size:12.5px;color:#9AA8BD;text-align:center}
+/* 5 Nov v2: premium table cards (coin + naam + din) */
+.bk-pills{gap:10px}
+.bk-pill{position:relative;gap:4px;padding:12px 4px 10px;border-radius:16px;border:1.5px solid #1F2C47;background:linear-gradient(180deg,#0F1830,#0A0F1C);transition:border-color .15s,transform .15s}
+.bk-pill .v2-tier{width:44px;height:44px}.bk-pill .v2-tier i{font-size:15px}
+.bk-pn{font-size:12px!important;font-weight:800;letter-spacing:.12em;color:#fff}
+.bk-pill small{font-size:10.5px;color:#8C9AB3}
+.bk-tick{position:absolute;top:6px;right:8px;width:18px;height:18px;border-radius:50%;font-style:normal;font-size:11px;font-weight:900;display:none;align-items:center;justify-content:center;color:#05070C;background:#4DA3FF}
+.bk-pill.on{transform:translateY(-1px)}
+.bk-pill.s.on{border-color:#C9D2E0;box-shadow:0 0 0 1px #C9D2E0 inset,0 8px 24px rgba(201,210,224,.12)}
+.bk-pill.b.on{border-color:#2F80FF;box-shadow:0 0 0 1px #2F80FF inset,0 8px 24px rgba(47,128,255,.22)}
+.bk-pill.g.on{border-color:#F2C866;box-shadow:0 0 0 1px #F2C866 inset,0 8px 24px rgba(242,200,102,.2)}
+.bk-pill.on .bk-tick{display:flex}.bk-pill.s.on .bk-tick{background:#C9D2E0}.bk-pill.g.on .bk-tick{background:#F2C866}
+/* 5 Nov owner FINAL: design 5 – bada $ amount + neeche hari USDT patti */
+.bk-pill{padding:0!important;gap:0!important;overflow:hidden;border-radius:16px!important;background:#0B1120!important;transform:none!important}
+.bk-pt{display:flex;flex-direction:column;align-items:center;gap:1px;padding:12px 4px 8px}
+.bk-pt b{font-size:28px;font-weight:900;letter-spacing:-.02em;color:#fff;line-height:1.05}
+.bk-pt b sup{font-size:14px;vertical-align:12px;color:#26A17B;margin-right:1px}
+.bk-pt small{font-size:10.5px;color:#8C9AB3}
+.bk-strip{display:flex;align-items:center;justify-content:center;gap:5px;background:#26A17B;color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.08em;padding:5px 2px}
+.bk-strip svg{width:14px;height:14px}
+.bk-pill.s.on,.bk-pill.b.on,.bk-pill.g.on{border-color:#26A17B!important;box-shadow:0 0 0 1px #26A17B inset,0 8px 22px rgba(38,161,123,.28)!important}
+.bk-pill.on .bk-pt{background:linear-gradient(180deg,rgba(38,161,123,.14),transparent)}
