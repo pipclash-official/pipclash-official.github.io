@@ -251,6 +251,14 @@
       } else {
         out += '<p class="muted2">Your MT5 login appears here at <b>' + hm12(s.creds_at) + '</b> UAE. Keep this page open or come back then.</p>';
       }
+      // 6 Nov owner: battle se pehle rules – table ke hisaab se (website-only players ke liye bhi)
+      var bal = ({ 10: 1000, 25: 2500, 50: 5000 })[+en.tier] || 1000, b$ = '$' + bal.toLocaleString('en-US');
+      out += '<div class="v2-rules" style="margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;font-size:13.5px;line-height:1.55">' +
+        '<b>📋 Quick rules' + (en.tier ? ' · $' + esc(String(en.tier)) + ' table' : '') + '</b><br>' +
+        '• Account: <b>' + b$ + '</b> (same for everyone in your table)<br>' +
+        '• Trade only <b>' + hm12(s.trade_start) + '–' + (s.trade_end ? hm12(s.trade_end) : '7:30 PM') + '</b> UAE – nothing before ' + hm12(s.trade_start) + '<br>' +
+        '• Prize: finish above <b>' + b$ + '</b> with <b>3+ trades</b> (each open 1+ min)<br>' +
+        '• No robots/EAs · final result 9:30 PM UAE</div>';
     }
     return out;
   }
