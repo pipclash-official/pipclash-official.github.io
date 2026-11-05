@@ -283,7 +283,7 @@
     box.hidden = false;
     $('[data-prize-title]').textContent = P.final ? 'Prize table' : 'Prize table so far';
     $('[data-prize-note]').textContent = (P.paid ? P.players + ' traders · prize pool $' + P.pool.toFixed(2) + ' · ' : '') +
-      (P.final ? 'Final – only traders in profit can win.' : 'Grows with every entry until ' + uaeHM(sched().join_close) + ' UAE.');
+      (P.final ? 'Final – only traders above $1,000 with 3+ trades can win.' : 'Grows with every entry until ' + uaeHM(sched().join_close) + ' UAE.');
     var m = function (v) { return '$' + (v % 1 ? v.toFixed(2) : v); };
     $('[data-prize-rows]').innerHTML = P.rows.map(function (r) {
       return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:14px"><span class="mono muted2">#' + r.rank + '</span><b class="mono' + (r.rank === 1 ? ' gold' : '') + '">' + m(r.usd) + '</b></div>';
