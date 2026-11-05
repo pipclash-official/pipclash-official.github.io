@@ -1230,3 +1230,10 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .v2-tier i:before{color:#26A17B;opacity:1!important}
 .v2-tier.b{border-color:#2F80FF}.v2-tier.g{border-color:#F2C866}
 .v2-tier.sm{width:44px!important;height:46px!important}.v2-tier.sm i{font-size:15px!important;margin-top:6px}.v2-tier.sm:before{height:13px;font-size:7.5px}
+/* 6 Nov owner screenshot: desktop pe address ka dabba patla tha – QR upar beech mein, amount + address poori chaudai */
+.w-qr-row{grid-template-columns:minmax(0,1fr)!important}.w-qr{justify-self:center}
+.w-adr b{font-size:14px;word-break:break-all;letter-spacing:.01em}
+/* 6 Nov: transactions icons + withdraw network card */
+.v2-tx{align-items:center;gap:12px}
+.tx-ic{flex:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;background:#16213a;color:#9AA8BD}
+.tx-ic.g{background:rgba(34,197,94,.14);color:#5BE08C}.tx-ic.b{background:rgba(47,128,255,.14);color:#8CC2FF}.tx-ic.y{background:rgba(242,200,102,.14);color:#F2C866}.tx-ic.r{background:rgba(239,68,68,.14);color:#FF7A7A}

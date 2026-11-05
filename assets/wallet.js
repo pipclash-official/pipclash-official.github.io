@@ -181,7 +181,9 @@
   }
   function txRow(r) {   // final design: line + status chip + bacha balance
     var up = r.amount >= 0;
-    return '<div class="v2-tx"><div><div>' + txLabel(r) + '</div>' +
+    var IC = { deposit: ['↓', 'g'], withdraw: ['↑', 'b'], withdraw_refund: ['↺', 'b'], entry: ['⚔', 'n'], entry_refund: ['↺', 'g'], prize: ['🏆', 'y'],
+               referral: ['🤝', 'y'], adjust: ['•', 'n'], deposit_reverse: ['↺', 'r'], prize_revoke: ['↺', 'r'] }[r.kind] || ['•', 'n'];   // 6 Nov: har line ka icon
+    return '<div class="v2-tx"><span class="tx-ic ' + IC[1] + '" aria-hidden="true">' + IC[0] + '</span><div style="flex:1;min-width:0"><div>' + txLabel(r) + '</div>' +
       '<div class="v2-row" style="justify-content:flex-start;gap:6px;margin-top:4px">' + (r.pending ? '<span class="v2-chip v2-gold">PENDING</span>' : '<span class="v2-chip v2-up">COMPLETED</span>') +
       '<span class="v2-mut" style="font-size:12px">' + when(r.created_at) + '</span></div></div>' +
       '<div style="text-align:right"><b class="tn ' + (r.pending ? '' : (up ? 'up' : 'down')) + '">' + (up ? '+' : '') + usd(r.amount) + '</b>' +
