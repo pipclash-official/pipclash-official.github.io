@@ -501,3 +501,8 @@
     var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(renderStandings, 200); });
   });
 })();
+
+/* 5 Nov: [data-hide-after="ISO time"] – us waqt ke baad apne aap chhupa (jaise "LAUNCH 9 NOV" banner) */
+(function () { function run() { var now = Date.now(); document.querySelectorAll("[data-hide-after]").forEach(function (el) {
+  var t = Date.parse(el.getAttribute("data-hide-after")); if (t && now >= t) el.hidden = true; }); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run); else run(); setInterval(run, 60000); })();

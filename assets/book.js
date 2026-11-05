@@ -37,6 +37,7 @@
   var cd = root.querySelector('[data-bk-cd]');
   function tick() {
     var s = Math.max(0, Math.floor((LAUNCH - Date.now()) / 1000));
+    if (!s) { cd.innerHTML = '<a class="cs-live" href="account.html">🔴 Battles are LIVE – join today’s battle →</a>'; return; }   // 5 Nov: launch ke baad 00:00 nahi
     var d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
     cd.innerHTML = [[d, 'DAYS'], [h, 'HRS'], [m, 'MIN'], [x, 'SEC']].map(function (p) {
       return '<div><b class="tn">' + (p[0] < 10 ? '0' : '') + p[0] + '</b><span>' + p[1] + '</span></div>';

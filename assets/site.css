@@ -1094,3 +1094,4 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .cs-afee{margin-top:8px;font-size:12.5px;color:var(--muted);text-align:center}
 .bk-ft small{display:block;font-size:12.5px;color:var(--muted);font-weight:400;margin-top:2px}
 .bk-ft small a{color:var(--accent2)}
+.cs-live{width:100%;display:block;padding:14px 16px;border-radius:14px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.45);color:#fff;font-weight:700;text-align:center;text-decoration:none}
