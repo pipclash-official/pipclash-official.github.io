@@ -263,7 +263,7 @@
     box.hidden = false;
     $('[data-ref-link]').textContent = link;
     $('[data-ref-copy]').setAttribute('data-copy', link);
-    var wa = $('[data-ref-wa]'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent((PAY.on ? 'Daily MT5 trading battle' : 'Free daily trading battle') + ' – same $1,000 demo account for everyone, top traders win. Join with my link: ' + link);
+    var wa = $('[data-ref-wa]'); if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent((PAY.on ? 'Daily MT5 trading battle' : 'Free daily trading battle') + ' – same account for everyone in your table, top traders win. Join with my link: ' + link);
     var tg = $('[data-ref-tg]'); if (tg) tg.href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Daily MT5 trading battle – join with my link');
     var cellR = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
     if (RF) {
