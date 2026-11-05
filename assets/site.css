@@ -1136,3 +1136,56 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 @media (max-width:520px){.w-qr-row{grid-template-columns:minmax(0,1fr)}.w-qr{justify-self:center}.w-big b{font-size:22px}}
 .w-amt .btn{flex:none;width:auto;padding-left:20px;padding-right:20px}.w-amt input{flex:1 1 auto;min-width:0;width:auto}
 .w-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+/* 5 Nov booking audit: why-book box, honest prize examples, founder video, later arenas */
+.cs-why{display:flex;flex-direction:column;gap:6px;margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(47,128,255,.08);border:1px solid #1E3A6E;font-size:14px;color:#C9D4E5}
+.cs-why b{color:#fff;font-size:15px}
+.cs-pex table{width:100%;border-collapse:collapse;font-size:15px}
+.cs-pex th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#7D8BA3;text-align:left;padding:6px 4px;font-weight:600}
+.cs-pex td{padding:10px 4px;border-top:1px solid #1C2536;font-weight:700}
+.cs-pex .cs-small{margin-top:10px}
+.cs-vid video{display:block;width:100%;max-width:300px;margin:0 auto 10px;border-radius:14px;background:#000;aspect-ratio:9/16}
+.cs-later{margin-top:10px}
+.cs-later summary{cursor:pointer;padding:12px 14px;border-radius:14px;border:1px dashed #2A3A5C;color:#9AA8BD;font-size:14px;font-weight:600;list-style:none}
+.cs-later summary::-webkit-details-marker{display:none}
+.cs-later[open] summary{margin-bottom:10px}
+.cs-later .cs-arena{margin-top:10px}
+@media (max-width:480px){.cs-chat{bottom:12px;right:12px;padding:12px}.cs{padding-bottom:76px}.cs-pex th{font-size:10.5px;letter-spacing:.04em}}
+/* 5 Nov owner: FAQ dabbe bahut bade the – ab patli line, ek ke neeche ek */
+.bk-faq{padding:4px 14px}
+.bk-faq details{margin:0!important;padding:0!important;border:0!important;border-bottom:1px solid #1C2536!important;border-radius:0!important;background:none!important;min-height:0!important}
+.bk-faq details:last-child{border-bottom:0!important}
+.bk-faq summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0!important;font-size:15px!important;line-height:1.3;min-height:0!important}
+.bk-faq p{margin:0 0 12px!important;font-size:13.5px}
+.cs-steps{gap:8px}
+.cs-steps li span{display:block;line-height:1.4}
+.cs-pex thead th{text-align:center;line-height:1.3}.cs-pex thead th:first-child{width:24%}
+.cs-pex tbody th{font-size:13px;color:#C9D4E5;text-align:left;padding:10px 4px;border-top:1px solid #1C2536;font-weight:600;text-transform:none;letter-spacing:0}
+.cs-pex tbody td{text-align:center;padding:10px 2px}.cs-pex td b{display:block;font-size:17px}
+.cs-pex td small{display:block;font-size:10.5px;color:#7D8BA3;font-weight:500;margin-top:2px}
+.cs-ask{display:flex;align-items:center;gap:14px;text-decoration:none;color:#fff;border-color:#1E3A6E;background:linear-gradient(160deg,#13244a,#111827)}
+.cs-ask-i{font-size:26px}.cs-ask b{display:block;font-size:15px}.cs-ask small{display:block;color:#9AA8BD;font-size:12.5px;margin-top:2px}
+.cs-ask-go{margin-left:auto;font-size:22px;color:#4DA3FF}
+/* 5 Nov owner: phone pe upar ka hissa chhota – book button pehli screen mein */
+@media (max-width:480px){
+ .cs-hero{gap:10px;padding-top:12px}
+ .cs-stage{height:112px}
+ .cs-big{top:4px;font-size:36px;line-height:.92}
+ .cs-logo{width:118px;height:126px;right:-6px;top:-8px}
+ .cs-001{font-size:96px;top:70px;right:-14px}
+ .cs-beam{top:120px;height:90px}
+ .cs-h2{font-size:23px}
+ .cs-p{font-size:14.5px;margin:0}
+ .cs-facts b{font-size:18px}
+}
+.cs-steps2{gap:6px;font-size:14px;color:#C9D4E5;padding-left:34px}
+.cs-steps2 b{display:inline!important;color:#fff;font-size:14px!important}
+/* 5 Nov owner: booking form chhota */
+.cs .bk-form{gap:10px;padding:14px 16px}
+.bk-form .bk-ft{font-size:14.5px}.bk-form .bk-ft .v2-tier{transform:scale(.8)}
+.bk-form .bk-f{gap:4px;font-size:13px}
+.bk-form .bk-f input,.bk-form .cs-ctyb{padding:9px 12px;font-size:16px;border-radius:9px}
+.bk-form .cs-priv{margin:-4px 0 0;font-size:11.5px}
+.bk-form .acc-check{gap:8px;align-items:center}.bk-form .acc-check label{font-size:13px;line-height:1.35}
+.bk-form .acc-check input{width:20px;height:20px;flex:none}
+.bk-form .btn-lg{padding:12px 16px;font-size:16px}
+.bk-form .bk-err:empty{display:none}
