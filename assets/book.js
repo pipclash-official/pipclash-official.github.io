@@ -133,15 +133,26 @@
   /* ---------- form ---------- */
   var form = root.querySelector('[data-bk-form]'), done = root.querySelector('[data-bk-done]');
   var err = form.querySelector('[data-bk-err]');
-  function openForm(fee) {
+  function openForm(fee, keep) {
     pick = fee; drawTables();
-    var t = tier(fee);
-    form.querySelector('[data-bk-ft]').innerHTML = coin(t) + '<span>Free seat · <b>' + t.name + '</b> arena<br><small>Entry ' + usd(t.fee) +
-      ' only on battle day · <a href="#arenas" data-arenas>change arena</a></small></span>';
+    var t = tier(fee), my = mine();
+    // 5 Nov owner: teeno table form ke andar hi dikhen ($10 / $25 / $50) – chhupe nahi
+    var pills = TIERS.map(function (x) {
+      var have = my.some(function (b) { return b.tier === x.fee; });
+      return '<button type="button" class="bk-pill ' + x.c + (x.fee === fee ? ' on' : '') + '" data-tp="' + x.fee + '"' + (have ? ' disabled' : '') + '>' +
+        '<b>' + usd(x.fee) + '</b><span>' + x.name + '</span><small>' + (have ? 'booked ✓' : x.fee === FIRST_FEE ? 'Mon 9 Nov' : 'Tue 10 Nov') + '</small></button>';
+    }).join('');
+    form.querySelector('[data-bk-ft]').innerHTML = '<div class="bk-pills" role="group" aria-label="Choose your table">' + pills + '</div>' +
+      '<small class="bk-ftn">Free seat · ' + t.name + ' · entry ' + usd(t.fee) + ' only on battle day</small>';
     form.hidden = false; done.hidden = true; err.textContent = '';
+    if (keep) return;
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(function () { form.querySelector('#bk-name').focus({ preventScroll: true }); }, 450);
   }
+  form.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tp]'); if (!b || b.disabled) return;
+    openForm(+b.getAttribute('data-tp'), true);
+  });
   var cta = root.querySelector('.cs-cta');
   if (cta) cta.addEventListener('click', function (e) {             // bada button = seedha form (STARTER), arena baad mein badal sakte
     e.preventDefault();

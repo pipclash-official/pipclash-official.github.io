@@ -1189,3 +1189,12 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 .bk-form .acc-check input{width:20px;height:20px;flex:none}
 .bk-form .btn-lg{padding:12px 16px;font-size:16px}
 .bk-form .bk-err:empty{display:none}
+/* 5 Nov owner: form mein teeno table */
+.bk-ft{flex-direction:column;align-items:stretch!important;gap:6px!important}
+.bk-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bk-pill{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px;border-radius:12px;border:1.5px solid #24355E;background:#0B1120;color:#C9D4E5;font:inherit;cursor:pointer}
+.bk-pill b{font-size:18px;color:#fff}.bk-pill span{font-size:11px;font-weight:700;letter-spacing:.08em}.bk-pill small{font-size:10.5px;color:#7D8BA3}
+.bk-pill.on{border-color:#2F80FF;background:linear-gradient(160deg,#16244a,#0B1120);box-shadow:0 0 0 1px #2F80FF inset}
+.bk-pill.g.on{border-color:#F2C866;box-shadow:0 0 0 1px #F2C866 inset}
+.bk-pill[disabled]{opacity:.5;cursor:default}
+.bk-ftn{font-size:12.5px;color:#9AA8BD;text-align:center}
