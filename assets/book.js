@@ -83,7 +83,7 @@
     var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
     var guess = TZ[tz.split('/').pop()] || (/^America\//.test(tz) ? 'US' : '') ||                  // pehle phone ka time zone, phir language
       ((navigator.language || '').split('-')[1] || '').toUpperCase();
-    setC(CODES.indexOf(guess) >= 0 ? guess : 'IN');
+    if (CODES.indexOf(guess) >= 0) setC(guess);           // 5 Nov: pata na chale to India nahi – khaali, user khud chune
   }
 
   /* ---------- 3 arenas ---------- */
@@ -150,6 +150,7 @@
     e.preventDefault();
     var name = form.querySelector('#bk-name').value.trim(), contact = form.querySelector('#bk-contact').value.trim();
     var country = form.querySelector('#bk-country').value, ok18 = form.querySelector('#bk-18').checked;
+    if (!country) { err.textContent = 'Please choose your country.'; return; }
     if (name.length < 2) { err.textContent = 'Please write your name.'; return; }
     if (contact.replace(/[^a-zA-Z0-9]/g, '').length < 4) { err.textContent = 'Please write your Telegram @username or WhatsApp number.'; return; }
     if (!ok18) { err.textContent = 'Please confirm you are 18 or older.'; return; }
