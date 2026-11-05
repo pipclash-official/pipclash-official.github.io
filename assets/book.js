@@ -92,11 +92,10 @@
   var FIRST_FEE = 10;   // 5 Nov owner: Battle #001 sirf STARTER $10 (5+ pakka) – PRO/ELITE Battle #002 se
   function drawTables() {
     var my = mine();
-    grid.innerHTML = TIERS.map(function (t) {
+    var card = function (t) {
       var n = counts ? Math.min(MAX, counts[t.fee] || 0) : null, full = n !== null && n >= MAX;
       var shown = n !== null && totalBooked() >= SHOW_FROM;          // kam ginti dikhane se bharosa ghatta – 30+ pe hi number
       var have = my.filter(function (b) { return b.tier === t.fee; })[0];
-      var top1 = (PRZ[t.fee] || [])[0];
       var btn = have ? '<button class="btn btn-ghost cs-abtn" type="button" data-show="' + t.fee + '">✅ Booked · see my seat</button>'
         : '<button class="btn cs-abtn' + (t.c === 'g' ? ' cs-gold' : '') + '" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Book FREE seat') + '</button>' +
           '<div class="cs-afee">' + (t.fee === FIRST_FEE ? 'Entry ' + usd(t.fee) + ' only on battle day · nothing to pay now'
@@ -106,16 +105,22 @@
         (shown ? '<div class="cs-seat"><b>' + n + '</b>/' + MAX + ' booked · ' + (full ? 'full – waitlist' : (MAX - n) + ' left') + '</div>' +
           '<div class="bar' + (t.c === 'g' ? ' g' : '') + '"><i style="width:' + (n || 0) + '%"></i></div>'
           : '<div class="cs-seat">' + (t.fee === FIRST_FEE ? 'Battle #001 · Mon 9 Nov · booking open' : 'From Battle #002 · Tue 10 Nov') + '</div>') + '</div>' +
-        (top1 ? '<div class="cs-p1"><span>#1 PRIZE</span><b class="gold">' + usd(top1) + '</b><span>if 100 play</span></div>' : '') + '</div>' + btn + '</div>';
-    }).join('');
+        '</div>' + btn + '</div>';
+    };
+    var first = TIERS.filter(function (t) { return t.fee === FIRST_FEE; }), later = TIERS.filter(function (t) { return t.fee !== FIRST_FEE; });
+    var openLater = later.some(function (t) { return pick === t.fee || my.some(function (b) { return b.tier === t.fee; }); });
+    grid.innerHTML = first.map(card).join('') +      // 5 Nov audit: 9 Nov ko sirf STARTER – baaki chhote mein (confusion kam)
+      '<details class="cs-later"' + (openLater ? ' open' : '') + '><summary>Also book PRO ($25) or ELITE ($50) – open from Tue 10 Nov</summary>' +
+      later.map(card).join('') + '</details>';
   }
   function loadCounts() {
     return rpc('pc_booking_counts').then(function (c) { if (c) { counts = c; drawTables(); } });
   }
 
   /* ---------- prize ladder (tabs) ---------- */
-  var ptabs = root.querySelector('[data-bk-ptabs]'), ladder = root.querySelector('[data-bk-ladder]'), ptier = 25;
+  var ptabs = root.querySelector('[data-bk-ptabs]'), ladder = root.querySelector('[data-bk-ladder]'), ptier = 10;
   function drawLadder() {
+    if (!ptabs || !ladder) return;          // 5 Nov: 100-player ladder hata (sach wale example build.py mein)
     ptabs.innerHTML = TIERS.map(function (t) { return '<button type="button" class="' + (t.fee === ptier ? 'on' : '') + '" data-pt="' + t.fee + '">' + t.name + '</button>'; }).join('');
     var p = PRZ[ptier] || [], cells = '';
     for (var r = 1; r <= 20; r++) cells += '<div class="' + (r <= 3 ? 't1' : '') + '"><span>#' + r + '</span><b>' + (p[r - 1] ? usd(p[r - 1]) : '–') + '</b></div>';
@@ -123,7 +128,7 @@
     ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats play: pool ' + usd(pool) + ' (80% of entry fees) · top ' + p.length + ' above $1,000 (3+ trades) win' +
       (p.length < 20 ? ' · smallest prize is $10, so #' + (p.length + 1) + '–20 get none' : '') + '. No fixed prize – real prizes are 80% of the entry fees actually paid.</p>';
   }
-  ptabs.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) { ptier = +b.getAttribute('data-pt'); drawLadder(); } });
+  if (ptabs) ptabs.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) { ptier = +b.getAttribute('data-pt'); drawLadder(); } });
 
   /* ---------- form ---------- */
   var form = root.querySelector('[data-bk-form]'), done = root.querySelector('[data-bk-done]');
@@ -132,15 +137,25 @@
     pick = fee; drawTables();
     var t = tier(fee);
     form.querySelector('[data-bk-ft]').innerHTML = coin(t) + '<span>Free seat · <b>' + t.name + '</b> arena<br><small>Entry ' + usd(t.fee) +
-      ' only on battle day · <a href="#arenas">change arena</a></small></span>';
+      ' only on battle day · <a href="#arenas" data-arenas>change arena</a></small></span>';
     form.hidden = false; done.hidden = true; err.textContent = '';
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(function () { form.querySelector('#bk-name').focus({ preventScroll: true }); }, 450);
   }
   var cta = root.querySelector('.cs-cta');
   if (cta) cta.addEventListener('click', function (e) {             // bada button = seedha form (STARTER), arena baad mein badal sakte
-    if (mine().length) return;
-    e.preventDefault(); openForm(pick || 10);
+    e.preventDefault();
+    if (mine().length) {                                            // pehle se booked: apni seat dikhao (arena list ab chhupi hai)
+      var w = root.querySelector('[data-bk-mine-wrap]'), sec = root.querySelector('#arenas');
+      if (sec) sec.hidden = false;
+      (w && !w.hidden ? w : sec).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    openForm(pick || 10);
+  });
+  root.addEventListener('click', function (e) {     // 5 Nov: arena list chhupi – "change arena" pe hi khule
+    var a = e.target.closest('[data-arenas]'); if (!a) return;
+    e.preventDefault(); var sec = root.querySelector('#arenas'); sec.hidden = false; sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
   grid.addEventListener('click', function (e) {
     var p = e.target.closest('[data-pick]'), s = e.target.closest('[data-show]');
@@ -251,14 +266,6 @@
   }
 
   if (ref) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – pick your arena below.'; }
-  /* Ad se aaya (3 Nov audit: 68 visit, 0 booking) – ad "FREE seat" bolta, upar fee/80% dekh ke log laut jaate.
-     Upar sirf free seat ki baat; fee/inaam ki poori baat neeche arena + ladder mein wahi rehti. */
-  if (!ref && /[?&](utm_source|fbclid)=/.test(location.search)) {
-    var hp = root.querySelector('.cs-hero .cs-p');
-    if (hp) hp.textContent = 'An MT5 battle every weekday (Mon–Fri). Everyone starts with the same $1,000 demo account – only your skill decides the leaderboard. Book your free seat for Battle #001.';
-    var f3 = root.querySelector('.cs-facts > div:last-child');
-    if (f3) f3.innerHTML = '<b class="gold">FREE</b><span>seat booking</span>';
-  }
   drawTables(); drawLadder(); drawMine(); loadCounts(); loadTop(); loadRecent();
   setInterval(function () { loadCounts(); loadRecent(); }, 30000);
 })();
