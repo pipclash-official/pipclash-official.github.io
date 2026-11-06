@@ -247,6 +247,13 @@
           : (/iphone|ipad/i.test(ua) ? 'https://apps.apple.com/app/metatrader-5/id413251709' : 'guide.html');
         out += '<div class="v2-mt5"><div class="v2-lbl">🛡 Your MT5 login</div>' + row('Server', cr.server) + row('Login', cr.login) + row('Password', cr.password) +
           '<a class="btn v2-btn" href="' + app + '">OPEN METATRADER 5</a></div>' +
+          /* 7 Nov AU5 (owner: sab fix karo): Fri test me ~29% ne 0 trade kiya – phone pe login 3 step */
+          '<div class="v2-steps" style="margin:10px 0;padding:12px 14px;border:1px solid rgba(148,163,184,.25);border-radius:12px;font-size:14px;line-height:1.55">' +
+          '<b>📱 Log in on your phone (1 minute)</b><br>' +
+          '1) Open MetaTrader 5 → ☰ menu → <b>Manage accounts</b> → <b>+</b><br>' +
+          '2) Tap <b>Login to an existing account</b> → search <b>' + esc(cr.server || 'MetaQuotes-Demo') + '</b> → select it<br>' +
+          '3) Enter the Login and Password above → <b>Sign in</b><br>' +
+          '<span class="muted2">Not connecting? Wait 1 minute and try again.</span></div>' +
           '<div class="v2-warn">⏰ Trade only after <b>' + hm12(s.trade_start) + '</b>. Early trade = disqualified. Don’t change the password. <a href="guide.html">MT5 help</a></div>';
       } else {
         out += '<p class="muted2">Your MT5 login appears here at <b>' + hm12(s.creds_at) + '</b> UAE. Keep this page open or come back then.</p>';
