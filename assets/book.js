@@ -15,11 +15,16 @@
   if (!root) return;
 
   var ref = (new URLSearchParams(location.search).get('ref') || '').replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 30), refInUrl = !!ref;
+  /* 6 Nov owner: ad ka link (?ref=META_UAE) dost ka invite NAHI – "Invited by a friend" mat dikhao, ref mat bacha, sirf source */
+  var AD_TAG = /^(META|FB|IG|ADS?|GOOGLE|TIKTOK|TT)[_-]/i.test(ref) ? ref.toLowerCase() : '';
+  if (AD_TAG) { ref = ''; refInUrl = false; }
   try { if (ref) localStorage.setItem('pc_book_ref', ref); else ref = localStorage.getItem('pc_book_ref') || ''; } catch (e) {}
+  if (/^(META|FB|IG|ADS?|GOOGLE|TIKTOK|TT)[_-]/i.test(ref)) ref = '';   // purana bacha hua ad tag bhi invite nahi
   /* 6 Nov owner: booking kahan se aayi – pehli baar (first) + is baar (now). Sirf naam ka source, koi personal data nahi. */
   function srcNow() {
     var q = new URLSearchParams(location.search), us = q.get('utm_source'), host = '';
     try { host = document.referrer ? new URL(document.referrer).hostname : ''; } catch (e) {}
+    if (AD_TAG) return 'meta_ad/' + AD_TAG;
     if (refInUrl) return 'invite:' + ref;
     if (us) return [us, q.get('utm_medium'), q.get('utm_content') || q.get('utm_campaign')].filter(Boolean).join('/');
     if (q.get('fbclid')) return /instagram/.test(host) ? 'meta_ad/instagram' : 'meta_ad';
@@ -224,8 +229,9 @@
     var msg = 'I booked my seat for PipClash Battle #001 – weekday (Mon–Fri) MT5 trading battle, same account for everyone in your table, top traders win. Only 100 seats per arena, booking is free: ' + url;
     done.innerHTML = '<span class="cs-pill u">' + (bk.waitlist ? 'ON THE WAITLIST' : already ? 'YOUR SEAT' : 'SEAT BOOKED ✓') + '</span>' +
       '<div class="cs-seatno">' + t.name + ' <span>arena · Battle #001</span></div>' +          // 5 Nov owner: seat number / ginti nahi (abhi kam)
-      '<a class="btn cs-tgjoin" href="https://pipclash.net/tg" target="_blank" rel="noopener" style="display:block;text-align:center;margin:10px 0 4px;font-weight:700">📢 Join Telegram – get battle news &amp; reminders</a>' +
-      '<div class="v2-mut" style="text-align:center;font-size:12.5px">One tap → our bot sends you a welcome message with all updates.</div>' +
+      /* 6 Nov owner ✅: bot reminder – Start dabaya to bot Sat/Sun/Mon khud yaad dilata (bridge bk_subscribe) */
+      '<a class="btn cs-tgjoin" href="https://t.me/Pipclashhelpbot?start=bk_' + encodeURIComponent(bk.code) + '" target="_blank" rel="noopener" style="display:block;text-align:center;margin:10px 0 4px;font-weight:700">🔔 Get reminders on Telegram</a>' +
+      '<div class="v2-mut" style="text-align:center;font-size:12.5px">Tap, then press Start – our bot reminds you Sat, Sun and on battle day.</div>' +
       '<div class="cs-code"><span>Your booking code</span><b>' + esc(bk.code) + '</b><small>Keep it (take a screenshot). When you create your account on 7 Nov, enter this code – it keeps your seat and your invites linked to you.</small></div>' +
       '<p class="bk-p">Launch Mon 9 Nov, 4:30 PM UAE. We will remind you before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
       (bk.waitlist ? ' If a booked seat is not used by 4 PM, it goes to the waitlist in order.' : '') + '</p>' +
