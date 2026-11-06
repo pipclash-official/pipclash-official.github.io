@@ -16,7 +16,8 @@
   var $ = function (s, el) { return (el || root).querySelector(s); };
   var pane = function () { return $('[data-a-pane]'); };
   var TITLES = { dash: 'Dashboard', command: 'Command center', influencers: 'Influencers', bookings: 'Bookings', battle: 'Battles',
-                 players: 'Players', money: 'Payments & KYC', support: 'Support', reports: 'Reports', settings: 'Settings', team: 'Team', log: 'Activity log' };
+                 players: 'Players', money: 'Payments & KYC', support: 'Support', reports: 'Reports', settings: 'Settings', team: 'Team', log: 'Activity log',
+                 today: "Today's tables", risk: 'Risk & fraud', daily: 'Daily hisaab' };
 
   /* ---------- demo data (sirf design dikhane ke liye) ---------- */
   function demoData() {
@@ -44,10 +45,30 @@
     };
   }
 
+  function demoOps() {   // 6 Nov: engine feed (pc_ops) ka nakli roop – sirf design
+    var t = function (id, tier, bal, pl, st) { return { id: id, no: '#001', tier: tier, balance: bal, status: st, players: pl, active: pl - 2, dq: 2, in_profit: Math.round(pl * 0.4),
+      low_trades_in_profit: 3, fees: pl * tier, pool: pl * tier * 0.8, platform: pl * tier * 0.2, prizes_paid: 0, flags: { start_balance: 1, robot: 1 },
+      top: [{ user: 'Arjun M.', pnl: bal * 0.12, pct: 12, trades: 5 }, { user: 'Lina K.', pnl: bal * 0.08, pct: 8, trades: 2 }, { user: 'Omar F.', pnl: bal * 0.05, pct: 5, trades: 4 }] }; };
+    return {
+      pools: { by_balance: { '1000': { free: 199, assigned: 50 }, '2500': { free: 34, assigned: 50 }, '5000': { free: 22, assigned: 50 } },
+               targets: { '1000': { target: 200, low: 150 }, '2500': { target: 120, low: 80 }, '5000': { target: 110, low: 70 } }, _at: new Date().toISOString() },
+      today: { date: day(Date.now()), tables: [t(17, 10, 1000, 50, 'live'), t(18, 25, 2500, 50, 'live'), t(19, 50, 5000, 50, 'live')],
+               msgs: { rules: ['$10 table 4:15 rules msg: 12/50 players ko Telegram pe gaya'], remind: ['$10 table 7 PM yaad: 3 profit wale – 2 ko Telegram msg gaya'] }, _at: new Date().toISOString() },
+      flags: { items: [{ cid: 19, user: 'Dost50-07', kind: 'start_balance', detail: 'start balance 1000 (table ka 5000)', time: new Date().toISOString(), status: 'active' },
+                       { cid: 18, user: 'Dost25-11', kind: 'robot', detail: 'EXPERT deals 14', time: new Date().toISOString(), status: 'disqualified' }] },
+      daily: { rows: [{ id: 16, no: 'T16', tier: 0, status: 'ended', start_utc: new Date(Date.now() - 864e5).toISOString(), players: 12, dq: 1, in_profit: 5, fees: 0, pool: 0, platform: 0, prizes_paid: 0 }] },
+      risk: { dq: [{ cid: 18, user: 'Dost25-11', why: 'robot: EXPERT deals' }], flags: [{ cid: 19, login: '750000007', kind: 'mirror', detail: 'opposite trades 20s' }], big: [{ cid: 17, user: 'Arjun M.', pnl: 320, pct: 32, trades: 6 }] },
+      fraud: { profiles: 140, same_phone: [{ phone_end: '4126', accounts: 2 }], self_referral: 0 },
+      server: { engine: '1', mt5: '6', disk_gb: '168', auto_last: '[auto 06 Nov 16:40 UAE] round 2 ok', backup_last: '06 Nov 23:30 backup -> Hostinger: OK [locked]', watchdog_last: 'ok', _at: new Date().toISOString() },
+      ads: { currency: 'INR', today: { total: { spend: 195, impressions: 886, clicks: 17, lpv: 11 } }, maximum: { total: { spend: 856, impressions: 8565, clicks: 108, lpv: 56 } },
+             status: [{ ad: 'Ad2 Tweet static', status: 'ACTIVE', daily_budget: 790 }] }
+    };
+  }
+
   /* ---------- data (asli: Supabase, admin RLS) ---------- */
   var CACHE = null, CACHE_AT = 0;
   function load(force) {
-    if (DEMO) { if (!CACHE) CACHE = demoData(); return Promise.resolve(CACHE); }
+    if (DEMO) { if (!CACHE) { CACHE = demoData(); CACHE.ops = demoOps(); CACHE.sources = [{ source: 'unknown (purani)', n: 18 }, { source: 'google', n: 1 }, { source: 'meta_ad', n: 0 }]; } return Promise.resolve(CACHE); }
     if (CACHE && !force && Date.now() - CACHE_AT < 60e3) return Promise.resolve(CACHE);
     var sb = A.sb, q = function (p) { return p.then(function (r) { return r.error ? { error: r.error } : r; }, function (e) { return { error: e }; }); };
     return Promise.all([
@@ -57,13 +78,16 @@
       q(sb.from('kyc').select('user_id', { count: 'exact', head: true }).eq('status', 'pending')),
       q(sb.from('support').select('id', { count: 'exact', head: true }).eq('status', 'open')),
       q(sb.from('wallets').select('balance')), q(sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(3)),
-      q(sb.rpc('pc_admin_partners')), q(sb.rpc('pc_admin_claims', { cid: null }))
+      q(sb.rpc('pc_admin_partners')), q(sb.rpc('pc_admin_claims', { cid: null })),
+      q(sb.from('pc_ops').select('id,data,updated_at')), q(sb.rpc('pc_admin_booking_sources'))
     ]).then(function (x) {
+      var ops = {}; (x[11].data || []).forEach(function (r) { ops[r.id] = r.data || {}; ops[r.id]._at = r.updated_at; });
       CACHE = {
         bookings: x[0].data || [], bookingsErr: x[0].error, profiles: x[1].data || [], deposits: x[2].data || [], withdrawals: x[3].data || [],
         entries: x[4].data || [], kycPending: x[5].count || 0, supportOpen: x[6].count || 0,
         wallets: (x[7].data || []).reduce(function (a, w) { return a + Number(w.balance || 0); }, 0),
-        battles: x[8].data || [], partners: x[9].data || [], partnersErr: x[9].error, claims: (x[10].data || []).length
+        battles: x[8].data || [], partners: x[9].data || [], partnersErr: x[9].error, claims: (x[10].data || []).length,
+        ops: ops, opsErr: x[11].error, sources: x[12].data || [], sourcesErr: x[12].error
       };
       CACHE_AT = Date.now(); return CACHE;
     });
@@ -116,6 +140,7 @@
       var due = sum(D.partners, function (p) { return p.due; });
       var depPend = D.deposits.filter(function (x) { return x.status === 'pending'; }).length, wdPend = D.withdrawals.filter(function (x) { return x.status === 'pending'; }).length;
       var b = D.battles[0], live = b && Date.now() - new Date(b.updated_at) < 5 * 60e3;
+      var tt = ((D.ops.today || {}).tables || []), noOf = {}; tt.forEach(function (x) { noOf[x.id] = x.no; });
       var chip = function (n, label, tab, bad) { return '<button class="o-chip ' + (n ? (bad ? 'bad' : '') : 'ok') + '" data-go="' + tab + '">' + label + ' <b>' + n + '</b></button>'; };
       var cty = {}; D.bookings.forEach(function (x) { cty[x.country || '?'] = (cty[x.country || '?'] || 0) + 1; });
       var ctyL = Object.keys(cty).sort(function (a, b2) { return cty[b2] - cty[a]; }).slice(0, 6), ctyMax = ctyL.length ? cty[ctyL[0]] : 1;
@@ -123,17 +148,17 @@
       var entered = {}; paidE(D.entries).forEach(function (e) { entered[e.user_id] = 1; });
       var fun = [['Bookings', D.bookings.length], ['Accounts', D.profiles.length], ['Deposited', Object.keys(depositors).length], ['Paid entry', Object.keys(entered).length]];
       var fMax = Math.max(1, fun[0][1]);
-      pane().innerHTML = demoBar() +
+      pane().innerHTML = demoBar() + (TAB === 'bookings' ? sourcesHtml(D) : '') +
         '<div class="o-alert"><b>Needs you now</b>' + chip(depPend, 'Deposits', 'money', 1) + chip(wdPend, 'Withdrawals', 'money', 1) + chip(D.kycPending, 'ID checks', 'money', 1) +
           chip(D.supportOpen, 'Support', 'support', 1) + chip(D.claims, 'Telegram prizes', 'money', 1) + chip(Math.round(due), 'Partner $ due', 'influencers', 0) +
-          '<span class="o-sp"></span><span class="o-engine"><span class="o-dot' + (live ? '' : ' off') + '"></span>' + (b ? 'Battle #' + b.contest_id + ' · ' + esc(b.status) + ' · ' + (b.players || 0) + ' players' : 'No battle yet') + '</span></div>' +
+          '<span class="o-sp"></span><span class="o-engine"><span class="o-dot' + (live ? '' : ' off') + '"></span>' + (b ? 'Battle ' + esc(noOf[b.contest_id] || ('#' + b.contest_id)) + ' · ' + esc(b.status) + ' · ' + (b.players || 0) + ' players' : 'No battle yet') + '</span></div>' +
         '<div class="o-kpis">' +
           kpi('k1', 'Deposits', money(dep), delta(dep, depP)) + kpi('k2', 'Withdrawals', money(wd), delta(wd, wdP)) +
           kpi('k3', 'Net deposits', money(dep - wd), '<small>in wallets now ' + money(D.wallets) + '</small>') +
           kpi('k4', 'Bookings', bk, delta(bk, bkP)) + kpi('k5', 'New accounts', pl, delta(pl, plP)) +
           kpi('k6', 'Paid entries', entC.length, delta(entC.length, entP.length)) +
           kpi('k3', 'Platform 20%', money(fees * 0.2), delta(fees, feesP)) + kpi('k2', 'Prize pools 80%', money(fees * 0.8), '<small>' + money(fees) + ' entry fees</small>') +
-        '</div>' +
+        '</div>' + tablesHtml(D) + '<div class="o-grid2">' + poolsHtml(D) + adsHtml(D) + '</div>' +
         '<div class="o-grid2">' +
           '<div class="o-card"><h3>Bookings & new accounts</h3><div class="o-sub">per day</div>' + bars(series(D.bookings, 'created_at', R || 30), series(D.profiles, 'created_at', R || 30), 'a', 'b') +
             '<div class="o-legend"><span><i style="background:var(--accent)"></i>Bookings</span><span><i style="background:var(--gold)"></i>Accounts</span></div></div>' +
@@ -169,7 +194,7 @@
           '<td>' + (p.active ? '<span class="o-tag g">Active</span>' : '<span class="o-tag">Off</span>') + '</td>' +
           '<td><button class="btn btn-ghost btn-sm" data-p-open="' + esc(p.code) + '">Open</button> <button class="btn btn-ghost btn-sm" data-copy="' + base + esc(p.code) + '">Copy link</button></td></tr>';
       }).join('');
-      pane().innerHTML = demoBar() + sqlHint(D.partnersErr) +
+      pane().innerHTML = demoBar() + (TAB === 'bookings' ? sourcesHtml(D) : '') + sqlHint(D.partnersErr) +
         '<div class="o-kpis">' + kpi('k3', 'Partners', P.length, '<small>' + P.filter(function (p) { return p.active; }).length + ' active</small>') +
           kpi('k4', 'Bookings via partners', tot('bookings'), '') + kpi('k5', 'Players via partners', tot('players'), '<small>' + tot('entries') + ' paid entries</small>') +
           kpi('k1', 'Fees from partners', money(tot('fees')), '') + kpi('k6', 'Partners earned', money(tot('earned')), '<small>paid ' + money(tot('paid')) + '</small>') +
@@ -180,6 +205,7 @@
           '<div class="o-note">Deal: 5% of every paid entry from their players – paid weekly (Monday). A player from a partner link never gives the 1% referral too. Link = pipclash.net/?ref=CODE</div>' +
           '<div class="o-scroll"><table class="o-table" data-p-table><thead><tr><th>Code</th><th>Platform</th><th>Rate</th><th class="r">Bookings</th><th class="r">Players</th><th class="r">Entries</th><th class="r">Fees</th><th class="r">Earned</th><th class="r">Paid</th><th class="r">Due</th><th>Status</th><th></th></tr></thead><tbody>' +
           (rows || '<tr><td colspan="12" class="o-note">No influencers yet – add the first one.</td></tr>') + '</tbody></table></div></div>' +
+        '<div class="o-row" style="margin:8px 0"><button class="btn btn-sm" data-p-batch-open>Monday payout list</button></div><div data-p-batch></div>' +
         '<div data-p-form></div><div data-p-detail></div>';
       if (OPEN) openPartner(OPEN);
     });
@@ -229,6 +255,12 @@
   }
 
   /* ---------- Bookings ---------- */
+  function sourcesHtml(D) {
+    var S = D.sources || [], mx = Math.max(1, Math.max.apply(null, S.map(function (x) { return x.n; }).concat([1])));
+    var nm = { meta_ad: 'Meta ads', google: 'Google', instagram: 'Instagram', telegram: 'Telegram', invite: 'Friend invite', direct: 'Direct', 'unknown (purani)': 'Purani (tracking se pehle)' };
+    return '<div class="o-card"><h3>Booking kahan se aayi</h3><div class="o-sub">pehli visit ka source · tracking 6 Nov se</div>' + sqlHint(D.sourcesErr) + '<div class="o-list">' +
+      (S.map(function (x) { return '<div class="row"><span>' + esc(nm[x.source] || x.source) + '</span><span class="bar"><i style="width:' + (x.n / mx * 100) + '%"></i></span><b>' + x.n + '</b></div>'; }).join('') || '<span class="o-note">Abhi data nahi.</span>') + '</div></div>';
+  }
   function bookings() {
     pane().innerHTML = '<div class="o-note">Loading…</div>';
     load(true).then(function (D) {
@@ -237,7 +269,7 @@
       var people = {}; B.forEach(function (x) { people[(x.contact || '').toLowerCase()] = 1; });
       var tier = by(function (x) { return x.tier; }), last24 = B.filter(function (x) { return inRange(x.created_at, 1, 0); }).length;
       var srcL = Object.keys(src).sort(function (a, b) { return src[b] - src[a]; }), sMax = srcL.length ? src[srcL[0]] : 1;
-      pane().innerHTML = demoBar() + sqlHint(D.bookingsErr) +
+      pane().innerHTML = demoBar() + (TAB === 'bookings' ? sourcesHtml(D) : '') + sqlHint(D.bookingsErr) +
         '<div class="o-kpis">' + kpi('k3', 'Bookings', B.length, '<small>' + Object.keys(people).length + ' people</small>') + kpi('k4', 'Last 24h', last24, '') +
           kpi('k1', 'STARTER $10', tier[10] || 0, '') + kpi('k6', 'PRO $25', tier[25] || 0, '') + kpi('k2', 'ELITE $50', tier[50] || 0, '') + '</div>' +
         '<div class="o-grid2"><div class="o-card"><h3>Where bookings come from</h3><div class="o-sub">tracking link (?ref=)</div><div class="o-list">' +
@@ -252,14 +284,27 @@
   }
 
   /* ---------- Command center ---------- */
+  function serverHtml(D) {   // 6 Nov Jarvis: server hara/laal (feed har 5 min)
+    var S = (D.ops || {}).server || {}, ok = function (c) { return '<span class="o-pill ' + (c ? 'live' : 'bad') + '">' + (c ? 'OK' : 'CHECK') + '</span>'; };
+    var fresh = S._at && Date.now() - new Date(S._at) < 15 * 60e3;
+    return '<div class="o-card"><h3>Server (engine VPS)</h3>' + feedNote(D, 'server') + '<div class="o-list">' +
+      '<div class="row"><span>Feed zinda (15 min)</span>' + ok(fresh) + '</div>' +
+      '<div class="row"><span>Engine process</span><b>' + esc(S.engine || '?') + ' ' + ok(S.engine === '1') + '</b></div>' +
+      '<div class="row"><span>MT5 khule</span><b>' + esc(S.mt5 || '?') + '</b></div>' +
+      '<div class="row"><span>Disk free</span><b>' + esc(S.disk_gb || '?') + ' GB</b></div>' +
+      '<div class="row"><span>Backup</span><span class="o-note">' + esc(S.backup_last || '–') + '</span></div>' +
+      '<div class="row"><span>Engine log</span><span class="o-note">' + esc(S.auto_last || '–') + '</span></div>' +
+      '<div class="row"><span>Watchdog</span><span class="o-note">' + esc(S.watchdog_last || '–') + '</span></div></div></div>';
+  }
   function command() {
     var L = [['Team group (Telegram)', 'Posts ✅, DM list, summary', 'https://web.telegram.org/'], ['Website', 'pipclash.net', 'https://pipclash.net/'],
       ['Supabase', 'database, SQL, auth', 'https://supabase.com/dashboard/project/vrcjgxnafmuxfkybtkbz'], ['Meta Ads', 'UAE ad, billing', 'https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=2727448367713368'],
       ['Instagram', '@pipclash_official', 'https://www.instagram.com/pipclash_official/'], ['Collabstr', 'paid creators', 'https://collabstr.com/influencers?c=trading'],
-      ['Search Console', 'Google traffic', 'https://search.google.com/search-console?resource_id=sc-domain%3Apipclash.net'], ['Resend', 'login emails', 'https://resend.com/emails'],
+      ['Search Console', 'Google traffic', 'https://search.google.com/search-console?resource_id=https%3A%2F%2Fpipclash.net%2F'], ['Resend', 'login emails', 'https://resend.com/emails'],
       ['Gmail (support@)', 'replies as support@', 'https://mail.google.com/'], ['GitHub', 'website repo', 'https://github.com/pipclash-official/pipclash-official.github.io'],
       ['Old admin', 'classic panel', 'admin.html'], ['Live arena', 'public leaderboard', 'https://pipclash.net/arena.html']];
-    pane().innerHTML = demoBar() +
+    load(false).then(function (D) { var x = $('[data-j-extra]'); if (x) x.innerHTML = '<div class="o-grid2">' + serverHtml(D) + adsHtml(D) + '</div>' + '<div class="o-grid2">' + poolsHtml(D) + sourcesHtml(D) + '</div>'; });
+    pane().innerHTML = demoBar() + '<div data-j-extra><div class="o-note">Loading…</div></div>' +
       '<div class="o-card"><h3>Launch countdown</h3><div class="o-sub">Battle #001 · Mon 9 Nov · 4:30 PM UAE · STARTER $10</div><div class="o-list">' +
       [['Thu 5', 'Team DMs (influencer list) · 10 friends each · approve tomorrow’s posts'], ['Fri 6', 'Ads decision · Supabase Pro + Resend Pro · Collabstr orders'],
        ['Sat 7', 'GO-LIVE: SQL once → real USDT addresses → paid ON → $10 test deposit/entry/withdraw · signup message to bookers'],
@@ -269,6 +314,88 @@
       '<div class="o-card"><h3>Ask Claude (Jarvis)</h3><div class="o-sub">Type a task – it is copied with today’s numbers; paste it in the Claude chat (C:\\pipclash).</div>' +
       '<textarea class="o-search" style="width:100%;min-height:80px" data-j-q placeholder="e.g. Make tomorrow’s influencer DM list from today’s bookings"></textarea>' +
       '<div class="o-row" style="margin-top:8px"><button class="btn btn-sm" data-j-copy>Copy for Claude</button><span class="o-note" data-j-msg></span></div></div>';
+  }
+
+  /* ---------- 6 Nov: engine feed (pc_ops) – tables today, pools, ads, risk, daily ---------- */
+  function ago(iso) { if (!iso) return '–'; var m = Math.round((Date.now() - new Date(iso)) / 60e3); return m < 1 ? 'abhi' : m < 60 ? m + ' min pehle' : Math.round(m / 60) + ' ghante pehle'; }
+  function feedNote(D, k) { var o = (D.ops || {})[k]; return o && o._at ? '<span class="o-mini">feed ' + ago(o._at) + '</span>' : '<span class="o-mini">feed abhi nahi (sql/supabase_ops_engine.sql + server task)</span>'; }
+  function stPill(st) { return '<span class="o-pill ' + (st === 'live' ? 'live' : st === 'upcoming' ? 'up' : st === 'cancelled' ? 'bad' : 'end') + '">' + esc(st || '–') + '</span>'; }
+  function tablesHtml(D) {
+    var T = ((D.ops || {}).today || {}).tables || [];
+    if (!T.length) return '<div class="o-card"><h3>Aaj ki tables</h3>' + feedNote(D, 'today') + '<p class="o-note">Aaj koi table nahi.</p></div>';
+    return '<div class="o-card"><h3>Aaj ki tables · ' + esc(((D.ops.today || {}).date) || '') + '</h3>' + feedNote(D, 'today') + '<div class="o-tables" style="margin-top:10px">' + T.map(function (t) {
+      return '<div class="o-tbl"><h4>Battle ' + esc(t.no) + ' · $' + t.tier + ' ' + stPill(t.status) + '</h4><div class="o-mini">account $' + Number(t.balance).toLocaleString() + ' · id ' + t.id + '</div>' +
+        '<div class="kv"><span>Players</span><b>' + t.players + ' (' + t.active + ' active, ' + t.dq + ' DQ)</b></div>' +
+        '<div class="kv"><span>Pool 80% / platform 20%</span><b>' + money(t.pool) + ' / ' + money(t.platform) + '</b></div>' +
+        '<div class="kv"><span>Profit mein</span><b>' + t.in_profit + (t.low_trades_in_profit ? ' <span class="o-pill bad">' + t.low_trades_in_profit + ' × 2/3 trade</span>' : '') + '</b></div>' +
+        (t.top || []).map(function (x, i) { return '<div class="kv"><span>#' + (i + 1) + ' ' + esc(x.user) + (x.trades < 3 ? ' <span class="o-pill bad">' + x.trades + '/3</span>' : '') + '</span><b>' + (x.pnl >= 0 ? '+' : '') + x.pnl.toFixed(2) + ' (' + x.pct + '%)</b></div>'; }).join('') +
+        (Object.keys(t.flags || {}).length ? '<div class="o-mini" style="margin-top:6px">flags: ' + Object.keys(t.flags).map(function (k) { return esc(k) + ' ' + t.flags[k]; }).join(' · ') + '</div>' : '') + '</div>';
+    }).join('') + '</div></div>';
+  }
+  function poolsHtml(D) {
+    var P = (D.ops || {}).pools || {}, B = P.by_balance || {}, T = P.targets || {};
+    var rows = ['1000', '2500', '5000'].map(function (k) {
+      var f = (B[k] || {}).free || 0, tg = (T[k] || {}).target || 0, lo = (T[k] || {}).low || 0, warn = f <= lo;
+      return '<div class="row"><span>$' + Number(k).toLocaleString() + ' account <span class="o-mini">(table $' + ({ '1000': 10, '2500': 25, '5000': 50 })[k] + ')</span></span><span class="bar"><i style="width:' + Math.min(100, tg ? f / tg * 100 : 0) + '%"></i></span><b>' + f + (warn ? ' <span class="o-pill bad">kam</span>' : '') + '</b></div>';
+    }).join('');
+    return '<div class="o-card"><h3>MT5 account dabbe (free)</h3><div class="o-sub">target tak engine raat ko khud banata</div>' + feedNote(D, 'pools') + '<div class="o-list">' + rows + '</div></div>';
+  }
+  function adsHtml(D) {
+    var A2 = (D.ops || {}).ads || {}, tdy = ((A2.today || {}).total) || {}, all = ((A2.maximum || {}).total) || {};
+    var adB = ((D.sources || []).filter(function (x) { return x.source === 'meta_ad'; })[0] || {}).n || 0;
+    var cur = A2.currency === 'INR' ? '₹' : '$', f = function (v) { return cur + Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); };
+    return '<div class="o-card"><h3>Ads (Meta)</h3><div class="o-sub">aaj / ab tak · ek booking kitne ki padi</div>' + (A2.error ? '<div class="o-demo">' + esc(A2.error) + '</div>' : '') + '<div class="o-list">' +
+      '<div class="row"><span>Kharch</span><b>' + f(tdy.spend) + ' / ' + f(all.spend) + '</b></div>' +
+      '<div class="row"><span>Log ne dekha</span><b>' + (tdy.impressions || 0) + ' / ' + (all.impressions || 0) + '</b></div>' +
+      '<div class="row"><span>Website pe aaye</span><b>' + (tdy.lpv || 0) + ' / ' + (all.lpv || 0) + (all.lpv ? ' <span class="o-mini">(' + f(all.spend / all.lpv) + '/visit)</span>' : '') + '</b></div>' +
+      '<div class="row"><span>Ads se booking</span><b>' + adB + (adB ? ' <span class="o-mini">(' + f(all.spend / adB) + '/booking)</span>' : ' <span class="o-pill bad">0</span>') + '</b></div>' +
+      '</div></div>';
+  }
+  function today() {
+    pane().innerHTML = '<div class="o-note">Loading…</div>';
+    load(true).then(function (D) {
+      var F = ((D.ops || {}).flags || {}).items || [], M = ((D.ops || {}).today || {}).msgs || {};
+      pane().innerHTML = demoBar() + sqlHint(D.opsErr) + tablesHtml(D) +
+        '<div class="o-grid2"><div class="o-card"><h3>Player messages (Telegram)</h3><div class="o-sub">4:15 rules · 7 PM 3-trade yaad</div><div class="o-list">' +
+          ((M.rules || []).concat(M.remind || []).map(function (x) { return '<div class="row"><span class="o-note">' + esc(x) + '</span></div>'; }).join('') || '<span class="o-note">Aaj abhi koi msg nahi gaya.</span>') + '</div></div>' +
+        poolsHtml(D) + '</div>' +
+        '<div class="o-card"><h3>Flags (aakhri 6 battles)</h3>' + feedNote(D, 'flags') + '<div class="o-scroll"><table class="o-table"><thead><tr><th>Battle id</th><th>Player</th><th>Kind</th><th>Detail</th><th>Status</th></tr></thead><tbody>' +
+          (F.map(function (f) { return '<tr><td>' + f.cid + '</td><td>' + esc(f.user || '–') + '</td><td><span class="o-pill ' + (/robot|hedge|mirror|pre_start|password/.test(f.kind) ? 'bad' : '') + '">' + esc(f.kind) + '</span></td><td class="o-note">' + esc(f.detail) + '</td><td>' + esc(f.status || '') + '</td></tr>'; }).join('') || '<tr><td colspan="5" class="o-note">Koi flag nahi.</td></tr>') +
+          '</tbody></table></div></div>';
+    });
+  }
+  function risk() {
+    pane().innerHTML = '<div class="o-note">Loading…</div>';
+    load(true).then(function (D) {
+      var R = (D.ops || {}).risk || {}, Fr = (D.ops || {}).fraud || {};
+      pane().innerHTML = demoBar() + sqlHint(D.opsErr) +
+        '<div class="o-kpis">' + kpi('k2', 'DQ (aaj/kal)', (R.dq || []).length, '') + kpi('k4', 'Risk flags', (R.flags || []).length, '') + kpi('k6', 'Bade winners (25%+)', (R.big || []).length, '') +
+          kpi('k1', 'Same phone accounts', (Fr.same_phone || []).length, '<small>' + (Fr.profiles || 0) + ' website accounts</small>') + kpi('k3', 'Khud ko refer', Fr.self_referral || 0, '') + '</div>' +
+        '<div class="o-grid2"><div class="o-card"><h3>Disqualified</h3>' + feedNote(D, 'risk') + '<div class="o-list">' + ((R.dq || []).map(function (x) { return '<div class="row"><span>' + esc(x.user) + ' <span class="o-mini">id ' + x.cid + '</span></span><span class="o-note">' + esc(x.why) + '</span></div>'; }).join('') || '<span class="o-note">Koi DQ nahi.</span>') + '</div></div>' +
+          '<div class="o-card"><h3>Bade winners – check karo</h3><div class="o-sub">balance ka 25%+ profit</div><div class="o-list">' + ((R.big || []).map(function (x) { return '<div class="row"><span>' + esc(x.user) + ' <span class="o-mini">id ' + x.cid + ' · ' + x.trades + ' trades</span></span><b>+' + x.pnl + ' (' + x.pct + '%)</b></div>'; }).join('') || '<span class="o-note">Koi nahi.</span>') + '</div></div></div>' +
+        '<div class="o-grid2"><div class="o-card"><h3>Risk flags</h3><div class="o-list">' + ((R.flags || []).map(function (x) { return '<div class="row"><span><span class="o-pill bad">' + esc(x.kind) + '</span> ' + esc(x.login) + ' <span class="o-mini">id ' + x.cid + '</span></span><span class="o-note">' + esc(x.detail) + '</span></div>'; }).join('') || '<span class="o-note">Koi flag nahi.</span>') + '</div></div>' +
+          '<div class="o-card"><h3>Fraud check (website accounts)</h3><div class="o-sub">same phone · khud ko refer</div>' + feedNote(D, 'fraud') + '<div class="o-list">' + ((Fr.same_phone || []).map(function (x) { return '<div class="row"><span>Phone …' + esc(x.phone_end) + '</span><b>' + x.accounts + ' accounts</b></div>'; }).join('') || '<span class="o-note">Same phone pe 2 account nahi.</span>') + '</div></div></div>';
+    });
+  }
+  function daily() {
+    pane().innerHTML = '<div class="o-note">Loading…</div>';
+    load(true).then(function (D) {
+      var Rr = ((D.ops || {}).daily || {}).rows || [], tot = function (f) { return sum(Rr, function (r) { return r[f]; }); };
+      pane().innerHTML = demoBar() + sqlHint(D.opsErr) +
+        '<div class="o-kpis">' + kpi('k4', 'Battles (21 din)', Rr.length, '') + kpi('k1', 'Entry fees', money(tot('fees')), '') + kpi('k3', 'Platform 20%', money(tot('platform')), '') +
+          kpi('k2', 'Prize pool 80%', money(tot('pool')), '') + kpi('k6', 'Inaam diya', money(tot('prizes_paid')), '') + '</div>' +
+        '<div class="o-card"><h3>Har battle ka hisaab</h3>' + feedNote(D, 'daily') + '<div class="o-row"><button class="btn btn-ghost btn-sm" data-d-csv>CSV</button></div><div class="o-scroll"><table class="o-table"><thead><tr><th>Date (UAE)</th><th>Battle</th><th>Table</th><th class="r">Players</th><th class="r">DQ</th><th class="r">Profit mein</th><th class="r">Fees</th><th class="r">Pool 80%</th><th class="r">Platform 20%</th><th class="r">Inaam diya</th><th>Status</th></tr></thead><tbody>' +
+          (Rr.map(function (r) { return '<tr><td>' + uae(r.start_utc) + '</td><td>' + esc(r.no) + '</td><td>' + (r.tier ? '$' + r.tier : 'free') + '</td><td class="r">' + r.players + '</td><td class="r">' + r.dq + '</td><td class="r">' + r.in_profit + '</td><td class="r">' + money(r.fees) + '</td><td class="r">' + money(r.pool) + '</td><td class="r">' + money(r.platform) + '</td><td class="r">' + money(r.prizes_paid) + '</td><td>' + stPill(r.status) + '</td></tr>'; }).join('') || '<tr><td colspan="11" class="o-note">Abhi koi battle khatam nahi hui.</td></tr>') +
+          '</tbody></table></div></div>';
+    });
+  }
+  function payoutBatch() {
+    var P = (CACHE.partners || []).filter(function (p) { return Number(p.due) > 0; });
+    var box = $('[data-p-batch]'); if (!box) return;
+    box.innerHTML = '<div class="o-card"><h3>Monday payout list</h3><div class="o-sub">Jinka due > 0 · paisa owner wallet se bheje, phir har partner pe "Save payout" (TXID)</div>' +
+      '<div class="o-row"><button class="btn btn-ghost btn-sm" data-p-batch-csv>CSV (wallet ke liye)</button></div><div class="o-scroll"><table class="o-table"><thead><tr><th>Code</th><th>Pay to (USDT)</th><th class="r">Due</th><th></th></tr></thead><tbody>' +
+      (P.map(function (p) { return '<tr><td><b>' + esc(p.code) + '</b></td><td class="o-note">' + esc(p.pay_to || '– address nahi –') + '</td><td class="r"><b>' + money(p.due) + '</b></td><td><button class="btn btn-ghost btn-sm" data-p-open="' + esc(p.code) + '">Open</button></td></tr>'; }).join('') || '<tr><td colspan="4" class="o-note">Kisi ka due nahi.</td></tr>') +
+      '</tbody></table></div><div class="o-mini" style="margin-top:6px">Kul: ' + money(sum(P, function (p) { return p.due; })) + ' · ' + P.length + ' partners</div></div>';
   }
 
   /* ---------- CSV ---------- */
@@ -286,6 +413,11 @@
     if (t.matches('[data-copy]')) { navigator.clipboard.writeText(t.getAttribute('data-copy')); t.textContent = 'Copied ✓'; }
     if (t.matches('[data-p-new]')) partnerForm();
     if (t.matches('[data-p-cancel]')) $('[data-p-form]').innerHTML = '';
+    if (t.matches('[data-p-batch-open]')) payoutBatch();
+    if (t.matches('[data-p-batch-csv]')) csv('pipclash-partner-payouts.csv', ['code', 'pay_to', 'due_usdt'],
+      (CACHE.partners || []).filter(function (p) { return Number(p.due) > 0; }).map(function (p) { return [p.code, p.pay_to, Number(p.due).toFixed(2)]; }));
+    if (t.matches('[data-d-csv]')) csv('pipclash-daily.csv', ['date', 'battle', 'tier', 'players', 'dq', 'in_profit', 'fees', 'pool', 'platform', 'prizes_paid', 'status'],
+      (((CACHE.ops || {}).daily || {}).rows || []).map(function (r) { return [r.start_utc, r.no, r.tier, r.players, r.dq, r.in_profit, r.fees, r.pool, r.platform, r.prizes_paid, r.status]; }));
     if (t.matches('[data-p-open]')) openPartner(t.getAttribute('data-p-open'));
     if (t.matches('[data-p-close]')) { OPEN = null; $('[data-p-detail]').innerHTML = ''; }
     if (t.matches('[data-p-edit]')) partnerForm((CACHE.partners || []).filter(function (x) { return x.code === t.getAttribute('data-p-edit'); })[0]);
@@ -328,7 +460,7 @@
   });
   root.addEventListener('change', function (e) { if (e.target.matches('[data-b-tier]')) e.target.dispatchEvent(new Event('input', { bubbles: true })); });
 
-  var SECTIONS = { dash: dash, influencers: influencers, bookings: bookings, command: command };
+  var SECTIONS = { dash: dash, influencers: influencers, bookings: bookings, command: command, today: today, risk: risk, daily: daily };
   function title() { var h = (location.hash || '#dash').slice(1).split('?')[0]; TAB = h; var el = $('[data-ops-title]'); if (el) el.textContent = TITLES[h] || 'Dashboard'; }
   function rerender() { if (SECTIONS[TAB]) SECTIONS[TAB](); else if (A && A.render) A.render(); }
   function route(t) {
