@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="assets/site.css?v=ops1">
-<link rel="stylesheet" href="assets/ops.css?v=ops2">
+<link rel="stylesheet" href="assets/ops.css?v=ops3">
 </head>
 <body class="ops-body">
 <div class="ops" data-admin>
@@ -72,7 +72,7 @@
 (function () {   // ?demo=1 (sirf laptop) = admin.js (login) nahi, sirf design; warna admin.js phir ops.js
   var demo = /[?&]demo=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   function add(src, cb) { var s = document.createElement('script'); s.src = src; if (cb) s.onload = cb; document.body.appendChild(s); }
-  if (demo) add('assets/ops.js?v=ops2'); else add('assets/admin.js?v=ops1', function () { add('assets/ops.js?v=ops2'); });
+  if (demo) add('assets/ops.js?v=ops3'); else add('assets/admin.js?v=ops1', function () { add('assets/ops.js?v=ops3'); });
 })();
 </script>
 </body>
