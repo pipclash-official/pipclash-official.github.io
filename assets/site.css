@@ -1243,3 +1243,21 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 
 .w-warn.w-warn-big{font-size:15px;color:var(--text);border-width:2px;background:rgba(245,185,66,.12)}
 .w-warn.w-warn-big b{color:#F2C866}
+
+/* ===== 7 Nov CEO audit – big-brand polish (UX-2/10/11/12/20/22/35/38) ===== */
+.sn-brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px;text-decoration:none;color:#EEF2F8}
+.sn-brand b{display:block;font-family:var(--f-display);font-weight:800;font-size:19px;letter-spacing:.12em;line-height:1}
+.sn-brand b i{font-style:normal;color:#4DA3FF}
+.sn-brand small{display:block;font-size:9.5px;letter-spacing:.26em;color:#93A0B8;margin-top:4px}
+.auth-code input::placeholder{letter-spacing:normal;font-size:16px;color:rgba(255,255,255,.4)}
+.auth-code .btn{width:100%;justify-content:center;text-align:center}
+@media (min-width:821px){
+  .auth-art{justify-content:center}
+  .auth-art img{position:static;display:block;width:200px;max-width:60%;margin:0 auto 6px}
+}
+.auth-big{text-wrap:balance}
+.sn-it[aria-current="page"],.snav .sn-it.on{background:rgba(47,128,255,.16)!important;color:#fff!important;box-shadow:inset 3px 0 0 #2F80FF;font-weight:700}
+body:not(.pc-in) .sn-list a[href="wallet.html"],body:not(.pc-in) .sn-list a[href="deposit.html"],body:not(.pc-in) .sn-list a[href="withdraw.html"],
+body:not(.pc-in) .sn-list a[href="transactions.html"],body:not(.pc-in) .sn-list .sn-lbl{display:none!important}
+.tr-hl td{color:#4DA3FF;font-weight:700}
+.step-k{white-space:nowrap}
