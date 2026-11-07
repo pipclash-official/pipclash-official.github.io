@@ -46,6 +46,7 @@
       var t = $('[data-w-test]'); if (t) t.hidden = S.mode !== 'test';
       setText('[data-w-min-dep]', usd(S.min_deposit || 10));
       setText('[data-w-min-wd]', usd(S.min_withdraw || 10));
+      if (typeof netUi === 'function') netUi();
       setAddr();
     });
   }
@@ -331,8 +332,23 @@
   });
 
   /* ---------- Withdraw page ---------- */
-  function recv() { var a = $('#w-wd-amt'); if (a) setText('[data-w-recv]', usd(Math.max(0, parseFloat(a.value) || 0))); }
+  // 7 Nov: TRC20 withdraw = network fee (settings trc20_wd_fee, default $3) amount se katti; BEP20 free
+  function wdFee() { var n = $('#w-wd-net'); return n && n.value === 'TRC20' ? (Number(S.trc20_wd_fee) || 3) : 0; }
+  function recv() {
+    var a = $('#w-wd-amt'); if (!a) return;
+    var f = wdFee(); setText('[data-w-fee]', f ? usd(f) : 'Free');
+    setText('[data-w-recv]', usd(Math.max(0, (parseFloat(a.value) || 0) - f)));
+  }
+  function netUi() {
+    var n = $('#w-wd-net'); if (!n) return; var t = n.value === 'TRC20', ad = $('#w-wd-addr');
+    setText('[data-w-addr-lbl]', 'Your USDT ' + (t ? 'TRC20 (TRON)' : 'BEP20') + ' address');
+    setText('[data-w-addr-help]', t ? 'Use a TRON address (starts with T, 34 characters) – in Binance choose “TRX / TRC20”. A $' + (Number(S.trc20_wd_fee) || 3) + ' network fee is taken from the amount. Payments to a wrong address cannot be recovered.'
+      : 'Use an address from Binance, Trust Wallet, MetaMask or any wallet that supports BNB Smart Chain. Payments to a wrong address cannot be recovered.');
+    if (ad) ad.placeholder = t ? 'T… (34 characters)' : '0x… (42 characters)';
+    recv();
+  }
   on('#w-wd-amt', 'input', recv);
+  on('#w-wd-net', 'change', netUi);
   on('[data-w-max]', 'click', function () { $('#w-wd-amt').value = BAL > 0 ? BAL.toFixed(2) : ''; recv(); });
   on('[data-w-kyc-form]', 'submit', function (e) {
     e.preventDefault();
@@ -355,8 +371,11 @@
     e.preventDefault();
     var amt = parseFloat($('#w-wd-amt').value), addr = $('#w-wd-addr').value.trim(), nt = $('#w-wd-net').value, b = $('[data-w-wd-form] button[type=submit]');
     if (!(amt > 0)) { msg('[data-w-wd-msg]', 'Please enter an amount.', true); return; }
-    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { msg('[data-w-wd-msg]', 'This is not a BEP20 address. It must start with 0x and have 42 characters (choose “BSC / BEP20” in your wallet).', true); return; }
-    if (!confirm('Withdraw ' + usd(amt) + ' USDT to ' + nt + ' address\n' + addr + ' ?\n\nPlease check the address – crypto transfers cannot be reversed.')) return;
+    if (nt === 'TRC20' ? !/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(addr) : !/^0x[0-9a-fA-F]{40}$/.test(addr)) {
+      msg('[data-w-wd-msg]', nt === 'TRC20' ? 'This is not a TRC20 (TRON) address. It must start with T and have 34 characters.' : 'This is not a BEP20 address. It must start with 0x and have 42 characters (choose “BSC / BEP20” in your wallet).', true); return; }
+    var fee = wdFee();
+    if (amt - fee <= 0) { msg('[data-w-wd-msg]', 'Amount must be more than the network fee.', true); return; }
+    if (!confirm('Withdraw ' + usd(amt) + ' USDT on ' + nt + (fee ? ' (network fee ' + usd(fee) + ', you receive ' + usd(amt - fee) + ')' : '') + ' to\n' + addr + ' ?\n\nPlease check the address – crypto transfers cannot be reversed.')) return;
     withOtp(b, function () {
       b.disabled = true; msg('[data-w-wd-msg]', 'Sending…');
       sb.rpc('pc_request_withdraw', { amt: amt, net: nt, addr: addr }).then(function (r) {
