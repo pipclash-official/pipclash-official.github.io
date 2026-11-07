@@ -1274,3 +1274,10 @@ body.pc-in .hm-intro{display:none}
 .ft-brand{text-decoration:none;color:#EEF2F8}.ft-brand b{font-family:var(--f-display);letter-spacing:.12em}.ft-brand b i{font-style:normal;color:#4DA3FF}
 .ft-brand small{color:#93A0B8;margin-left:6px}
 .ft-soc{display:flex;gap:14px;flex-wrap:wrap}.ft-soc a{color:#93A0B8}
+
+/* 7 Nov: deposit "No USDT yet?" box */
+.w-nu-steps{list-style:none;counter-reset:nu;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.w-nu-steps li{counter-increment:nu;position:relative;padding-left:40px;display:flex;flex-direction:column;gap:3px;font-size:14px;line-height:1.5}
+.w-nu-steps li::before{content:counter(nu);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:#2F80FF;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.w-nu-steps li span{color:#C9D2E3}
+.w-nu-tip{font-size:13px;color:#93A0B8;margin:12px 0 0;line-height:1.5}
