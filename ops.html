@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="assets/site.css?v=ops1">
-<link rel="stylesheet" href="assets/ops.css?v=ops3">
+<link rel="stylesheet" href="assets/ops.css?v=ops4">
 </head>
 <body class="ops-body">
 <div class="ops" data-admin>
@@ -29,21 +29,19 @@
     <aside class="ops-side">
       <a class="ops-brand" href="ops.html"><img src="assets/icon-192.png" alt="" width="34" height="34"><span><b>PipClash</b><small>Ops · Back office</small></span></a>
       <nav class="ops-nav" aria-label="Admin">
-        <div class="ops-grp">Overview</div>
-        <button type="button" data-a-tab="dash"><i>▦</i>Dashboard</button>
-        <button type="button" data-a-tab="command"><i>✦</i>Command center</button>
-        <button type="button" data-a-tab="today"><i>⚡</i>Today's tables</button>
-        <div class="ops-grp">Growth</div>
-        <button type="button" data-a-tab="influencers"><i>★</i>Influencers</button>
-        <button type="button" data-a-tab="bookings"><i>🎟</i>Bookings</button>
-        <div class="ops-grp">Operations</div>
+        <div class="ops-grp">Roz ka kaam</div>
+        <button type="button" data-a-tab="today"><i>⚡</i>Aaj (battle day)</button>
+        <button type="button" data-a-tab="money"><i>$</i>Payments &amp; KYC</button>
         <button type="button" data-a-tab="battle"><i>⚔</i>Battles</button>
         <button type="button" data-a-tab="players"><i>👤</i>Players</button>
-        <button type="button" data-a-tab="money"><i>$</i>Payments &amp; KYC</button>
         <button type="button" data-a-tab="support"><i>✉</i>Support</button>
         <button type="button" data-a-tab="risk"><i>⚠</i>Risk &amp; fraud</button>
-        <div class="ops-grp">Reports &amp; system</div>
         <button type="button" data-a-tab="daily"><i>Σ</i>Daily hisaab</button>
+        <button type="button" data-a-tab="influencers"><i>★</i>Influencers</button>
+        <details class="ops-more"><summary class="ops-grp">More ▾</summary>
+        <button type="button" data-a-tab="dash"><i>▦</i>Dashboard</button>
+        <button type="button" data-a-tab="command"><i>✦</i>Command center</button>
+        <button type="button" data-a-tab="bookings"><i>🎟</i>Bookings</button>
         <button type="button" data-a-tab="campaigns"><i>↗</i>Campaigns</button>
         <button type="button" data-a-tab="creatives"><i>▣</i>Creatives</button>
         <button type="button" data-a-tab="competitions"><i>🏆</i>Competitions</button>
@@ -52,6 +50,7 @@
         <button type="button" data-a-tab="settings"><i>⚙</i>Settings</button>
         <button type="button" data-a-tab="team"><i>☺</i>Team</button>
         <button type="button" data-a-tab="log"><i>≡</i>Activity log</button>
+        </details>
       </nav>
       <div class="ops-me" data-a-me></div>
     </aside>
@@ -76,7 +75,7 @@
 (function () {   // ?demo=1 (sirf laptop) = admin.js (login) nahi, sirf design; warna admin.js phir ops.js
   var demo = /[?&]demo=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   function add(src, cb) { var s = document.createElement('script'); s.src = src; if (cb) s.onload = cb; document.body.appendChild(s); }
-  if (demo) add('assets/ops.js?v=ops6'); else add('assets/admin.js?v=ops4', function () { add('assets/ops.js?v=ops6'); });
+  if (demo) add('assets/ops.js?v=ops7'); else add('assets/admin.js?v=ops4', function () { add('assets/ops.js?v=ops7'); });
 })();
 </script>
 </body>
