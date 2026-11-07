@@ -149,7 +149,7 @@
       var entered = {}; paidE(D.entries).forEach(function (e) { entered[e.user_id] = 1; });
       var fun = [['Bookings', D.bookings.length], ['Accounts', D.profiles.length], ['Deposited', Object.keys(depositors).length], ['Paid entry', Object.keys(entered).length]];
       var fMax = Math.max(1, fun[0][1]);
-      pane().innerHTML = demoBar() + (TAB === 'bookings' ? sourcesHtml(D) : '') +
+      pane().innerHTML = demoBar() + healthBanner(D) + (TAB === 'bookings' ? sourcesHtml(D) : '') +
         '<div class="o-alert"><b>Needs you now</b>' + chip(depPend, 'Deposits', 'money', 1) + chip(wdPend, 'Withdrawals', 'money', 1) + chip(D.kycPending, 'ID checks', 'money', 1) +
           chip(D.supportOpen, 'Support', 'support', 1) + chip(D.claims, 'Telegram prizes', 'money', 1) + chip(Math.round(due), 'Partner $ due', 'influencers', 0) +
           '<span class="o-sp"></span><span class="o-engine"><span class="o-dot' + (live ? '' : ' off') + '"></span>' + (b ? 'Battle ' + esc(noOf[b.contest_id] || (window.pcTagOf ? window.pcTagOf(b) : '#' + b.contest_id)) + ' · ' + esc(b.status) + ' · ' + (b.players || 0) + ' players' : 'No battle yet') + '</span></div>' +
@@ -195,7 +195,7 @@
           '<td>' + (p.active ? '<span class="o-tag g">Active</span>' : '<span class="o-tag">Off</span>') + '</td>' +
           '<td><button class="btn btn-ghost btn-sm" data-p-open="' + esc(p.code) + '">Open</button> <button class="btn btn-ghost btn-sm" data-copy="' + base + esc(p.code) + '">Copy link</button></td></tr>';
       }).join('');
-      pane().innerHTML = demoBar() + (TAB === 'bookings' ? sourcesHtml(D) : '') + sqlHint(D.partnersErr) +
+      pane().innerHTML = demoBar() + healthBanner(D) + (TAB === 'bookings' ? sourcesHtml(D) : '') + sqlHint(D.partnersErr) +
         '<div class="o-kpis">' + kpi('k3', 'Partners', P.length, '<small>' + P.filter(function (p) { return p.active; }).length + ' active</small>') +
           kpi('k4', 'Bookings via partners', tot('bookings'), '') + kpi('k5', 'Players via partners', tot('players'), '<small>' + tot('entries') + ' paid entries</small>') +
           kpi('k1', 'Fees from partners', money(tot('fees')), '') + kpi('k6', 'Partners earned', money(tot('earned')), '<small>paid ' + money(tot('paid')) + '</small>') +
@@ -270,7 +270,7 @@
       var people = {}; B.forEach(function (x) { people[(x.contact || '').toLowerCase()] = 1; });
       var tier = by(function (x) { return x.tier; }), last24 = B.filter(function (x) { return inRange(x.created_at, 1, 0); }).length;
       var srcL = Object.keys(src).sort(function (a, b) { return src[b] - src[a]; }), sMax = srcL.length ? src[srcL[0]] : 1;
-      pane().innerHTML = demoBar() + (TAB === 'bookings' ? sourcesHtml(D) : '') + sqlHint(D.bookingsErr) +
+      pane().innerHTML = demoBar() + healthBanner(D) + (TAB === 'bookings' ? sourcesHtml(D) : '') + sqlHint(D.bookingsErr) +
         '<div class="o-kpis">' + kpi('k3', 'Bookings', B.length, '<small>' + Object.keys(people).length + ' people</small>') + kpi('k4', 'Last 24h', last24, '') +
           kpi('k1', 'STARTER $10', tier[10] || 0, '') + kpi('k6', 'PRO $25', tier[25] || 0, '') + kpi('k2', 'ELITE $50', tier[50] || 0, '') + '</div>' +
         '<div class="o-grid2"><div class="o-card"><h3>Where bookings come from</h3><div class="o-sub">tracking link (?ref=)</div><div class="o-list">' +
@@ -306,10 +306,10 @@
       ['Old admin', 'classic panel', 'admin.html'], ['Live arena', 'public leaderboard', 'https://pipclash.net/arena.html']];
     load(false).then(function (D) { var x = $('[data-j-extra]'); if (x) x.innerHTML = '<div class="o-grid2">' + serverHtml(D) + adsHtml(D) + '</div>' + '<div class="o-grid2">' + poolsHtml(D) + sourcesHtml(D) + '</div>'; });
     pane().innerHTML = demoBar() + '<div data-j-extra><div class="o-note">Loading…</div></div>' +
-      '<div class="o-card"><h3>Launch countdown</h3><div class="o-sub">Battle #001 · Mon 9 Nov · 4:30 PM UAE · STARTER $10</div><div class="o-list">' +
-      [['Thu 5', 'Team DMs (influencer list) · 10 friends each · approve tomorrow’s posts'], ['Fri 6', 'Ads decision · Supabase Pro + Resend Pro · Collabstr orders'],
-       ['Sat 7', 'GO-LIVE: SQL once → real USDT addresses → paid ON → $10 test deposit/entry/withdraw · signup message to bookers'],
-       ['Sun 8', 'Reminder to all bookers · MT5 install guide'], ['Mon 9', '10 AM entry opens · 4:00 close (5+ needed) · 4:25 logins · 4:30 battle · 9:30 results + payout proof']]
+      '<div class="o-card"><h3>Battle day – what happens when (UAE)</h3><div class="o-sub">Mon–Fri · engine does the timed steps itself</div><div class="o-list">' +
+      [['Any time', 'Players deposit + join the next battle (Join battle page)'], ['4:00 PM', 'Entry closes · a table with fewer than 5 = cancelled + full refund (automatic)'],
+       ['4:15 PM', 'Engine prepares – do NOT touch the engine until 7:45 PM'], ['4:25 PM', 'MT5 logins sent to players'], ['4:30–7:30 PM', 'Battle live – watch Battles / Risk'],
+       ['7:30–9:30 PM', 'Review – DQ only if a rule is broken'], ['9:30 PM', 'Final result + prizes to wallets (automatic)'], ['After', 'Withdrawals: Payments → Start payout → send → Paid + TXID']]
         .map(function (x) { return '<div class="row"><b style="min-width:60px">' + x[0] + '</b><span class="o-sp">' + x[1] + '</span></div>'; }).join('') + '</div></div>' +
       '<div class="o-card"><h3>Quick links</h3><div class="o-links">' + L.map(function (x) { return '<a href="' + x[2] + '" target="_blank" rel="noopener"><b>' + x[0] + '</b><small>' + x[1] + '</small></a>'; }).join('') + '</div></div>' +
       '<div class="o-card"><h3>Ask Claude (Jarvis)</h3><div class="o-sub">Type a task – it is copied with today’s numbers; paste it in the Claude chat (C:\\pipclash).</div>' +
@@ -319,6 +319,21 @@
 
   /* ---------- 6 Nov: engine feed (pc_ops) – tables today, pools, ads, risk, daily ---------- */
   function ago(iso) { if (!iso) return '–'; var m = Math.round((Date.now() - new Date(iso)) / 60e3); return m < 1 ? 'abhi' : m < 60 ? m + ' min pehle' : Math.round(m / 60) + ' ghante pehle'; }
+
+  /* 7 Nov (ADM-4/10): engine chup = bada laal patta · flags ke saaf shabd */
+  var FLAGW = { hft_suspected: 'Fast trading – allowed, just watch', ea_suspected: 'Robot / EA suspected → DQ rule', robot: 'Robot / EA → DQ rule',
+    exact_mismatch: 'Result differs from MT5 – check', no_exact: 'MT5 exact result missing – check', late_price: 'Price arrived late', price_note: 'Price note',
+    pnl_equity: 'P&L vs equity differs – check', hedge_cross_table: 'Opposite trades on 2 tables – check', copy_trading: 'Copy trading suspected – check',
+    start_balance: 'Wrong start balance', mirror: 'Mirror / opposite trades – check', pre_trade: 'Traded before 4:30 → DQ rule' };
+  window.pcFlag = function (k) { return FLAGW[k] || String(k || '').replace(/_/g, ' '); };
+  function feedAge(D) { var t = 0; Object.keys(D.ops || {}).forEach(function (k) { var o = D.ops[k]; if (o && o._at) t = Math.max(t, new Date(o._at).getTime()); }); return t ? (Date.now() - t) / 60e3 : null; }
+  function healthBanner(D) {
+    if (DEMO) return '';
+    var m = feedAge(D);
+    if (m === null || m > 15) return '<div class="o-card" style="border:2px solid #EF4444;background:rgba(239,68,68,.12)"><h3 style="color:#F87171;margin:0">🚨 Engine silent ' + (m === null ? '(no feed)' : Math.round(m) + ' min') + '</h3>' +
+      '<div class="o-note">The server has not reported for 15+ minutes. During a battle (4:15–7:45 PM UAE) this is urgent: tell Claude / check the VPS. Deposits may not be credited.</div></div>';
+    return '';
+  }
   function feedNote(D, k) { var o = (D.ops || {})[k]; return o && o._at ? '<span class="o-mini">feed ' + ago(o._at) + '</span>' : '<span class="o-mini">feed abhi nahi (sql/supabase_ops_engine.sql + server task)</span>'; }
   function stPill(st) { return '<span class="o-pill ' + (st === 'live' ? 'live' : st === 'upcoming' ? 'up' : st === 'cancelled' ? 'bad' : 'end') + '">' + esc(st || '–') + '</span>'; }
   function tablesHtml(D) {
@@ -330,7 +345,7 @@
         '<div class="kv"><span>Pool 80% / platform 20%</span><b>' + money(t.pool) + ' / ' + money(t.platform) + '</b></div>' +
         '<div class="kv"><span>Profit mein</span><b>' + t.in_profit + (t.low_trades_in_profit ? ' <span class="o-pill bad">' + t.low_trades_in_profit + ' × 2/3 trade</span>' : '') + '</b></div>' +
         (t.top || []).map(function (x, i) { return '<div class="kv"><span>#' + (i + 1) + ' ' + esc(x.user) + (x.trades < 3 ? ' <span class="o-pill bad">' + x.trades + '/3</span>' : '') + '</span><b>' + (x.pnl >= 0 ? '+' : '') + x.pnl.toFixed(2) + ' (' + x.pct + '%)</b></div>'; }).join('') +
-        (Object.keys(t.flags || {}).length ? '<div class="o-mini" style="margin-top:6px">flags: ' + Object.keys(t.flags).map(function (k) { return esc(k) + ' ' + t.flags[k]; }).join(' · ') + '</div>' : '') + '</div>';
+        (Object.keys(t.flags || {}).length ? '<div class="o-mini" style="margin-top:6px">flags: ' + Object.keys(t.flags).map(function (k) { return esc(window.pcFlag(k)) + ' ×' + t.flags[k]; }).join(' · ') + '</div>' : '') + '</div>';
     }).join('') + '</div></div>';
   }
   function poolsHtml(D) {
@@ -366,7 +381,7 @@
           ((M.rules || []).concat(M.remind || []).map(function (x) { return '<div class="row"><span class="o-note">' + esc(x) + '</span></div>'; }).join('') || '<span class="o-note">Aaj abhi koi msg nahi gaya.</span>') + '</div></div>' +
         poolsHtml(D) + '</div>' +
         '<div class="o-card"><h3>Flags (aakhri 6 battles)</h3>' + feedNote(D, 'flags') + '<div class="o-scroll"><table class="o-table"><thead><tr><th>Battle id</th><th>Player</th><th>Kind</th><th>Detail</th><th>Status</th></tr></thead><tbody>' +
-          (F.map(function (f) { return '<tr><td>' + f.cid + '</td><td>' + esc(f.user || '–') + '</td><td><span class="o-pill ' + (/robot|hedge|mirror|pre_start|password/.test(f.kind) ? 'bad' : '') + '">' + esc(f.kind) + '</span></td><td class="o-note">' + esc(f.detail) + '</td><td>' + esc(f.status || '') + '</td></tr>'; }).join('') || '<tr><td colspan="5" class="o-note">Koi flag nahi.</td></tr>') +
+          (F.map(function (f) { return '<tr><td>' + f.cid + '</td><td>' + esc(f.user || '–') + '</td><td><span class="o-pill ' + (/robot|hedge|mirror|pre_start|password/.test(f.kind) ? 'bad' : '') + '">' + esc(window.pcFlag(f.kind)) + '</span></td><td class="o-note">' + esc(f.detail) + '</td><td>' + esc(f.status || '') + '</td></tr>'; }).join('') || '<tr><td colspan="5" class="o-note">Koi flag nahi.</td></tr>') +
           '</tbody></table></div></div>';
     });
   }
@@ -379,7 +394,7 @@
           kpi('k1', 'Same phone accounts', (Fr.same_phone || []).length, '<small>' + (Fr.profiles || 0) + ' website accounts</small>') + kpi('k3', 'Khud ko refer', Fr.self_referral || 0, '') + '</div>' +
         '<div class="o-grid2"><div class="o-card"><h3>Disqualified</h3>' + feedNote(D, 'risk') + '<div class="o-list">' + ((R.dq || []).map(function (x) { return '<div class="row"><span>' + esc(x.user) + ' <span class="o-mini">id ' + x.cid + '</span></span><span class="o-note">' + esc(x.why) + '</span></div>'; }).join('') || '<span class="o-note">Koi DQ nahi.</span>') + '</div></div>' +
           '<div class="o-card"><h3>Bade winners – check karo</h3><div class="o-sub">balance ka 25%+ profit</div><div class="o-list">' + ((R.big || []).map(function (x) { return '<div class="row"><span>' + esc(x.user) + ' <span class="o-mini">id ' + x.cid + ' · ' + x.trades + ' trades</span></span><b>+' + x.pnl + ' (' + x.pct + '%)</b></div>'; }).join('') || '<span class="o-note">Koi nahi.</span>') + '</div></div></div>' +
-        '<div class="o-grid2"><div class="o-card"><h3>Risk flags</h3><div class="o-list">' + ((R.flags || []).map(function (x) { return '<div class="row"><span><span class="o-pill bad">' + esc(x.kind) + '</span> ' + esc(x.login) + ' <span class="o-mini">id ' + x.cid + '</span></span><span class="o-note">' + esc(x.detail) + '</span></div>'; }).join('') || '<span class="o-note">Koi flag nahi.</span>') + '</div></div>' +
+        '<div class="o-grid2"><div class="o-card"><h3>Risk flags</h3><div class="o-list">' + ((R.flags || []).map(function (x) { return '<div class="row"><span><span class="o-pill bad">' + esc(window.pcFlag(x.kind)) + '</span> ' + esc(x.login) + ' <span class="o-mini">id ' + x.cid + '</span></span><span class="o-note">' + esc(x.detail) + '</span></div>'; }).join('') || '<span class="o-note">Koi flag nahi.</span>') + '</div></div>' +
           '<div class="o-card"><h3>Fraud check (website accounts)</h3><div class="o-sub">same phone · khud ko refer</div>' + feedNote(D, 'fraud') + '<div class="o-list">' + ((Fr.same_phone || []).map(function (x) { return '<div class="row"><span>Phone …' + esc(x.phone_end) + '</span><b>' + x.accounts + ' accounts</b></div>'; }).join('') || '<span class="o-note">Same phone pe 2 account nahi.</span>') + '</div></div></div>' + '<div data-fraud-x></div>';
       fraudExtra();
     });
