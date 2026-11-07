@@ -258,7 +258,7 @@
     if (!$('[data-w-send]')) return;
     var on2 = !!q || !QUOTE_OK;
     Q = q;
-    $('[data-w-send]').hidden = !on2 || DONE_SHOWN; $('[data-w-dep-form]').hidden = !on2;
+    $('[data-w-send]').hidden = !on2 || DONE_SHOWN; $('[data-w-dep-form]').hidden = true;   // 7 Nov: TXID claim band (chori ka raasta) – team haath se
     var fa = $('[data-w-form-area]'); if (fa) fa.hidden = (!!q && QUOTE_OK) || DONE_SHOWN;   // invoice dikhe to form chhupao
     $('#w-dep-amt').readOnly = QUOTE_OK;
     if (q) {
