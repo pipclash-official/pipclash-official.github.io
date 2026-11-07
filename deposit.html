@@ -27,11 +27,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=112">
-<script src="assets/site.js?v=112" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=113">
+<script src="assets/site.js?v=113" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/wallet.js?v=112" defer></script>
-<script src="assets/v2.js?v=112" defer></script>
+<script src="assets/wallet.js?v=113" defer></script>
+<script src="assets/v2.js?v=113" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -83,13 +83,16 @@
           <div class="w-qr-row"><div class="w-qr" data-w-qr aria-label="QR code of the deposit address"></div>
             <div class="w-qr-txt"><span class="w-lbl">Amount to send</span><div class="w-big"><b class="mono" data-w-quote-amt>–</b><button class="w-cp" type="button" data-w-amt-copy data-copy="">Copy</button></div>
               <span class="w-lbl">Deposit address</span><div class="w-adr"><b class="mono" data-w-addr>–</b><button class="w-cp" type="button" data-w-addr-copy data-copy="">Copy</button></div></div></div>
-          <div class="w-warn"><b>Send exactly this amount.</b> The cents (like .37) show us the payment is yours. If your exchange takes a withdrawal fee, add it so that <b>exactly this amount arrives</b>. Only USDT on <b data-w-net-name>TRON (TRC20)</b> – other coins or networks are lost.</div>
+          <div class="w-warn w-warn-big"><b>⚠️ Send EXACTLY <span data-w-quote-amt>this amount</span> – not more, not less.</b> The cents show us the payment is yours, so it is added automatically.
+            <b>Binance / exchange:</b> make sure the <b>“Receive amount”</b> (after the fee) is exactly this number – add the fee on top.
+            Only USDT on <b data-w-net-name>TRON (TRC20)</b> – other coins or networks are lost.</div>
           <ol class="w-track" data-w-track><li class="on" data-w-st="wait"><i></i><span><b>Waiting for your payment</b><small>We check the blockchain every few seconds – keep this page open.</small></span></li>
             <li data-w-st="check"><i></i><span><b>Payment found – checking</b><small>Big deposits ($200+) are checked by our team first.</small></span></li>
             <li data-w-st="done"><i></i><span><b>Added to your wallet</b><small>Usually 1–3 minutes after you send.</small></span></li></ol>
           <button class="w-link" type="button" data-w-new>Change amount or network</button>
-          <details class="w-help" data-w-help><summary>Sent it but nothing after 10 minutes?</summary>
-            <form data-w-dep-form hidden><label for="w-dep-amt">Amount sent (USDT)</label><input id="w-dep-amt" type="number" min="1" step="0.01" inputmode="decimal" placeholder="10" readonly>
+          <details class="w-help" data-w-help><summary>Sent a different amount, or nothing after 10 minutes?</summary>
+            <p class="muted2" style="font-size:14px;margin:8px 0 0">Your USDT is safe in our wallet. Message <a href="https://t.me/PipClashBot" target="_blank" rel="noopener">@PipClashBot</a> → “Talk to admin” with your <b>PipClash email</b> and the <b>TXID</b> from your exchange. Our team checks the blockchain and adds it to your wallet by hand.</p>
+            <form data-w-dep-form hidden data-off><label for="w-dep-amt">Amount sent (USDT)</label><input id="w-dep-amt" type="number" min="1" step="0.01" inputmode="decimal" placeholder="10" readonly>
               <label for="w-dep-tx">Transaction ID (TXID / hash)</label><input id="w-dep-tx" type="text" autocomplete="off" placeholder="Paste the TXID from your exchange or wallet">
               <button class="btn" type="submit">Check my payment</button><p class="acc-msg" data-w-dep-msg role="status"></p></form></details>
         </div>
