@@ -37,6 +37,17 @@
       toast('Done ✅'); (done || render)(); return r;
     }).catch(function (e) { if (btn) btn.disabled = false; alert('No connection – nothing was saved. Try again. (' + ((e && e.message) || e) + ')'); return null; });
   }
+
+  // 7 Nov (A13): admin me bhi players jaisa number – launch Mon 9 Nov = #001, har Mon–Fri +1; usse pehle test = T<id>
+  function tagOf(o) {
+    var m = String((o && o.name) || '').match(/(\d{4})-(\d{2})-(\d{2})/), id = o && o.contest_id;
+    if (!m) return '#' + id;
+    var day = Date.UTC(+m[1], +m[2] - 1, +m[3]), launch = Date.UTC(2026, 10, 9);
+    if (day < launch) return 'T' + id;
+    var n = 0; for (var t = launch; t <= day; t += 864e5) { var w = new Date(t).getUTCDay(); if (w > 0 && w < 6) n++; }
+    return '#' + ('00' + n).slice(-3);
+  }
+  window.pcTagOf = tagOf;
   function pendingNote(r) { if (r && r.data === 'PENDING') alert('Saved for approval – another admin must press Confirm in Settings.'); }
   function toast(t) { var el = $('[data-a-toast]'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 1800); }
   function who(uid) { var p = P[uid]; return p ? '<b>' + esc(p.name) + '</b><div class="muted2 a-sm">' + esc(p.phone) + '</div>' : '<span class="muted2">' + esc(String(uid).slice(0, 8)) + '</span>'; }
@@ -168,7 +179,7 @@
         st('In wallets', usd((x[1].data || []).reduce(function (a, w) { return a + Number(w.balance); }, 0))) +
         st('Website entries (next battle)', ents.length + (paid.length ? ' · ' + paid.length + ' paid' : '')) +
         st('Prize pool 80% · platform 20%', usd(fees * 0.8) + ' · ' + usd(fees * 0.2)) +
-        (sameDay.length > 1 ? sameDay : (b ? [b] : [])).map(function (o) { return st('Battle #' + o.contest_id + ' – ' + o.status + (/\$\d+/.test(o.name || '') ? ' · ' + o.name.match(/\$\d+/)[0] + ' table' : ''), o.players + ' players', 'battle'); }).join('') +
+        (sameDay.length > 1 ? sameDay : (b ? [b] : [])).map(function (o) { return st('Battle ' + tagOf(o) + ' – ' + o.status + (/\$\d+/.test(o.name || '') ? ' · ' + o.name.match(/\$\d+/)[0] + ' table' : ''), o.players + ' players', 'battle'); }).join('') +
         Object.keys(byTier).filter(function (t) { return +t; }).map(function (t) { return st('$' + t + ' table – paid entries', byTier[t].n + ' · pool ' + usd(byTier[t].f * 0.8)); }).join('') +
         st('Telegram prizes waiting', (x[8].data || []).length, 'money') + '</div>' +
         // A13: engine har minute data bhejta hai – 5 min se chup = laptop/engine band
@@ -177,7 +188,28 @@
   }
 
   /* ---------- Money ---------- */
+
+  /* 7 Nov (A5): galat amount / bina quote wale deposit (engine NO_MATCH) – owner email daal ke 1 click me player ko de */
+  function loadUnmatched(tries) {
+    var box = $('[data-unm]');
+    if (!box) { if ((tries || 0) < 25) setTimeout(function () { loadUnmatched((tries || 0) + 1); }, 200); return; }
+    sb.from('pc_unmatched').select('*').order('seen_at', { ascending: false }).limit(20).then(function (r) {
+      var rows = r.data || [], open = rows.filter(function (u) { return u.status === 'open'; });
+      if (r.error) { box.innerHTML = ''; return; }
+      box.innerHTML = card('Unmatched deposits' + (open.length ? ' <span class="tag-bad">' + open.length + ' OPEN</span>' : ''),
+        table(['When', 'Amount', 'TXID', 'Status', ''], rows.map(function (u) {
+          var ex = (u.network === 'BEP20' ? 'https://bscscan.com/tx/' : 'https://tronscan.org/#/transaction/') + encodeURIComponent(u.txid);
+          return '<tr' + (u.status === 'open' ? ' class="a-flag"' : '') + '><td class="muted2">' + when(u.seen_at) + '</td><td class="mono"><b>' + usd(u.amount) + '</b><div class="muted2 a-sm">' + esc(u.network) + '</div></td>' +
+            '<td><a class="w-mono" href="' + ex + '" target="_blank" rel="noopener">' + esc(String(u.txid).slice(0, 14)) + '…</a></td>' +
+            '<td>' + esc(u.status) + (u.assigned_by ? '<div class="muted2 a-sm">' + esc(u.assigned_by) + '</div>' : '') + (u.note ? '<div class="muted2 a-sm">' + esc(u.note) + '</div>' : '') + '</td>' +
+            '<td class="a-act">' + (u.status === 'open' && owner() ? '<button class="btn btn-sm" data-unm-give="' + esc(u.txid) + '" data-amt="' + u.amount + '" data-net="' + esc(u.network) + '">Give to player</button>' +
+              '<button class="btn btn-ghost btn-sm" data-unm-ignore="' + esc(u.txid) + '">Ignore</button>' : '') + '</td></tr>';
+        }), 'No unmatched deposits ✅'),
+        'USDT came to our address but the amount did not match any player. Ask the player on Telegram for their PipClash email + TXID, open the TXID link, check it is the same, then "Give to player". One TXID can only be given once.');
+    });
+  }
   function money() {
+    loadUnmatched();
     Promise.all([
       sb.from('deposits').select('*').eq('status', 'pending').order('id'),
       sb.from('withdrawals').select('*').in('status', ['pending', 'processing']).order('id'),
@@ -197,6 +229,7 @@
         (y[1].data || []).forEach(function (d) { if (!depBy[d.user_id]) depBy[d.user_id] = d; });
         wds.forEach(function (w, i) { var r = y[2][i]; dayTot[w.id] = r && !r.error && r.data != null ? Number(r.data) : Number(w.amount); });
         pane().innerHTML =
+          '<div data-unm></div>' +
           card('Deposits to check', table(['Player', 'Amount', 'TXID', 'Check', ''], (x[0].data || []).map(function (d) {
             var isBig = Number(d.amount) >= bigDep;
             return '<tr><td>' + who(d.user_id) + '</td><td class="mono"><b>' + usd(d.amount) + '</b>' + (isBig ? ' <span class="tag-bad">BIG</span>' : '') + '<div class="muted2 a-sm">' + esc(d.network) + ' · ' + when(d.created_at) + '</div></td>' +
@@ -246,8 +279,8 @@
         sb.rpc('pc_admin_claims', { cid: BID })
       ]).then(function (x) {
         var pl = x[0].data || [], canDq = b.status !== 'ended';
-        var pick = '<select data-bid>' + bs.map(function (o) { return '<option value="' + o.contest_id + '"' + (o.contest_id === BID ? ' selected' : '') + '>#' + o.contest_id + ' · ' + esc(o.name) + ' · ' + esc(o.status) + '</option>'; }).join('') + '</select>';
-        pane().innerHTML = card('Battle #' + b.contest_id + ' <span class="tag-wait">' + esc(b.status).toUpperCase() + '</span>',
+        var pick = '<select data-bid>' + bs.map(function (o) { return '<option value="' + o.contest_id + '"' + (o.contest_id === BID ? ' selected' : '') + '>' + tagOf(o) + ' · ' + esc(o.name) + ' (id ' + o.contest_id + ')' + ' · ' + esc(o.status) + '</option>'; }).join('') + '</select>';
+        pane().innerHTML = card('Battle ' + tagOf(b) + ' <span class="tag-wait">' + esc(b.status).toUpperCase() + '</span>',
           pick + '<p class="muted2 a-sm">' + b.players + ' players · data from the laptop engine, updated ' + when(b.updated_at) +
           '. DQ / Publish are done by the engine within ~1 minute.</p>' +
           (owner() && b.status === 'review' ? '<button class="btn" data-publish="' + b.contest_id + '">Publish FINAL result now</button>' : '') +
@@ -400,6 +433,11 @@
     if (a('data-a-tab')) return go(a('data-a-tab'));
     if (a('data-go')) return go(a('data-go'));
     if (b.hasAttribute('data-a-refresh')) return render();
+    if (a('data-unm-give')) {
+      var em = prompt('Give ' + usd(a('data-amt')) + ' ' + a('data-net') + ' (TX ' + a('data-unm-give').slice(0, 10) + '…) to which player?\nType their PipClash email:');
+      if (em && confirm('Add ' + usd(a('data-amt')) + ' to ' + em.trim() + '\'s wallet?\nTX ' + a('data-unm-give') + '\nThis cannot be given twice.')) call('pc_admin_unmatched_assign', { tx: a('data-unm-give'), em: em.trim() }, b);
+    }
+    if (a('data-unm-ignore')) { var why = prompt('Why ignore this transfer? (e.g. our own test, returned to sender)'); if (why) call('pc_admin_unmatched_ignore', { tx: a('data-unm-ignore'), why: why }, b); }
     if (a('data-dep-ok') && confirm('Approve this deposit? Check the TXID on the explorer first.')) call('pc_admin_deposit', { did: +a('data-dep-ok'), ok: true, why: null }, b);
     if (a('data-dep-no')) { var w1 = prompt('Reason for rejecting this deposit:'); if (w1) call('pc_admin_deposit', { did: +a('data-dep-no'), ok: false, why: w1 }, b); }
     if (a('data-wd-check') && confirm('I checked the name, ID and history – this withdrawal looks OK.')) call('pc_admin_withdraw_check', { wid: +a('data-wd-check') }, b);
