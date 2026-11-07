@@ -198,7 +198,7 @@
       head = ph.k === 'open' ? chip('● ENTRY OPEN', 'up') + '<span class="v2-mut">closes in <b class="tn" data-v2-left>' + left(ph.to) + '</b></span>'
         : chip('NEXT BATTLE', 'acc') + '<span class="v2-mut">' + dayName(ph.date) + ' · ' + hm12(s.trade_start) + ' UAE</span>';
       body = seats + poolBox(t.free ? 'Prize table · only traders in profit win' : 'Prize pool now · grows with every entry');
-      cta = '<a class="btn btn-lg v2-btn" href="join.html">' + (ph.k === 'open' ? 'JOIN BATTLE' : 'BOOK A SEAT') + ' →</a>';
+      cta = '<a class="btn btn-lg v2-btn" href="join.html">' + 'JOIN BATTLE' + ' →</a>';
     } else if (ph.k === 'closed' || ph.k === 'live') {
       var live = ph.k === 'live';
       head = (live ? chip('● LIVE', 'down') : chip('ENTRY CLOSED', 'gold')) + '<span class="v2-mut">' + (live ? 'time left' : 'starts in') + ' <b class="tn" data-v2-left>' + left(ph.to) + '</b></span>';
