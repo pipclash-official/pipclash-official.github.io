@@ -73,12 +73,12 @@
     if (CACHE && !force && Date.now() - CACHE_AT < 60e3) return Promise.resolve(CACHE);
     var sb = A.sb, q = function (p) { return p.then(function (r) { return r.error ? { error: r.error } : r; }, function (e) { return { error: e }; }); };
     return Promise.all([
-      q(sb.rpc('pc_admin_bookings')), allRows('profiles', 'id,created_at,partner'),
-      allRows('deposits', 'amount,status,created_at,network'), allRows('withdrawals', 'amount,status,created_at'),
-      allRows('web_entries', 'contest_date,tier,paid_fee,refunded,status,user_id'),
+      q(sb.rpc('pc_admin_bookings')), allRows('profiles', 'id,created_at,partner', sb),
+      allRows('deposits', 'amount,status,created_at,network', sb), allRows('withdrawals', 'amount,status,created_at', sb),
+      allRows('web_entries', 'contest_date,tier,paid_fee,refunded,status,user_id', sb),
       q(sb.from('kyc').select('user_id', { count: 'exact', head: true }).eq('status', 'pending')),
       q(sb.from('support').select('id', { count: 'exact', head: true }).eq('status', 'open')),
-      allRows('wallets', 'balance'), q(sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(3)),
+      allRows('wallets', 'balance', sb), q(sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(3)),
       q(sb.rpc('pc_admin_partners')), q(sb.rpc('pc_admin_claims', { cid: null })),
       q(sb.from('pc_ops').select('id,data,updated_at')), q(sb.rpc('pc_admin_booking_sources'))
     ]).then(function (x) {
@@ -605,7 +605,7 @@
         }), 'Koi message nahi.') + '</div>';
     });
   }
-  function allRows(tb, cols) {   // C31 (7 Nov): Supabase 1000 row pe rukta – page-page sab lo, total galat na ho
+  function allRows(tb, cols, sb) {   // C31 (7 Nov): Supabase 1000 row pe rukta – page-page sab lo, total galat na ho
     var out = [], step = 1000;
     function page(i) {
       return sb.from(tb).select(cols).range(i, i + step - 1).then(function (r) {
