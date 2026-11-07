@@ -443,7 +443,7 @@
     if (a('data-wd-check') && confirm('I checked the name, ID and history – this withdrawal looks OK.')) call('pc_admin_withdraw_check', { wid: +a('data-wd-check') }, b);
     if (a('data-dep-check') && confirm('BIG deposit: I opened the TXID – the exact amount arrived at our address.')) call('pc_admin_deposit_check', { did: +a('data-dep-check') }, b);
     if (a('data-wd-start') && confirm('Start payout? All checks run now. Only AFTER this, send the USDT.')) call('pc_admin_withdraw_start', { wid: +a('data-wd-start') }, b);
-    if (a('data-wd-undo') && confirm('You did NOT send the USDT? The withdrawal goes back to waiting.')) call('pc_admin_withdraw_unstart', { wid: +a('data-wd-undo') }, b);
+    if (a('data-wd-undo') && (prompt('ONLY if you did NOT send any USDT for this withdrawal.\nIf you already sent it, press "Paid – paste TXID" instead (undo = it could be paid twice).\n\nType NOT SENT to undo:') || '').trim().toUpperCase() === 'NOT SENT') call('pc_admin_withdraw_unstart', { wid: +a('data-wd-undo') }, b);
     if (a('data-wd-ok')) { var tx = prompt('You sent the USDT. Paste the payout TXID:'); if (tx) call('pc_admin_withdraw', { wid: +a('data-wd-ok'), paid: true, why: tx }, b); }
     if (a('data-wd-no')) { var w2 = prompt('Reason for rejecting (the amount goes back to the player):'); if (w2) call('pc_admin_withdraw', { wid: +a('data-wd-no'), paid: false, why: w2 }, b); }
     if (a('data-kyc-ok') && confirm('Approve this ID? The name must match the account.')) call('pc_admin_kyc', { uid: a('data-kyc-ok'), ok: true, why: null, doc: a('data-doc') }, b);
