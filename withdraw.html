@@ -27,11 +27,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=110">
-<script src="assets/site.js?v=110" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=111">
+<script src="assets/site.js?v=111" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/wallet.js?v=110" defer></script>
-<script src="assets/v2.js?v=110" defer></script>
+<script src="assets/wallet.js?v=111" defer></script>
+<script src="assets/v2.js?v=111" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -66,12 +66,13 @@
           <p class="muted2" style="font-size:13px">The name must match your PipClash account. Only our team can see this photo.</p>
           <button class="btn" type="submit">Upload ID</button><p class="acc-msg" data-w-kyc-msg role="status"></p></form>
         <form data-w-wd-form hidden>
-          <select id="w-wd-net" hidden><option value="BEP20">BEP20</option></select>
-          <label for="w-wd-addr">Your USDT BEP20 address</label><input id="w-wd-addr" type="text" autocomplete="off" placeholder="0x… (42 characters)">
-          <p class="muted2" style="font-size:13px">Use an address from Binance, Trust Wallet, MetaMask or any wallet that supports BNB Smart Chain. Payments to a wrong address cannot be recovered.</p>
+          <label for="w-wd-net">Network</label>
+          <select id="w-wd-net"><option value="BEP20">USDT · BEP20 (BNB Smart Chain) – free · recommended</option><option value="TRC20">USDT · TRC20 (TRON) – $3 network fee</option></select>
+          <label for="w-wd-addr" data-w-addr-lbl>Your USDT BEP20 address</label><input id="w-wd-addr" type="text" autocomplete="off" placeholder="0x… (42 characters)">
+          <p class="muted2" style="font-size:13px" data-w-addr-help>Use an address from Binance, Trust Wallet, MetaMask or any wallet that supports BNB Smart Chain. Payments to a wrong address cannot be recovered.</p>
           <label for="w-wd-amt">Amount (USDT, minimum <span data-w-min-wd>$10</span>)</label>
           <div class="w-amt"><input id="w-wd-amt" type="number" min="1" step="0.01" inputmode="decimal"><button class="btn btn-ghost btn-sm" type="button" data-w-max>Max</button></div>
-          <div class="w-recv"><div><span>Available</span><b class="tn" data-w-bal>$0.00</b></div><div><span>Network fee</span><b>Free</b></div><div><span>You receive</span><b class="tn" data-w-recv>$0.00</b></div></div>
+          <div class="w-recv"><div><span>Available</span><b class="tn" data-w-bal>$0.00</b></div><div><span>Network fee</span><b data-w-fee>Free</b></div><div><span>You receive</span><b class="tn" data-w-recv>$0.00</b></div></div>
           <button class="btn btn-lg" type="submit">Request withdrawal</button><p class="acc-msg" data-w-wd-msg role="status"></p></form>
       </div>
       <div class="w-side"><div class="v2-card"><div class="v2-lbl">Your withdrawals</div><div data-w-wds class="w-reqs"><p class="v2-mut">No withdrawals yet.</p></div></div>
