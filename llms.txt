@@ -2,7 +2,7 @@
 
 > PipClash is an MT5 demo trading competition held every weekday (Monday–Friday), 4:30–7:30 PM UAE time. Everyone in a table gets the same fresh MT5 account ($10 table: $1,000 · $25: $2,500 · $50: $5,000); a live leaderboard ranks P&L. 80% of a table's entry fees form its prize pool (traders who finish above their starting balance with at least 3 trades win, up to the top 20%), 20% is the platform fee. Trading uses demo money only. 18+.
 
-- [Book a seat – Battle #001, Mon 9 Nov 2026](https://pipclash.net/)
+- [Join the next battle](https://pipclash.net/join.html)
 - [Rules and FAQ](https://pipclash.net/rules.html)
 - [MT5 setup guide](https://pipclash.net/guide.html)
 - [Live arena](https://pipclash.net/arena.html)
