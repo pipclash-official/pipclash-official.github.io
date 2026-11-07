@@ -349,6 +349,12 @@
   }
   on('#w-wd-amt', 'input', recv);
   on('#w-wd-net', 'change', netUi);
+  document.addEventListener('click', function (e) {   // withdraw network cards (BEP20 free / TRC20 $3)
+    var c = e.target.closest('[data-w-wnet]'), s = $('#w-wd-net'); if (!c || !s) return;
+    s.value = c.getAttribute('data-w-wnet');
+    $$('[data-w-wnet]').forEach(function (x) { x.setAttribute('aria-checked', String(x === c)); });
+    netUi();
+  });
   on('[data-w-max]', 'click', function () { $('#w-wd-amt').value = BAL > 0 ? BAL.toFixed(2) : ''; recv(); });
   on('[data-w-kyc-form]', 'submit', function (e) {
     e.preventDefault();
