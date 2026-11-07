@@ -96,6 +96,21 @@
     return '<span class="v2-tier ' + (fee >= 50 ? 'g' : fee >= 25 ? 'b' : 's') + (sm ? ' sm' : '') + '" aria-hidden="true"><i>' + fee + '</i></span>';
   }
 
+  /* A11/A20 (7 Nov): fraud check ke liye device id + IP (sirf admin dekhta) · ?c=reel1 campaign yaad (signup pe profile me) */
+  var CAMP = (new URLSearchParams(location.search).get('c') || '').replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 40);
+  try { if (CAMP) localStorage.setItem('pc_c', CAMP); } catch (e) { }
+  function seen(sb) {
+    try {
+      if (sessionStorage.getItem('pc_seen')) return;
+      sessionStorage.setItem('pc_seen', '1');
+      var d = localStorage.getItem('pc_dev');
+      if (!d) { d = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem('pc_dev', d); }
+      sb.rpc('pc_seen_log', { d: d }).then(function () { }, function () { });
+      var c = localStorage.getItem('pc_c');
+      if (c) sb.rpc('pc_set_campaign', { c: c }).then(function () { }, function () { });
+    } catch (e) { }
+  }
+
   /* ---------- Supabase (fetch – library sirf login ke liye) ---------- */
   function rest(path, body) {
     return fetch(SB_URL + '/rest/v1/' + path, { method: body ? 'POST' : 'GET', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
@@ -130,6 +145,7 @@
     return S.sb.auth.getSession().then(function (r) {
       S.user = r.data && r.data.session && r.data.session.user;
       if (!S.user) return;
+      seen(S.sb);
       return Promise.all([
         S.sb.from('wallets').select('balance').eq('user_id', S.user.id).maybeSingle(),
         S.sb.from('web_entries').select('contest_date,status,tier,paid_fee,public_name').eq('user_id', S.user.id).order('contest_date', { ascending: false }).limit(40)
