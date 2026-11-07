@@ -40,7 +40,9 @@
   }
   var SRC_NOW = srcNow(), SRC_FIRST = '';
   try { SRC_FIRST = localStorage.getItem('pc_src_first') || ''; if (!SRC_FIRST && SRC_NOW) { SRC_FIRST = SRC_NOW; localStorage.setItem('pc_src_first', SRC_NOW); } } catch (e) {}
-  function sourceTag() { var f = SRC_FIRST || SRC_NOW || 'direct', n = SRC_NOW || 'direct'; return (f === n ? f : f + '|now:' + n).slice(0, 80); }
+  var CAMP = (new URLSearchParams(location.search).get('c') || '').replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 40);   // A20 (7 Nov): ?c=reel1
+  try { if (CAMP) localStorage.setItem('pc_c', CAMP); else CAMP = localStorage.getItem('pc_c') || ''; } catch (e) { }
+  function sourceTag() { var f = SRC_FIRST || SRC_NOW || 'direct', n = SRC_NOW || 'direct'; return ((f === n ? f : f + '|now:' + n) + (CAMP ? '|c=' + CAMP : '')).slice(0, 80); }
   var counts = null, pick = null;
 
   function rpc(fn, body) {
