@@ -153,7 +153,7 @@
     var p = PRZ[ptier] || [], cells = '';
     for (var r = 1; r <= 20; r++) cells += '<div class="' + (r <= 3 ? 't1' : '') + '"><span>#' + r + '</span><b>' + (p[r - 1] ? usd(p[r - 1]) : '–') + '</b></div>';
     var pool = ptier * MAX * 0.8;                                 // 100 entries ka 80%
-    ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats play: pool ' + usd(pool) + ' (80% of entry fees) · top ' + p.length + ' above their start (3+ trades) win' +
+    ladder.innerHTML = '<div class="prz">' + cells + '</div><p class="cs-small">If all 100 seats fill: pool ' + usd(pool) + ' (80% of entry fees) · top ' + p.length + ' above their start (3+ trades) win' +
       (p.length < 20 ? ' · smallest prize is $10, so #' + (p.length + 1) + '–20 get none' : '') + '. No fixed prize – real prizes are 80% of the entry fees actually paid.</p>';
   }
   if (ptabs) ptabs.addEventListener('click', function (e) { var b = e.target.closest('[data-pt]'); if (b) { ptier = +b.getAttribute('data-pt'); drawLadder(); } });
@@ -238,7 +238,7 @@
       '<p class="bk-p">Launch Mon 9 Nov, 4:30 PM UAE. We will remind you before launch. On launch day you pay the entry in USDT and get your MT5 login.' +
       (bk.waitlist ? ' If a booked seat is not used by 4 PM, it goes to the waitlist in order.' : '') + '</p>' +
       '<div class="cs-earn"><b>Invite friends – get <span class="gold">1%</span> credit on every entry they pay, forever.</b>' +
-      '<span>Friends who book with your link stay linked to you. When they play paid battles, 1% of each entry goes to your PipClash wallet.</span></div>' +
+      '<span>Friends who book with your link stay linked to you. When they join paid battles, 1% of each entry goes to your PipClash wallet.</span></div>' +
       '<div class="cs-lbl" style="margin:4px 0 0">Your invite link</div>' +
       '<div class="bk-link"><input readonly value="' + esc(url) + '" aria-label="Your invite link"><button class="btn btn-sm" type="button" data-copy>Copy</button></div>' +
       '<div class="cs-share"><a class="btn cs-wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg) + '">WhatsApp</a>' +
