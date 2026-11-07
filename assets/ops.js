@@ -189,7 +189,7 @@
       var rows = P.map(function (p) {
         return '<tr><td><b>' + esc(p.code) + '</b><div class="o-note">' + esc(p.name || '') + ' · ' + esc(p.contact || '') + '</div></td>' +
           '<td>' + esc(p.platform || '–') + (p.followers ? '<div class="o-note">' + Number(p.followers).toLocaleString() + ' followers</div>' : '') + '</td>' +
-          '<td><span class="o-tag b">' + pct(p.rate_now) + '</span><div class="o-note">since ' + esc(p.started_on || '') + '</div></td>' +
+          '<td><span class="o-tag b">' + pct(p.rate_now) + '</span><div class="o-note">' + (Number(p.boost_days) > 0 ? '10% till ' + esc(p.boost_until || '') + ', then 5%' : 'since ' + esc(p.started_on || '')) + '</div></td>' +
           '<td class="r">' + p.bookings + '</td><td class="r">' + p.players + '</td><td class="r">' + p.entries + '</td><td class="r">' + money(p.fees) + '</td>' +
           '<td class="r"><b>' + money(p.earned) + '</b></td><td class="r">' + money(p.paid) + '</td><td class="r"><span class="o-tag ' + (p.due > 0 ? 'r' : 'g') + '">' + money(p.due) + '</span></td>' +
           '<td>' + (p.active ? '<span class="o-tag g">Active</span>' : '<span class="o-tag">Off</span>') + '</td>' +
@@ -203,7 +203,7 @@
         '<div class="o-card"><div class="o-row"><h3>All influencers</h3><span class="o-sp"></span>' +
           '<input class="o-search" placeholder="Search code / name" data-p-q> <button class="btn btn-ghost btn-sm" data-p-csv>Export CSV</button>' +
           (own ? ' <button class="btn btn-sm" data-p-new>+ Add influencer</button>' : '') + '</div>' +
-          '<div class="o-note">Deal: flat 5% of every paid entry from their players – paid daily, after each battle result. A player from a partner link never gives the 1% referral too. Link = pipclash.net/?ref=CODE</div>' +
+          '<div class="o-note">Deal: flat 5% of every paid entry from their players (only influencers promised 10% in the old email: 10% for the first 2 weeks from Deal start, then 5%) – paid daily, after each battle result. A player from a partner link never gives the 1% referral too. Link = pipclash.net/?ref=CODE</div>' +
           '<div class="o-scroll"><table class="o-table" data-p-table><thead><tr><th>Code</th><th>Platform</th><th>Rate</th><th class="r">Bookings</th><th class="r">Players</th><th class="r">Entries</th><th class="r">Fees</th><th class="r">Earned</th><th class="r">Paid</th><th class="r">Due</th><th>Status</th><th></th></tr></thead><tbody>' +
           (rows || '<tr><td colspan="12" class="o-note">No influencers yet – add the first one.</td></tr>') + '</tbody></table></div></div>' +
         '<div class="o-row" style="margin:8px 0"><button class="btn btn-sm" data-p-batch-open>Daily payout list</button></div><div data-p-batch></div>' +
@@ -223,7 +223,7 @@
       '<label>Country<input name="country" value="' + esc(p.country || '') + '"></label>' +
       '<label>Deal start<input name="start" type="date" value="' + esc(p.started_on || day(Date.now())) + '"></label>' +
       '<label>Their own PipClash email<input name="own" type="email" value="' + esc(p.own_email || '') + '" placeholder="no 5% on their own entries"></label>' +
-      '<label>Commission % (flat 5)<input name="p" type="number" step="0.5" min="5" max="5" readonly value="' + (Number(p.pct) * 100) + '"></label>' +
+      '<label>Deal<select name="deal"><option value="5">Flat 5%</option><option value="10"' + (Number(p.boost_days) > 0 ? ' selected' : '') + '>10% pehle 2 hafte, phir 5% (sirf purane email wale)</option></select></label>' +
       '<label>Pay to (USDT address)<input name="pay" value="' + esc(p.pay_to || '') + '" placeholder="0x… (BEP20) or T… (TRC20)"></label>' +
       '<label>Active<select name="on"><option value="1"' + (p.active ? ' selected' : '') + '>Active</option><option value="0"' + (p.active ? '' : ' selected') + '>Off</option></select></label>' +
       '<label style="grid-column:1/-1">Notes<textarea name="notes" rows="2">' + esc(p.notes || '') + '</textarea></label>' +
@@ -501,7 +501,8 @@
     }
     if (f.matches('[data-p-save]')) {
       e.preventDefault();
-      var args = { c: v('c'), nm: v('nm'), p: (+v('p') || 0) / 100, bp: (+v('p') || 0) / 100, bd: 0, start: v('start') || null, on_: v('on') === '1',
+      var ten = v('deal') === '10';   // 8 Nov owner: purane email me 10%/2 hafte ka vaada – sirf unke liye
+      var args = { c: v('c'), nm: v('nm'), p: 0.05, bp: ten ? 0.10 : 0.05, bd: ten ? 14 : 0, start: v('start') || null, on_: v('on') === '1',
                    contact_: v('contact') || null, platform_: v('platform') || null, followers_: v('followers') ? +v('followers') : null, country_: v('country') || null, pay_to_: v('pay') || null, notes_: v('notes') || null, own_: v('own') || null };
       if (!(args.p >= 0.05 && args.p <= 0.10)) { alert('Commission must be between 5% and 10%.'); return; }
       if (DEMO) { alert('Demo – save only works after login.'); return; }
