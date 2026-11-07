@@ -125,8 +125,8 @@
       var shown = n !== null && totalBooked() >= SHOW_FROM;          // kam ginti dikhane se bharosa ghatta – 30+ pe hi number
       var have = my.filter(function (b) { return b.tier === t.fee; })[0];
       var btn = have ? '<button class="btn btn-ghost cs-abtn" type="button" data-show="' + t.fee + '">✅ Booked · see my seat</button>'
-        : '<button class="btn cs-abtn' + (t.c === 'g' ? ' cs-gold' : '') + '" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Book FREE seat') + '</button>' +
-          '<div class="cs-afee">' + (t.fee === FIRST_FEE ? 'Entry ' + usd(t.fee) + ' only on battle day · nothing to pay now'
+        : '<button class="btn cs-abtn' + (t.c === 'g' ? ' cs-gold' : '') + '" type="button" data-pick="' + t.fee + '">' + (full ? 'Join waitlist' : 'Free reminder') + '</button>' +
+          '<div class="cs-afee">' + (t.fee === FIRST_FEE ? 'Entry ' + usd(t.fee) + ' · <a href="join.html">join now</a> or get a free reminder'
             : 'Opens from Battle #002 (Tue 10 Nov) · entry ' + usd(t.fee) + ' · nothing to pay now') + '</div>';
       return '<div class="cs-arena ' + t.c + (pick === t.fee ? ' on' : '') + '">' +
         '<div class="cs-arow">' + coin(t) + '<div class="cs-ainfo"><b class="cs-aname">' + t.name + '</b>' +
@@ -172,7 +172,7 @@
         '<span class="bk-strip">' + USDT_SVG + 'USDT</span></button>';   // 5 Nov owner: design 5 ($ + hari USDT patti)
     }).join('');
     form.querySelector('[data-bk-ft]').innerHTML = '<div class="bk-pills" role="group" aria-label="Choose your table">' + pills + '</div>' +
-      '<small class="bk-ftn">Free seat · ' + t.name + ' · entry ' + usd(t.fee) + ' only on battle day</small>';
+      '<small class="bk-ftn">Free reminder · ' + t.name + ' · entry ' + usd(t.fee) + ' is paid on the Join page</small>';
     form.hidden = false; done.hidden = true; err.textContent = '';
     if (keep) return;
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -212,7 +212,7 @@
     if (!ok18) { err.textContent = 'Please confirm you are 18 or older.'; return; }
     var b = form.querySelector('button[type=submit]'); b.disabled = true; b.textContent = 'Booking…'; err.textContent = '';
     rpc('pc_book', { p_name: name, p_contact: contact, p_country: country, p_tier: pick, p_ref: ref }).then(function (r) {
-      b.disabled = false; b.textContent = 'Book my free seat';
+      b.disabled = false; b.textContent = 'Remind me';
       if (!r) { err.textContent = 'Could not book right now – check your internet and try again.'; return; }
       if (!r.ok) { err.textContent = r.err === 'limit' ? 'Too many bookings from this network today.' : 'Please check your details and try again.'; return; }
       var bk = { tier: r.tier, code: r.code, seat: r.seat, waitlist: r.waitlist, name: name };
@@ -260,7 +260,7 @@
     var my = mine();
     if (!my.length) { mineWrap.hidden = true; return; }
     var url = link(my[0].code);
-    var msg = 'Book your free seat for PipClash Battle #001 – weekday (Mon–Fri) MT5 trading battle, same account for everyone in your table, top traders win. Only 100 seats per arena: ' + url;
+    var msg = 'Join PipClash Battle #001 – weekday (Mon–Fri) MT5 trading battle, same account for everyone in your table, top traders win. Only 100 seats per arena: ' + url;
     mineBox.innerHTML = my.map(function (b) {
       var t = tier(b.tier);
       return '<div class="cs-mrow">' + coin(t) + '<div><b>' + t.name + ' · ' + (b.waitlist ? 'waitlist #' : 'seat #') + b.seat + '</b><div class="v2-mut">Booking code <b class="gold">' + esc(b.code) + '</b></div></div></div>';
@@ -307,7 +307,7 @@
     });
   }
 
-  if (refInUrl) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – your seat booking is free.'; }   // 5 Nov: sirf asli invite link pe (purana yaad wala ref nahi)
+  if (refInUrl) { var rb = root.querySelector('[data-bk-ref]'); rb.hidden = false; rb.textContent = 'Invited by a friend 🎉 – welcome to PipClash.'; }   // 5 Nov: sirf asli invite link pe (purana yaad wala ref nahi)
   drawTables(); drawLadder(); drawMine(); loadCounts(); loadTop(); loadRecent();
   setInterval(function () { loadCounts(); loadRecent(); }, 30000);
 })();
