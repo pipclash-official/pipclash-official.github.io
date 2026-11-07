@@ -75,7 +75,7 @@
       var d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + i));
       if ((s.days || [1, 2, 3, 4, 5]).indexOf(new Date(d.getTime() + 4 * 36e5).getUTCDay()) < 0) continue;
       var at = function (m) { return new Date(d.getTime() + m * 60e3); };
-      if (now < at(jo)) return { k: 'opens', t: at(jo) };
+      // 7 Nov go-live: entry agle battle ke liye pehle se khuli (pc_tier_date) – 'opens' nahi, seedha 'closes'
       if (now < at(jc)) return { k: 'closes', t: at(jc) };
       if (now < at(ts)) return { k: 'starts', t: at(ts) };
       if (now < at(te)) return { k: 'live', t: at(te) };
