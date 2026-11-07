@@ -190,7 +190,7 @@
     var ph = phase(), list = tablesData(), t = list[list.length - 1], b = D().battle || {}, s = sched(), st = D().standings || [];
     var elite = t.fee >= 50, head, body, cta;
     var label = t.free ? '<div class="v2-eyebrow">FREE BATTLE</div><div class="v2-h">Daily battle</div>'
-      : '<div class="v2-eyebrow' + (elite ? ' gold' : '') + '">' + t.name + (elite ? ' · VIP' : '') + '</div><div class="v2-h">' + usd(t.fee) + ' TABLE</div>';
+      : '<div class="v2-eyebrow' + (elite ? ' gold' : '') + '">' + t.name + '' + '</div><div class="v2-h">' + usd(t.fee) + ' TABLE</div>';
     var poolBox = function (txt) { return '<div class="v2-mut">' + txt + '</div><div class="v2-pool tn">' + usd(t.pool) + '</div>'; };
     var seats = t.max ? '<div class="v2-row v2-mut"><span class="tn">' + t.taken + ' / ' + t.max + ' players</span><span class="tn">' + Math.max(0, t.max - t.taken) + ' seats left</span></div>' + bar(t.taken / t.max * 100, elite)
       : '<div class="v2-row v2-mut"><span class="tn">' + t.taken + ' players joined</span><span>Entry free</span></div>';
@@ -269,7 +269,7 @@
         : 'Today’s entry is closed – seats below are for ' + dayName(nextDay(ph.date, true));
     box.innerHTML = list.map(function (t) {
       var elite = t.fee >= 50, pro = t.fee === 25, mine = S.mine[t.fee];
-      var badge = t.free ? chip('FREE', 'up') : (t.taken >= t.max ? chip('FULL', 'down') : elite ? '<span class="v2-chip v2-vip">VIP</span>' : pro ? '<span class="v2-chip v2-pop">POPULAR</span>' : chip('● ENTRY OPEN', 'up'));
+      var badge = t.free ? chip('FREE', 'up') : (t.taken >= t.max ? chip('FULL', 'down') : elite ? '<span class="v2-chip v2-vip">ELITE</span>' : pro ? '<span class="v2-chip v2-pop">POPULAR</span>' : chip('● ENTRY OPEN', 'up'));
       var prizes = t.rows.length ? '1st ' + usd(t.rows[0], true) + (t.rows[1] ? ' · 2nd ' + usd(t.rows[1], true) : '') + (t.rows[2] ? ' · 3rd ' + usd(t.rows[2], true) : '') + ' · up to ' + t.rows.length + ' prizes' : 'Prizes start at 5 players (fewer = full refund)';
       var btn;
       if (t.free) btn = '<a class="btn v2-btn" href="account.html#signup">JOIN FREE</a><a class="btn btn-ghost v2-btn2" href="https://t.me/PipClashBot">or join on Telegram</a>';
@@ -505,7 +505,7 @@
     if (!$('[data-ref-card]')) return;
     var on = location.hash === '#refer', t = $('.v2-ttl');
     document.body.classList.toggle('v2-refer-only', on);
-    if (t) t.textContent = on ? 'Refer & earn' : 'My battle';
+    if (t) t.textContent = on ? 'Invite friends' : 'My battle';
     document.querySelectorAll('.sn-it').forEach(function (a) { var h = a.getAttribute('href'); if (h === 'account.html' || h === 'account.html#refer') { if ((h === 'account.html#refer') === on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); } });
   }
   window.addEventListener('hashchange', referMode);
