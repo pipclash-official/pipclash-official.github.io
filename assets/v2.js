@@ -492,6 +492,7 @@
   function shell() {
     var chipBox = $('[data-v2-chip]'), me = $('[data-v2-me]'), mb = $('[data-v2-mbal]'), lo = $('[data-v2-logout]');
     if (!S.user) return;
+    document.body.classList.add('pc-in');
     var nm = myName() || (S.profile && S.profile.name) || 'Trader';
     if (chipBox) chipBox.innerHTML = '<a class="v2-balchip" href="wallet.html" aria-label="Wallet balance">' + coin('₮') + '<b class="tn">' + usd(S.bal || 0, true) + '</b></a>';
     if (me) me.innerHTML = '<div class="v2-av">' + esc(nm.charAt(0).toUpperCase()) + '</div><div><b>' + esc(nm) + '</b><div class="v2-mut">' +
