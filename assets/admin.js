@@ -26,7 +26,7 @@
               BAD_TRC20: 'TRC20 address must start with T and have 34 characters.', BAD_BEP20: 'BEP20 address must start with 0x and have 42 characters.',
               ADDRESS_FIRST: 'Save both real USDT addresses before switching to LIVE.', NOT_APPROVED: 'Only an approved deposit can be reversed.', NO_KYC: 'This player has not uploaded an ID.',
               REQUEST_WAITING: 'A request for this player is already waiting for the engine – wait a minute.', ALREADY_REPLYING: 'Another admin is already sending a reply.',
-              BAD_REQUEST: 'Unknown request.', TXID_USED: 'This TXID was already used.', TOO_OLD: 'This request is older than 24 hours – ask for it again.', KEEP_TWO_ADMINS: 'The team must keep at least 2 admins.',
+              BAD_REQUEST: 'Unknown request.', TXID_USED: 'This TXID was already used.', BANNED_WORD: 'This text has a word we never use (game / earn / invest / guaranteed).', BAD_URL: 'Please use a full https:// link.', SENDER_ONLY: 'Only the sending system can mark this sent.', BAD_NETWORK: 'Choose BEP20 or TRC20.', BAD_ADDRESS: 'This wallet address is not valid for the network.', NOT_FOUND: 'Not found – refresh the page.', TOO_OLD: 'This request is older than 24 hours – ask for it again.', KEEP_TWO_ADMINS: 'The team must keep at least 2 admins.',
               DOC_CHANGED: 'The player uploaded a new ID photo – open it again before you decide.', BAD_TXID: 'This TXID does not look like a real transaction hash.' };
   function errText(e) { var m = String((e && e.message) || e || ''); for (var k in ERR) if (m.indexOf(k) >= 0) return ERR[k]; return m; }
   function call(fn, args, btn, done) {
@@ -50,6 +50,7 @@
   window.pcTagOf = tagOf;
   function pendingNote(r) { if (r && r.data === 'PENDING') alert('Saved for approval – another admin must press Confirm in Settings.'); }
   function toast(t) { var el = $('[data-a-toast]'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 1800); }
+  function rowOf(b) { var tr = b.closest('tr'); return tr ? '\n\n' + tr.innerText.replace(/\s+/g, ' ').replace(/(Approve|Reject|Check|Start payout|Paid – paste TXID|Not sent – undo|Copy|View ID)/g, '').trim().slice(0, 220) : ''; }
   function who(uid) { var p = P[uid]; return p ? '<b>' + esc(p.name) + '</b><div class="muted2 a-sm">' + esc(p.phone) + '</div>' : '<span class="muted2">' + esc(String(uid).slice(0, 8)) + '</span>'; }
   function people(ids) {
     ids = ids.filter(function (i, n) { return i && !P[i] && ids.indexOf(i) === n; });
@@ -237,19 +238,17 @@
               '<td>' + (d.checked_name ? '<span class="tag-ok">✓ ' + esc(d.checked_name) + '</span>' : (isBig ? '<button class="btn btn-ghost btn-sm" data-dep-check="' + d.id + '">Check</button>' : '<span class="muted2 a-sm">not needed</span>')) + '</td>' +
               '<td class="a-act"><button class="btn btn-sm" data-dep-ok="' + d.id + '">Approve</button><button class="btn btn-ghost btn-sm" data-dep-no="' + d.id + '">Reject</button></td></tr>';
           }), 'No deposits waiting ✅'), 'Open the TXID: the amount on the blockchain must be EXACTLY the amount here (every player gets their own cents, like $50.37) and it must have arrived at our address. ' +
-            usd(bigDep) + '+ needs a Check from a DIFFERENT admin before Approve.') +
+            'Staff can only Check – the owner approves.') +
           card('Withdrawals', table(['Player', 'Amount', 'Address', 'Check', ''], wds.map(function (w) {
             var isBig = dayTot[w.id] >= big, proc = w.status === 'processing', dep = depBy[w.user_id];
             return '<tr' + (proc ? ' class="a-flag"' : '') + '><td>' + who(w.user_id) + (dep ? '<div class="muted2 a-sm">last deposit approved by ' + esc([dep.checked_name, dep.decided_by].filter(Boolean).join(' + ')) + '</div>' : '<div class="muted2 a-sm">no approved deposit</div>') + '</td>' +
-              '<td class="mono"><b>' + usd(w.amount) + '</b>' + (isBig ? ' <span class="tag-bad" title="24h total ' + usd(dayTot[w.id]) + '">BIG</span>' : '') + (proc ? ' <span class="tag-wait">SENDING</span>' : '') +
-              (Number(w.fee) > 0 ? '<div class="tag-wait">SEND ' + usd(Number(w.amount) - Number(w.fee)) + ' (fee ' + usd(w.fee) + ')</div>' : '') +
-              '<div class="muted2 a-sm">' + esc(w.network) + ' · ' + when(w.created_at) + '</div></td>' +
+              '<td class="mono"><b style="font-size:17px">SEND ' + usd(Number(w.amount) - Number(w.fee || 0)) + '</b> <span class="tag-wait">' + esc(w.network) + '</span>' + (Number(w.fee) > 0 ? '<div class="muted2 a-sm">asked ' + usd(w.amount) + ' · fee ' + usd(w.fee) + ' kept</div>' : '') + (isBig ? ' <span class="tag-bad" title="24h total ' + usd(dayTot[w.id]) + '">BIG</span>' : '') + (proc ? ' <span class="tag-wait">SENDING</span>' : '') +
+                            '<div class="muted2 a-sm">' + esc(w.network) + ' · ' + when(w.created_at) + '</div></td>' +
               '<td><span class="w-mono">' + esc(w.address) + '</span> <button class="btn btn-ghost btn-sm" data-copy="' + esc(w.address) + '">Copy</button></td>' +
               '<td>' + (w.checked_name ? '<span class="tag-ok">✓ ' + esc(w.checked_name) + '</span>' : '<button class="btn btn-ghost btn-sm" data-wd-check="' + w.id + '">Check</button>') + '</td>' +
               '<td class="a-act">' + (proc ? (owner() ? '<button class="btn btn-sm" data-wd-ok="' + w.id + '">Paid – paste TXID</button><button class="btn btn-ghost btn-sm" data-wd-undo="' + w.id + '">Not sent – undo</button>' : '<span class="muted2 a-sm">owner is sending</span>')
-                : (owner() ? '<button class="btn btn-sm" data-wd-start="' + w.id + '"' + (w.checked_name ? '' : ' disabled title="Check first"') + '>Start payout</button>' : '') + '<button class="btn btn-ghost btn-sm" data-wd-no="' + w.id + '">Reject</button>') + '</td></tr>';
-          }), 'No withdrawals waiting ✅'), 'Step 1: an admin checks name, ID and history and presses Check. Step 2: the owner presses Start payout – ALL checks run now, BEFORE any USDT leaves. ' +
-            'Step 3: send the USDT, then Paid + TXID. ' + usd(big) + '+ in 24 hours needs the Check from a DIFFERENT admin. A started payout cannot be rejected. Reject = money goes back to the player.') +
+                : (owner() ? '<button class="btn btn-sm" data-wd-start="' + w.id + '"' + ((w.checked_name || owner()) ? '' : ' disabled title="Check first"') + '>Start payout</button>' : '') + '<button class="btn btn-ghost btn-sm" data-wd-no="' + w.id + '">Reject</button>') + '</td></tr>';
+          }), 'No withdrawals waiting ✅'), '1) Check name + ID. 2) Owner presses Start payout (all checks run before any USDT leaves). 3) Send the SEND amount on the shown network from Trust Wallet, then Paid + TXID. A started payout cannot be rejected. Reject = money goes back to the player.') +
           card('Telegram prizes to send', table(['Battle', 'Player', 'Prize', 'Status', 'Payment', ''], claims.map(function (c) {
             return '<tr><td class="mono">#' + c.contest_id + '</td><td><b>' + esc(c.player) + '</b></td><td class="mono">' + usd(c.prize) + '</td><td>' + esc(c.status) + '</td><td class="w-mono">' + esc(c.pay || '–') + '</td>' +
               '<td>' + (owner() && c.status === 'review' ? '<button class="btn btn-sm" data-claim="' + esc(c.player) + '" data-cid="' + c.contest_id + '">Mark paid</button>' : '') + '</td></tr>';
@@ -289,7 +288,7 @@
             var dq = p.status === 'disqualified';
             return '<tr' + (p.flags ? ' class="a-flag"' : '') + '><td class="mono">' + (p.rank || '–') + '</td><td><b>' + esc(p.player) + '</b><div class="muted2 a-sm">' + esc(p.channel || '') + (p.prize ? ' · prize ' + usd(p.prize) : '') + '</div></td>' +
               '<td class="mono r ' + (p.pnl >= 0 ? 'up' : 'down') + '">' + usd(p.pnl) + '</td><td class="mono">' + (p.trades || 0) + '</td>' +
-              '<td>' + esc(p.status) + (p.dq_reason ? '<div class="muted2 a-sm">' + esc(p.dq_reason) + '</div>' : '') + (p.flags ? '<div class="a-flags">⚠️ ' + esc(p.flags) + '</div>' : '') + '</td>' +
+              '<td>' + esc(p.status) + (p.dq_reason ? '<div class="muted2 a-sm">' + esc(p.dq_reason) + '</div>' : '') + (p.flags ? '<div class="a-flags">⚠️ ' + esc(String(p.flags).split(/[,;]\s*/).map(function (f) { var k = f.split(':')[0].trim(); return window.pcFlag ? window.pcFlag(k) + (f.indexOf(':') > 0 ? ' –' + f.slice(f.indexOf(':') + 1) : '') : f; }).join(' · ')) + '</div>' : '') + '</td>' +
               '<td class="a-act">' + (canDq ? (dq ? '<button class="btn btn-ghost btn-sm" data-undq="' + esc(p.player) + '" data-why="' + esc(p.dq_reason || '') + '">Undo DQ</button>' : '<button class="btn btn-ghost btn-sm" data-dq="' + esc(p.player) + '">DQ</button>') :
                 (owner() && p.prize > 0 ? '<button class="btn btn-ghost btn-sm" data-revoke="' + esc(p.player) + '" data-prize="' + p.prize + '">Revoke prize</button>' : '')) + '</td></tr>';
           }), 'No players.')) +
@@ -388,10 +387,10 @@
     sb.from('setting_changes').select('*').eq('status', 'pending').order('id', { ascending: false }).then(function (r) {
       var pend = r.data || [], box = $('[data-set-pending]');
       if (!box) return;
-      box.innerHTML = pend.length ? card('Waiting for a second admin', table(['Setting', 'New value', 'By', ''], pend.map(function (c) {
+      box.innerHTML = pend.length ? card('Waiting for the owner', table(['Setting', 'New value', 'By', ''], pend.map(function (c) {
         return '<tr><td><b>' + esc(c.key) + '</b></td><td class="w-mono">' + esc(JSON.stringify(c.value)) + '</td><td>' + esc(c.requested_name || '') + '<div class="muted2 a-sm">' + when(c.created_at) + '</div></td>' +
           '<td class="a-act"><button class="btn btn-sm" data-set-ok="' + c.id + '">Confirm</button><button class="btn btn-ghost btn-sm" data-set-no="' + c.id + '">Reject</button></td></tr>';
-      }), ''), 'Money settings (USDT address, big amounts) need a DIFFERENT admin to confirm. Check the address carefully before you confirm.') : '';
+      }), ''), 'Settings saved by staff wait here for the owner. Check the address carefully before you confirm.') : '';
     });
     if (!owner()) { pane().innerHTML = '<div data-set-pending></div>' + card('Settings', '<p class="muted2">Only the owner can change settings. Pending money settings from the owner appear above for you to confirm.</p>'); return; }
     var f = function (k, lab, type) { return '<label>' + lab + '</label><input type="' + (type || 'text') + '" data-set="' + k + '" value="' + esc(S[k] == null ? '' : S[k]) + '">'; };
@@ -399,7 +398,7 @@
       '<label>Mode</label><select data-set="mode"><option value="test"' + (S.mode === 'test' ? ' selected' : '') + '>TEST – no real money</option><option value="live"' + (S.mode === 'live' ? ' selected' : '') + '>LIVE – real money</option></select>' +
       '<label class="acc-check"><input type="checkbox" data-set="paid_entry"' + (S.paid_entry === true ? ' checked' : '') + '> Paid entry ON (players pay the entry fee from their wallet)</label>' +
       f('entry_fee', 'Entry fee (USD)', 'number') + f('min_deposit', 'Minimum deposit (USD)', 'number') + f('min_withdraw', 'Minimum withdrawal (USD)', 'number') +
-      f('big_withdraw', 'Big withdrawal – needs 2 admins from (USD)', 'number') + f('big_deposit', 'Big deposit – needs 2 admins from (USD)', 'number') + f('usdt_trc20', 'Our USDT TRC20 address') + f('usdt_bep20', 'Our USDT BEP20 address') +
+      f('big_withdraw', 'Big withdrawal – flagged BIG from (USD)', 'number') + f('big_deposit', 'Big deposit – owner approves from (USD)', 'number') + f('usdt_trc20', 'Our USDT TRC20 address') + f('usdt_bep20', 'Our USDT BEP20 address') +
       '<button class="btn btn-lg" type="submit">Save changes</button></form>', 'Every change is saved in the activity log. The laptop engine picks up paid entry ON/OFF within a minute.');
   }
 
@@ -407,7 +406,7 @@
   function team() {
     sb.from('pc_admins').select('*').order('added_at').then(function (r) {
       var few = (r.data || []).length < 2;
-      pane().innerHTML = (few ? '<div class="card acc-card a-flag"><b>⚠️ Only one admin.</b><p class="muted2">Big withdrawals and big deposits need a SECOND admin to press Check – with one admin they cannot be done. Add at least one trusted person below.</p></div>' : '') +
+      pane().innerHTML = '' +
         card('Team', table(['Name', 'Role', 'Added', ''], (r.data || []).map(function (a) {
         return '<tr><td><b>' + esc(a.name || '') + '</b></td><td>' + esc(a.role) + '</td><td class="muted2">' + when(a.added_at) + '</td>' +
           '<td>' + (owner() ? '<button class="btn btn-ghost btn-sm" data-team-rm="' + a.user_id + '">Remove</button>' : '') + '</td></tr>';
@@ -438,15 +437,15 @@
       if (em && confirm('Add ' + usd(a('data-amt')) + ' to ' + em.trim() + '\'s wallet?\nTX ' + a('data-unm-give') + '\nThis cannot be given twice.')) call('pc_admin_unmatched_assign', { tx: a('data-unm-give'), em: em.trim() }, b);
     }
     if (a('data-unm-ignore')) { var why = prompt('Why ignore this transfer? (e.g. our own test, returned to sender)'); if (why) call('pc_admin_unmatched_ignore', { tx: a('data-unm-ignore'), why: why }, b); }
-    if (a('data-dep-ok') && confirm('Approve this deposit? Check the TXID on the explorer first.')) call('pc_admin_deposit', { did: +a('data-dep-ok'), ok: true, why: null }, b);
+    if (a('data-dep-ok') && confirm('Approve this deposit? Check the TXID on the explorer first.' + rowOf(b))) call('pc_admin_deposit', { did: +a('data-dep-ok'), ok: true, why: null }, b);
     if (a('data-dep-no')) { var w1 = prompt('Reason for rejecting this deposit:'); if (w1) call('pc_admin_deposit', { did: +a('data-dep-no'), ok: false, why: w1 }, b); }
-    if (a('data-wd-check') && confirm('I checked the name, ID and history – this withdrawal looks OK.')) call('pc_admin_withdraw_check', { wid: +a('data-wd-check') }, b);
+    if (a('data-wd-check') && confirm('I checked the name, ID and history – this withdrawal looks OK.' + rowOf(b))) call('pc_admin_withdraw_check', { wid: +a('data-wd-check') }, b);
     if (a('data-dep-check') && confirm('BIG deposit: I opened the TXID – the exact amount arrived at our address.')) call('pc_admin_deposit_check', { did: +a('data-dep-check') }, b);
-    if (a('data-wd-start') && confirm('Start payout? All checks run now. Only AFTER this, send the USDT.')) call('pc_admin_withdraw_start', { wid: +a('data-wd-start') }, b);
+    if (a('data-wd-start') && confirm('Start payout? All checks run now. Only AFTER this, send the USDT.' + rowOf(b))) call('pc_admin_withdraw_start', { wid: +a('data-wd-start') }, b);
     if (a('data-wd-undo') && (prompt('ONLY if you did NOT send any USDT for this withdrawal.\nIf you already sent it, press "Paid – paste TXID" instead (undo = it could be paid twice).\n\nType NOT SENT to undo:') || '').trim().toUpperCase() === 'NOT SENT') call('pc_admin_withdraw_unstart', { wid: +a('data-wd-undo') }, b);
-    if (a('data-wd-ok')) { var tx = prompt('You sent the USDT. Paste the payout TXID:'); if (tx) call('pc_admin_withdraw', { wid: +a('data-wd-ok'), paid: true, why: tx }, b); }
+    if (a('data-wd-ok')) { var tx = prompt('You sent the USDT. Paste the payout TXID:' + rowOf(b)); if (tx) call('pc_admin_withdraw', { wid: +a('data-wd-ok'), paid: true, why: tx }, b); }
     if (a('data-wd-no')) { var w2 = prompt('Reason for rejecting (the amount goes back to the player):'); if (w2) call('pc_admin_withdraw', { wid: +a('data-wd-no'), paid: false, why: w2 }, b); }
-    if (a('data-kyc-ok') && confirm('Approve this ID? The name must match the account.')) call('pc_admin_kyc', { uid: a('data-kyc-ok'), ok: true, why: null, doc: a('data-doc') }, b);
+    if (a('data-kyc-ok') && confirm('Approve this ID? The name must match the account.' + rowOf(b))) call('pc_admin_kyc', { uid: a('data-kyc-ok'), ok: true, why: null, doc: a('data-doc') }, b);
     if (a('data-kyc-no')) { var w3 = prompt('Reason (shown to the player):'); if (w3) call('pc_admin_kyc', { uid: a('data-kyc-no'), ok: false, why: w3, doc: a('data-doc') }, b); }
     if (a('data-kyc-view')) sb.storage.from('kyc').createSignedUrl(a('data-kyc-view'), 300).then(function (r) { if (r.data) window.open(r.data.signedUrl, '_blank', 'noopener'); else alert('Could not open the file.'); });
     if (a('data-copy')) navigator.clipboard && navigator.clipboard.writeText(a('data-copy')).then(function () { toast('Copied'); });
@@ -507,5 +506,5 @@
   // setTimeout: callback ke andar seedha Supabase call = deadlock (naya sign-in 'Loading…' pe atakta tha)
   sb.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') setTimeout(load, 0); });
   load();
-  setInterval(function () { if (!$('[data-a-view="main"]').hidden && ['dash', 'money', 'battle', 'support'].indexOf(TAB) >= 0 && !document.activeElement.matches('input,textarea,select')) render(); }, 30000);
+  setInterval(function () { if (!$('[data-a-view="main"]').hidden && ['dash', 'battle', 'support'].indexOf(TAB) >= 0 && !document.activeElement.matches('input,textarea,select')) render(); }, 30000);
 })();
