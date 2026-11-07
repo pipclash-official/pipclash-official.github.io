@@ -319,3 +319,28 @@
     b.classList.add('is-hide'); clearTimeout(t); t = setTimeout(function () { b.classList.remove('is-hide'); }, 900);
   }, { passive: true });
 })();
+
+/* 7 Nov (A11): [data-nb] = agla battle apne aap – "Battle #002 · Tue 10 Nov · 4:30 PM UAE" (launch Mon 9 Nov = #001, har Mon–Fri +1) */
+(function () {
+  function uaeParts(ms) { var d = new Date(ms + 4 * 36e5); return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), wd: d.getUTCDay(), h: d.getUTCHours(), mi: d.getUTCMinutes() }; }
+  function nextBattle() {
+    var now = Date.now(), p = uaeParts(now), day = Date.UTC(p.y, p.m, p.d);
+    var after = p.h * 60 + p.mi >= 19 * 60 + 30;                       // 7:30 PM UAE ke baad = agla din
+    if (after || p.wd === 0 || p.wd === 6) { do { day += 864e5; } while ([0, 6].indexOf(new Date(day).getUTCDay()) >= 0); }
+    var launch = Date.UTC(2026, 10, 9); if (day < launch) day = launch;
+    var n = 0; for (var t = launch; t <= day; t += 864e5) { var w = new Date(t).getUTCDay(); if (w > 0 && w < 6) n++; }
+    var dd = new Date(day), D = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dd.getUTCDay()],
+        M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dd.getUTCMonth()];
+    var tag = 'Battle #' + ('00' + n).slice(-3), when = D + ' ' + dd.getUTCDate() + ' ' + M + ' · 4:30 PM UAE';
+    return { tag: tag, when: when, line: tag + ' · ' + when };
+  }
+  function run() {
+    var b = nextBattle();
+    document.querySelectorAll('[data-nb]').forEach(function (el) {
+      var k = el.getAttribute('data-nb'), v = b[k] || b.line;
+      el.textContent = el.hasAttribute('data-nb-up') ? v.toUpperCase() : v;
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
+(function () { var now = Date.now(); document.querySelectorAll('[data-hide-after]').forEach(function (el) { var t = Date.parse(el.getAttribute('data-hide-after')); if (t && now >= t) el.hidden = true; }); })();
