@@ -27,11 +27,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=118">
-<script src="assets/site.js?v=118" defer></script>
+<link rel="stylesheet" href="assets/site.css?v=119">
+<script src="assets/site.js?v=119" defer></script>
 <script src="assets/vendor/supabase.js" defer></script>
-<script src="assets/wallet.js?v=118" defer></script>
-<script src="assets/v2.js?v=118" defer></script>
+<script src="assets/wallet.js?v=119" defer></script>
+<script src="assets/v2.js?v=119" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -75,7 +75,7 @@
           <div class="w-recv"><div><span>Available</span><b class="tn" data-w-bal>$0.00</b></div><div><span>Network fee</span><b data-w-fee>Free</b></div><div><span>You receive</span><b class="tn" data-w-recv>$0.00</b></div></div>
           <button class="btn btn-lg" type="submit">Request withdrawal</button><p class="acc-msg" data-w-wd-msg role="status"></p></form>
       </div>
-      <div class="w-side"><div class="v2-card"><div class="v2-lbl">Your withdrawals</div><div data-w-wds class="w-reqs"><p class="v2-mut">No withdrawals yet.</p></div></div>
+      <div class="w-side"><div class="v2-card" data-w-save-card><div class="v2-lbl">Save your address early</div><p class="v2-mut" style="font-size:13px;margin:6px 0 8px">For safety, a new address works 24 hours after it is saved. Save it now – then your prize can be withdrawn at once.</p><form data-w-save-form><select id="w-save-net"><option value="BEP20">USDT · BEP20 (free)</option><option value="TRC20">USDT · TRC20 ($3 fee)</option></select><input id="w-save-addr" type="text" autocomplete="off" placeholder="Your USDT address" style="margin-top:8px"><button class="btn btn-sm" type="submit" style="margin-top:8px;width:100%;justify-content:center">Save address</button><p class="acc-msg" data-w-save-msg role="status"></p></form></div><div class="v2-card"><div class="v2-lbl">Your withdrawals</div><div data-w-wds class="w-reqs"><p class="v2-mut">No withdrawals yet.</p></div></div>
         <div class="v2-card"><div class="v2-lbl">How it works</div><ul class="w-know"><li>Verify your ID once before your first withdrawal.</li>
           <li>The amount is held from your balance at once, then checked and sent by our team.</li><li>You can have one withdrawal waiting at a time.</li></ul></div></div>
     </div></div>
