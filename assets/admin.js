@@ -209,6 +209,7 @@
             var isBig = dayTot[w.id] >= big, proc = w.status === 'processing', dep = depBy[w.user_id];
             return '<tr' + (proc ? ' class="a-flag"' : '') + '><td>' + who(w.user_id) + (dep ? '<div class="muted2 a-sm">last deposit approved by ' + esc([dep.checked_name, dep.decided_by].filter(Boolean).join(' + ')) + '</div>' : '<div class="muted2 a-sm">no approved deposit</div>') + '</td>' +
               '<td class="mono"><b>' + usd(w.amount) + '</b>' + (isBig ? ' <span class="tag-bad" title="24h total ' + usd(dayTot[w.id]) + '">BIG</span>' : '') + (proc ? ' <span class="tag-wait">SENDING</span>' : '') +
+              (Number(w.fee) > 0 ? '<div class="tag-wait">SEND ' + usd(Number(w.amount) - Number(w.fee)) + ' (fee ' + usd(w.fee) + ')</div>' : '') +
               '<div class="muted2 a-sm">' + esc(w.network) + ' · ' + when(w.created_at) + '</div></td>' +
               '<td><span class="w-mono">' + esc(w.address) + '</span> <button class="btn btn-ghost btn-sm" data-copy="' + esc(w.address) + '">Copy</button></td>' +
               '<td>' + (w.checked_name ? '<span class="tag-ok">✓ ' + esc(w.checked_name) + '</span>' : '<button class="btn btn-ghost btn-sm" data-wd-check="' + w.id + '">Check</button>') + '</td>' +
