@@ -1,91 +1,75 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta name="robots" content="noindex,follow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PipClash – MT5 Demo Trading Competition · Battle #001</title>
-<meta name="description" content="Book a free seat for Battle #001 (Mon 9 Nov, 4:30 PM UAE) – a weekday MT5 demo trading competition. Same account for everyone in your table, live leaderboard.">
-<meta property="og:title" content="PipClash – MT5 Demo Trading Competition · Battle #001">
-<meta property="og:description" content="Book a free seat for Battle #001 (Mon 9 Nov, 4:30 PM UAE) – a weekday MT5 demo trading competition. Same account for everyone in your table, live leaderboard.">
+<title>Join battle – PipClash</title>
+<meta name="description" content="Join the PipClash MT5 demo trading battle (Mon–Fri) – same account for everyone in your table, 3 hours, top traders win.">
+<meta property="og:title" content="Join battle – PipClash">
+<meta property="og:description" content="Join the PipClash MT5 demo trading battle (Mon–Fri) – same account for everyone in your table, 3 hours, top traders win.">
 <meta property="og:type" content="website">
-<link rel="canonical" href="https://pipclash.net/">
-<meta property="og:url" content="https://pipclash.net/">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://pipclash.net/#org", "name": "PipClash", "url": "https://pipclash.net/", "logo": "https://pipclash.net/assets/icon-512.png", "email": "support@pipclash.net", "address": {"@type": "PostalAddress", "addressCountry": "AE"}, "sameAs": ["https://www.instagram.com/pipclash_official/", "https://www.threads.net/@pipclash_official", "https://www.youtube.com/@pipclash_official", "https://x.com/PipClashFX", "https://t.me/PipClashBot"]}, {"@type": "WebSite", "@id": "https://pipclash.net/#site", "name": "PipClash", "alternateName": ["Pip Clash", "PipClash Trading Battles"], "url": "https://pipclash.net/", "publisher": {"@id": "https://pipclash.net/#org"}}, {"@type": "Event", "name": "PipClash Battle #001 – MT5 demo trading competition", "description": "Weekday MT5 demo trading competition. Everyone in a table trades the same fresh MT5 account ($1,000 / $2,500 / $5,000 by table) for 3 hours; traders who finish above their starting balance with 3+ trades share 80% of the entry fees. Seat booking is free.", "startDate": "2026-11-09T16:30:00+04:00", "endDate": "2026-11-09T19:30:00+04:00", "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode", "eventStatus": "https://schema.org/EventScheduled", "location": {"@type": "VirtualLocation", "url": "https://pipclash.net/"}, "image": ["https://pipclash.net/assets/og_battle001.png"], "organizer": {"@id": "https://pipclash.net/#org"}, "offers": {"@type": "Offer", "price": "10", "priceCurrency": "USD", "url": "https://pipclash.net/", "availability": "https://schema.org/InStock", "validFrom": "2026-11-07T00:00:00+04:00"}}]}</script>
+<link rel="canonical" href="https://pipclash.net/join.html">
+<meta property="og:url" content="https://pipclash.net/join.html">
 <meta property="og:site_name" content="PipClash">
-<meta property="og:image" content="https://pipclash.net/assets/og_battle001.png">
+<meta property="og:image" content="https://pipclash.net/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#05070C">
+<meta name="theme-color" content="#080B12">
 <!-- 6 Nov: Google favicon niyam – stable URL (bina ?v), 48 ka guna, root favicon.ico -->
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/assets/favicon-48.png" type="image/png" sizes="48x48">
 <link rel="icon" href="/assets/icon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=106">
-<script type="importmap">{"imports":{"three":"./assets/vendor/three.module.min.js"}}</script>
-<script>window.PC_BOOK_PRIZES={"10": [274, 124, 78, 56, 43, 35, 29, 25, 22, 19, 17, 16, 14, 13, 12, 11, 11], "25": [663, 299, 187, 135, 104, 84, 71, 61, 53, 47, 42, 38, 35, 32, 29, 27, 25, 24, 22, 21], "50": [1326, 597, 375, 269, 208, 169, 141, 121, 106, 94, 84, 76, 69, 64, 59, 55, 51, 48, 45, 42]};</script>
-<script src="assets/book.js?v=107" defer></script>
-<script>/* 5 Nov: 3D logo page khulne ke baad – pehle SVG logo; dheema net / data saver = sirf SVG */addEventListener("load",function(){var c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||"")||innerWidth<700)return;/* 6 Nov: phone pe 3D nahi (671 KB bachao) */setTimeout(function(){var s=document.createElement("script");s.type="module";s.src="assets/brand3d.js?v=106";document.head.appendChild(s)},600)});</script>
+<link rel="stylesheet" href="assets/site.css?v=108">
+<script src="assets/site.js?v=108" defer></script>
+<script src="assets/vendor/supabase.js" defer></script>
+<script src="assets/v2.js?v=108" defer></script>
 </head>
-<body class="cs-body">
-<main class="cs" data-book>
-  <section class="cs-hero">
-    <div class="cs-beam" aria-hidden="true"></div><div class="cs-001" aria-hidden="true">001</div>
-    <header class="cs-top"><span class="cs-mini cs-emb"><span class="cs-fb"><svg width="100%" height="100%" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#4DA3FF" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#2F80FF"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#22C55E"/></svg></span><canvas data-brand3d data-still aria-hidden="true"></canvas></span>
-      <b class="cs-wm">PIP<span>CLASH</span></b><span class="cs-pill b">LAUNCH 9 NOV</span></header>
-    <div class="cs-row"><span class="cs-pill g">BATTLE #001</span><span class="cs-tag">MON 9 NOV · 4:30 PM UAE</span></div>
-    <div class="cs-stage">
-      <h1 class="cs-big"><span>TRADE.</span><span class="acc">CLASH.</span><span class="gold">WIN.</span></h1>
-      <span class="cs-logo cs-emb"><span class="cs-fb"><svg width="100%" height="100%" viewBox="0 0 64 64" aria-hidden="true"><path d="M21 5v54" stroke="#4DA3FF" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="14" height="40" rx="3" fill="#2F80FF"/><path d="M28 14h9a13.5 13.5 0 0 1 0 27h-9" fill="none" stroke="#EEF2F8" stroke-width="8"/><path d="M48 44v14" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="47" width="8" height="8" rx="2" fill="#22C55E"/></svg></span><canvas data-brand3d aria-label="PipClash 3D logo"></canvas></span>
-    </div>
-    <h2 class="cs-h2">Same account for your table. 3 hours.<br><span class="acc">Top traders win.</span></h2>
-    <p class="cs-p">MT5 demo trading competition, Mon–Fri. <b>Booking is free</b> – the <b>$10</b> entry is paid only on battle day.</p>
-    <div class="cs-facts"><div><b>FREE</b><span>seat booking</span></div><div><b>$10</b><span>entry · 9 Nov</span></div><div><b class="gold">80%</b><span>of entries = prizes</span></div></div>
-    <a class="btn btn-lg cs-cta" href="#arenas">Book my FREE seat →</a>
-    <div class="cs-trust"><span>✓ No payment now</span><span>✓ No card</span><span>✓ 30 seconds</span></div>
-    <div class="cs-cd" data-bk-cd aria-label="Time to launch" style="margin-top:14px"></div>
-    <div class="cs-why"><b>Why book now?</b><span>✓ Your seat is held – only 100 per arena</span><span>✓ We remind you on WhatsApp or Telegram before 4:30 PM</span><span>✓ You get a 1-minute guide to pay the $10 entry</span></div>
-    <div class="bk-refbar" data-bk-ref hidden></div>
-  </section>
+<body>
+<div class="shell">
+<aside class="snav" id="snav" aria-label="Menu">
+  <div class="v2-me" data-v2-me><div class="v2-av">P</div><div><b>PipClash</b><div class="v2-mut"><a href="account.html#login">Log in</a> · <a href="account.html#signup">Sign up</a></div></div></div>
+  <div class="v2-glass v2-mbal" data-v2-mbal hidden></div>
+  <nav class="sn-list"><a class="sn-it" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a><a class="sn-it" href="book.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg><span>Book free seat</span></a><a class="sn-it" href="join.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 0 0-4V4H3z"/><path d="M9 4v16"/></svg><span>Join battle</span></a><a class="sn-it" href="arena.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-6 4 4 8-9"/><path d="M15 6h5v5"/></svg><span>Live arena</span><span class="sn-tag" data-live-tag hidden>LIVE</span></a><a class="sn-it" href="winners.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Results</span></a><a class="sn-it" href="account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>My battle</span></a><a class="sn-it" href="account.html#refer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13"/><path d="M12 7c-2-4-6-3-5 0M12 7c2-4 6-3 5 0"/></svg><span>Invite friends</span></a><a class="sn-it" href="rules.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span>Rules & MT5 guide</span></a><div class="sn-lbl" data-paid hidden>WALLET</div><a class="sn-it" href="wallet.html" data-paid hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M16 15h2"/></svg><span>Wallet</span></a><a class="sn-it" href="deposit.html" data-paid hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg><span>Deposit</span></a><a class="sn-it" href="withdraw.html" data-paid hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V8M7 13l5-5 5 5M5 4h14"/></svg><span>Withdraw</span></a><a class="sn-it" href="transactions.html" data-paid hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>Transactions</span></a></nav>
+  <button class="v2-card v2-tgcard v2-install" type="button" data-install hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><div><b>Install app</b><div class="v2-mut">PipClash on your home screen</div></div></button>
+  <a class="v2-card v2-tgcard" href="https://t.me/PipClashBot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4L3 11l6 2 2 6 3-4 5 4z"/></svg><div><b>Telegram bot</b><div class="v2-mut">Alerts + MT5 login</div></div></a>
+  <div class="sn-foot">Demo MT5 accounts · 18+ · <a href="legal.html">Terms &amp; privacy</a><span data-v2-logout></span></div>
+</aside>
+<div class="scrim" data-scrim hidden></div>
+<div class="mcol">
+<header class="tbar v2-tbar">
+  <button class="mbtn" type="button" data-menu aria-label="Open menu" aria-controls="snav" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <span class="v2-ttl">Join battle</span>
+  <a class="tb-cd" href="join.html" data-cd hidden><span data-cd-label>Entry</span> <b class="tn" data-cd-t>--:--:--</b></a>
+  <span class="v2-tright" data-v2-chip><a class="v2-login" href="account.html#login">Log in</a></span>
+</header>
+<main>
 
-  <form class="cs-card bk-form" data-bk-form hidden novalidate>
-    <div class="bk-ft" data-bk-ft></div>
-    <label class="bk-f"><span>Your name</span><input id="bk-name" maxlength="40" autocomplete="name" placeholder="Your first name"></label>
-    <label class="bk-f"><span>WhatsApp <i class="cs-or">or</i> Telegram @username</span><input id="bk-contact" maxlength="40" autocomplete="tel" placeholder="+971 50 xxx xxxx or @username"></label><p class="cs-priv">🔒 Only to remind you. Never shown or shared.</p>
-    <div class="bk-f"><span>Country</span><div class="cs-cty" data-cty><button type="button" class="cs-ctyb" aria-haspopup="listbox" aria-expanded="false" data-cty-btn><img alt="" width="24" height="18" data-cty-flag><span data-cty-name>Select your country</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="cs-ctyp" data-cty-pop hidden><input type="search" placeholder="Search country…" autocomplete="off" aria-label="Search country" data-cty-q><div class="cs-ctyl" role="listbox" data-cty-list></div></div><input type="hidden" id="bk-country" value=""></div></div>
-    <div class="acc-check"><input id="bk-18" type="checkbox"><label for="bk-18">I’m 18+ and accept the <a href="rules.html">Rules</a> &amp; <a href="legal.html">Terms</a></label></div>
-    <div class="bk-err" data-bk-err role="alert"></div>
-    <button class="btn btn-lg" type="submit">Book my free seat</button>
-  </form>
-  <div class="cs-card bk-done" data-bk-done hidden></div>
-  <section class="cs-sec" data-bk-mine-wrap hidden><div class="cs-lbl">My seat & invite link</div><div class="cs-card cs-mine" data-bk-mine></div></section>
+<section class="section first"><div class="wrap v2-wrap">
+  <div class="v2-when" data-v2-when>Loading…</div>
+  <div data-v2-join style="display:flex;flex-direction:column;gap:14px"><div class="v2-card v2-mut">Loading tables…</div></div>
+  <p class="v2-mut" style="text-align:center" data-v2-note>No fixed prize · 80% of entry fees go to the prize pool · fewer than 5 players = full refund · max 100 per table.<br>Each table is its own battle with its own leaderboard.</p>
+</div></section>
 
-  <section class="cs-sec" data-bk-recent-wrap hidden><div class="cs-lbl">Just booked</div><div class="cs-card cs-feed" data-bk-recent></div></section>
-
-  <section class="cs-sec" id="arenas" hidden><div class="cs-lbl">Choose your arena · 100 seats each</div><div class="cs-arenas" data-bk-tables></div></section>
-
-
-  <section class="cs-sec"><div class="cs-lbl">#1 prize · by table and players</div><div class="cs-card cs-pex">
-    <table><thead><tr><th></th><th>STARTER<br>$10</th><th>PRO<br>$25</th><th>ELITE<br>$50</th></tr></thead><tbody><tr><th>20 players</th><td><b class="gold">$83</b><small>pool $160 · 4 win</small></td><td><b class="gold">$207</b><small>pool $400 · 4 win</small></td><td><b class="gold">$413</b><small>pool $800 · 4 win</small></td></tr><tr><th>50 players</th><td><b class="gold">$156</b><small>pool $400 · 10 win</small></td><td><b class="gold">$389</b><small>pool $1,000 · 10 win</small></td><td><b class="gold">$778</b><small>pool $2,000 · 10 win</small></td></tr><tr><th>100 players</th><td><b class="gold">$274</b><small>pool $800 · 17 win</small></td><td><b class="gold">$663</b><small>pool $2,000 · 20 win</small></td><td><b class="gold">$1,326</b><small>pool $4,000 · 20 win</small></td></tr></tbody></table>
-    <p class="cs-small" style="margin-top:8px"><b>Mon 9 Nov = STARTER only.</b> PRO and ELITE start Tue 10 Nov.</p>
-    <p class="cs-small">Prize pool = 80% of the entries actually paid. Only traders who finish above their starting balance ($1,000 on the $10 table) with 3+ trades can win; every prize is at least $10. If nobody qualifies, everyone gets 80% back. No fixed prize.</p></div></section>
-  <section class="cs-sec"><div class="cs-lbl">Who runs PipClash</div><div class="cs-card cs-vid"><video src="assets/founder.mp4" poster="assets/founder_poster.jpg" controls playsinline preload="none"></video>
-    <p class="cs-small">45 seconds: how the money works – 80% back to the players, 20% runs PipClash, fewer than 5 players = full refund.</p></div></section>
-
-  <div data-bk-top hidden></div>
-  <section class="cs-sec"><a class="cs-card cs-ask" href="https://t.me/Pipclashhelpbot" target="_blank" rel="noopener"><span class="cs-ask-i" aria-hidden="true">💬</span><span><b>Any question? Ask us on Telegram</b><small>How to pay, rules, prizes – our bot answers in a minute</small></span><span class="cs-ask-go" aria-hidden="true">→</span></a></section>
-
-  <footer class="cs-foot">Trading is on demo MT5 accounts – not financial advice. 18+.<br>
-    <a href="legal.html#terms">Terms</a> · <a href="legal.html#privacy">Privacy</a> · <a href="rules.html">Rules</a> · <a href="https://pipclash.net/tg">Telegram channel</a><br><a href="forex-trading-competition.html">Forex trading competition</a> · <a href="mt5-trading-competition.html">MT5 competition</a> · <a href="gold-trading-competition.html">Gold competition</a><br>
-    PipClash team · United Arab Emirates · <a href="mailto:support@pipclash.net">support@pipclash.net</a></footer>
 </main>
-<a class="cs-chat" href="https://t.me/Pipclashhelpbot" target="_blank" rel="noopener" aria-label="Ask us on Telegram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 3.6 2.9 10.8c-1.3.5-1.3 1.2-.2 1.6l4.7 1.5 1.8 5.6c.2.6.4.8.8.8s.6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.3-1.5Z" fill="currentColor"/></svg><span>Questions? Ask us</span></a>
+<footer class="foot v2-foot"><div class="wrap">
+  <span>Trading is on demo MT5 accounts – not financial advice. 18+. <a href="legal.html#terms">Terms</a> · <a href="legal.html#privacy">Privacy</a> · <a href="rules.html">Rules</a> · <a href="https://pipclash.net/tg">Telegram channel</a><br><a href="forex-trading-competition.html">Forex trading competition</a> · <a href="mt5-trading-competition.html">MT5 competition</a> · <a href="gold-trading-competition.html">Gold competition</a><br>PipClash team · United Arab Emirates · <a href="mailto:support@pipclash.net">support@pipclash.net</a></span>
+</div></footer>
+</div></div>
+<script>(function(){var b=document.querySelector('[data-menu]'),n=document.getElementById('snav'),s=document.querySelector('[data-scrim]');
+var mq=matchMedia('(max-width:1023px)');   /* phone/tablet: band menu Tab se na pakda jaaye (WW9) */
+function set(o,f){document.body.classList.toggle('menu-open',o);b.setAttribute('aria-expanded',o);s.hidden=!o;n.inert=mq.matches&&!o;
+if(o&&f){var a=n.querySelector('a,button');if(a)a.focus();}if(!o&&f)b.focus();}
+set(false);mq.addEventListener('change',function(){set(false)});
+b.addEventListener('click',function(){var o=!document.body.classList.contains('menu-open');set(o,true)});s.addEventListener('click',function(){set(false,true)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('menu-open'))set(false,true)});
+})();</script>
 <script data-goatcounter="https://pipclash.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "28208340692544b398e642a85de7a3bd"}'></script><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1916271473136202');fbq('track','PageView');</script>
 </body>
