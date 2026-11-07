@@ -152,7 +152,7 @@
       pane().innerHTML = demoBar() + (TAB === 'bookings' ? sourcesHtml(D) : '') +
         '<div class="o-alert"><b>Needs you now</b>' + chip(depPend, 'Deposits', 'money', 1) + chip(wdPend, 'Withdrawals', 'money', 1) + chip(D.kycPending, 'ID checks', 'money', 1) +
           chip(D.supportOpen, 'Support', 'support', 1) + chip(D.claims, 'Telegram prizes', 'money', 1) + chip(Math.round(due), 'Partner $ due', 'influencers', 0) +
-          '<span class="o-sp"></span><span class="o-engine"><span class="o-dot' + (live ? '' : ' off') + '"></span>' + (b ? 'Battle ' + esc(noOf[b.contest_id] || ('#' + b.contest_id)) + ' · ' + esc(b.status) + ' · ' + (b.players || 0) + ' players' : 'No battle yet') + '</span></div>' +
+          '<span class="o-sp"></span><span class="o-engine"><span class="o-dot' + (live ? '' : ' off') + '"></span>' + (b ? 'Battle ' + esc(noOf[b.contest_id] || (window.pcTagOf ? window.pcTagOf(b) : '#' + b.contest_id)) + ' · ' + esc(b.status) + ' · ' + (b.players || 0) + ' players' : 'No battle yet') + '</span></div>' +
         '<div class="o-kpis">' +
           kpi('k1', 'Deposits', money(dep), delta(dep, depP)) + kpi('k2', 'Withdrawals', money(wd), delta(wd, wdP)) +
           kpi('k3', 'Net deposits', money(dep - wd), '<small>in wallets now ' + money(D.wallets) + '</small>') +
