@@ -75,7 +75,7 @@
 (function () {   // ?demo=1 (sirf laptop) = admin.js (login) nahi, sirf design; warna admin.js phir ops.js
   var demo = /[?&]demo=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   function add(src, cb) { var s = document.createElement('script'); s.src = src; if (cb) s.onload = cb; document.body.appendChild(s); }
-  if (demo) add('assets/ops.js?v=ops7'); else add('assets/admin.js?v=ops4', function () { add('assets/ops.js?v=ops7'); });
+  if (demo) add('assets/ops.js?v=ops8'); else add('assets/admin.js?v=ops4', function () { add('assets/ops.js?v=ops8'); });
 })();
 </script>
 </body>
