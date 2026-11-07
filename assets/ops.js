@@ -17,7 +17,8 @@
   var pane = function () { return $('[data-a-pane]'); };
   var TITLES = { dash: 'Dashboard', command: 'Command center', influencers: 'Influencers', bookings: 'Bookings', battle: 'Battles',
                  players: 'Players', money: 'Payments & KYC', support: 'Support', reports: 'Reports', settings: 'Settings', team: 'Team', log: 'Activity log',
-                 today: "Today's tables", risk: 'Risk & fraud', daily: 'Daily hisaab' };
+                 today: "Today's tables", risk: 'Risk & fraud', daily: 'Daily hisaab',
+                 campaigns: 'Campaigns', creatives: 'Creatives', competitions: 'Competitions', broadcast: 'Broadcast' };
 
   /* ---------- demo data (sirf design dikhane ke liye) ---------- */
   function demoData() {
@@ -202,10 +203,10 @@
         '<div class="o-card"><div class="o-row"><h3>All influencers</h3><span class="o-sp"></span>' +
           '<input class="o-search" placeholder="Search code / name" data-p-q> <button class="btn btn-ghost btn-sm" data-p-csv>Export CSV</button>' +
           (own ? ' <button class="btn btn-sm" data-p-new>+ Add influencer</button>' : '') + '</div>' +
-          '<div class="o-note">Deal: 5% of every paid entry from their players – paid weekly (Monday). A player from a partner link never gives the 1% referral too. Link = pipclash.net/?ref=CODE</div>' +
+          '<div class="o-note">Deal: 5% (5–10% for bigger partners) of every paid entry from their players – paid daily, after each battle result. A player from a partner link never gives the 1% referral too. Link = pipclash.net/?ref=CODE</div>' +
           '<div class="o-scroll"><table class="o-table" data-p-table><thead><tr><th>Code</th><th>Platform</th><th>Rate</th><th class="r">Bookings</th><th class="r">Players</th><th class="r">Entries</th><th class="r">Fees</th><th class="r">Earned</th><th class="r">Paid</th><th class="r">Due</th><th>Status</th><th></th></tr></thead><tbody>' +
           (rows || '<tr><td colspan="12" class="o-note">No influencers yet – add the first one.</td></tr>') + '</tbody></table></div></div>' +
-        '<div class="o-row" style="margin:8px 0"><button class="btn btn-sm" data-p-batch-open>Monday payout list</button></div><div data-p-batch></div>' +
+        '<div class="o-row" style="margin:8px 0"><button class="btn btn-sm" data-p-batch-open>Daily payout list</button></div><div data-p-batch></div>' +
         '<div data-p-form></div><div data-p-detail></div>';
       if (OPEN) openPartner(OPEN);
     });
@@ -222,7 +223,7 @@
       '<label>Country<input name="country" value="' + esc(p.country || '') + '"></label>' +
       '<label>Deal start<input name="start" type="date" value="' + esc(p.started_on || day(Date.now())) + '"></label>' +
       '<label>Their own PipClash email<input name="own" type="email" value="' + esc(p.own_email || '') + '" placeholder="no 5% on their own entries"></label>' +
-      '<label>Commission %<input name="p" type="number" step="0.5" min="0" max="20" value="' + (Number(p.pct) * 100) + '"></label>' +
+      '<label>Commission % (5–10)<input name="p" type="number" step="0.5" min="5" max="10" value="' + (Number(p.pct) * 100) + '"></label>' +
       '<label>Pay to (USDT address)<input name="pay" value="' + esc(p.pay_to || '') + '" placeholder="0x… (BEP20) or T… (TRC20)"></label>' +
       '<label>Active<select name="on"><option value="1"' + (p.active ? ' selected' : '') + '>Active</option><option value="0"' + (p.active ? '' : ' selected') + '>Off</option></select></label>' +
       '<label style="grid-column:1/-1">Notes<textarea name="notes" rows="2">' + esc(p.notes || '') + '</textarea></label>' +
@@ -240,7 +241,7 @@
         '<div class="o-kpis">' + kpi('k6', 'Earned', money(p.earned), '') + kpi('k1', 'Paid', money(p.paid), p.last_paid ? '<small>last ' + uae(p.last_paid) + '</small>' : '') + kpi('k2', 'Due', money(p.due), '') + '</div>' +
         ((DEMO || A.owner()) ? '<h3 style="margin-top:14px">Mark paid</h3><div class="o-note">First send USDT from your wallet, then paste the TXID here.</div>' +
           '<form class="o-form" data-p-pay><label>Amount (USDT)<input name="amt" type="number" step="0.01" min="0.01" value="' + Math.max(0, Number(p.due) || 0).toFixed(2) + '"></label>' +
-          '<label>TXID<input name="tx" required minlength="20" placeholder="0x… / tron tx hash"></label><label>Week from<input name="f" type="date"></label><label>Week to<input name="t" type="date"></label>' +
+          '<label>TXID<input name="tx" required minlength="20" placeholder="0x… / tron tx hash"></label><label>Battle day from<input name="f" type="date"></label><label>Battle day to<input name="t" type="date"></label>' +
           '<div class="o-row" style="grid-column:1/-1"><button class="btn btn-sm" type="submit">Save payout</button></div></form>' : '') +
         '<div class="o-grid2" style="margin-top:12px"><div><h3>Earnings by day</h3><table class="o-table"><thead><tr><th>Day</th><th class="r">Entries</th><th class="r">Fees</th><th class="r">Rate</th><th class="r">Earned</th></tr></thead><tbody>' +
           ((d.days || []).map(function (x) { return '<tr><td>' + esc(x.contest_date) + '</td><td class="r">' + x.entries + '</td><td class="r">' + money(x.fees) + '</td><td class="r">' + pct(x.rate) + '</td><td class="r">' + money(x.amount) + '</td></tr>'; }).join('') || '<tr><td colspan="5" class="o-note">No paid entries yet.</td></tr>') +
@@ -355,7 +356,12 @@
     pane().innerHTML = '<div class="o-note">Loading…</div>';
     load(true).then(function (D) {
       var F = ((D.ops || {}).flags || {}).items || [], M = ((D.ops || {}).today || {}).msgs || {};
-      pane().innerHTML = demoBar() + sqlHint(D.opsErr) + tablesHtml(D) +
+      var C = ((D.ops || {}).today || {}).counts || {};
+      pane().innerHTML = demoBar() + sqlHint(D.opsErr) +
+        '<div class="o-kpis">' + kpi('k3', '4:15 rules msg', (C.rules_sent || 0) + ' / ' + (C.rules_total || 0), '<small>Telegram pe gaya / players</small>') +
+          kpi('k4', '7 PM 3-trade yaad', C.remind_sent || 0, '<small>' + (C.remind_low || 0) + ' players profit me, 3 se kam trade</small>') +
+          kpi('k2', 'Abhi 2/3 trade (profit)', C.low_trades_in_profit || 0, '<small>3 trade nahi to inaam nahi</small>') +
+          kpi('k6', 'Galat start balance', C.wrong_balance || 0, '<small>flag – check karo</small>') + '</div>' + tablesHtml(D) +
         '<div class="o-grid2"><div class="o-card"><h3>Player messages (Telegram)</h3><div class="o-sub">4:15 rules · 7 PM 3-trade yaad</div><div class="o-list">' +
           ((M.rules || []).concat(M.remind || []).map(function (x) { return '<div class="row"><span class="o-note">' + esc(x) + '</span></div>'; }).join('') || '<span class="o-note">Aaj abhi koi msg nahi gaya.</span>') + '</div></div>' +
         poolsHtml(D) + '</div>' +
@@ -374,7 +380,8 @@
         '<div class="o-grid2"><div class="o-card"><h3>Disqualified</h3>' + feedNote(D, 'risk') + '<div class="o-list">' + ((R.dq || []).map(function (x) { return '<div class="row"><span>' + esc(x.user) + ' <span class="o-mini">id ' + x.cid + '</span></span><span class="o-note">' + esc(x.why) + '</span></div>'; }).join('') || '<span class="o-note">Koi DQ nahi.</span>') + '</div></div>' +
           '<div class="o-card"><h3>Bade winners – check karo</h3><div class="o-sub">balance ka 25%+ profit</div><div class="o-list">' + ((R.big || []).map(function (x) { return '<div class="row"><span>' + esc(x.user) + ' <span class="o-mini">id ' + x.cid + ' · ' + x.trades + ' trades</span></span><b>+' + x.pnl + ' (' + x.pct + '%)</b></div>'; }).join('') || '<span class="o-note">Koi nahi.</span>') + '</div></div></div>' +
         '<div class="o-grid2"><div class="o-card"><h3>Risk flags</h3><div class="o-list">' + ((R.flags || []).map(function (x) { return '<div class="row"><span><span class="o-pill bad">' + esc(x.kind) + '</span> ' + esc(x.login) + ' <span class="o-mini">id ' + x.cid + '</span></span><span class="o-note">' + esc(x.detail) + '</span></div>'; }).join('') || '<span class="o-note">Koi flag nahi.</span>') + '</div></div>' +
-          '<div class="o-card"><h3>Fraud check (website accounts)</h3><div class="o-sub">same phone · khud ko refer</div>' + feedNote(D, 'fraud') + '<div class="o-list">' + ((Fr.same_phone || []).map(function (x) { return '<div class="row"><span>Phone …' + esc(x.phone_end) + '</span><b>' + x.accounts + ' accounts</b></div>'; }).join('') || '<span class="o-note">Same phone pe 2 account nahi.</span>') + '</div></div></div>';
+          '<div class="o-card"><h3>Fraud check (website accounts)</h3><div class="o-sub">same phone · khud ko refer</div>' + feedNote(D, 'fraud') + '<div class="o-list">' + ((Fr.same_phone || []).map(function (x) { return '<div class="row"><span>Phone …' + esc(x.phone_end) + '</span><b>' + x.accounts + ' accounts</b></div>'; }).join('') || '<span class="o-note">Same phone pe 2 account nahi.</span>') + '</div></div></div>' + '<div data-fraud-x></div>';
+      fraudExtra();
     });
   }
   function daily() {
@@ -392,7 +399,7 @@
   function payoutBatch() {
     var P = (CACHE.partners || []).filter(function (p) { return Number(p.due) > 0; });
     var box = $('[data-p-batch]'); if (!box) return;
-    box.innerHTML = '<div class="o-card"><h3>Monday payout list</h3><div class="o-sub">Jinka due > 0 · paisa owner wallet se bheje, phir har partner pe "Save payout" (TXID)</div>' +
+    box.innerHTML = '<div class="o-card"><h3>Daily payout list (after result)</h3><div class="o-sub">Jinka due > 0 · paisa owner wallet se bheje, phir har partner pe "Save payout" (TXID)</div>' +
       '<div class="o-row"><button class="btn btn-ghost btn-sm" data-p-batch-csv>CSV (wallet ke liye)</button></div><div class="o-scroll"><table class="o-table"><thead><tr><th>Code</th><th>Pay to (USDT)</th><th class="r">Due</th><th></th></tr></thead><tbody>' +
       (P.map(function (p) { return '<tr><td><b>' + esc(p.code) + '</b></td><td class="o-note">' + esc(p.pay_to || '– address nahi –') + '</td><td class="r"><b>' + money(p.due) + '</b></td><td><button class="btn btn-ghost btn-sm" data-p-open="' + esc(p.code) + '">Open</button></td></tr>'; }).join('') || '<tr><td colspan="4" class="o-note">Kisi ka due nahi.</td></tr>') +
       '</tbody></table></div><div class="o-mini" style="margin-top:6px">Kul: ' + money(sum(P, function (p) { return p.due; })) + ' · ' + P.length + ' partners</div></div>';
@@ -419,6 +426,19 @@
     if (t.matches('[data-d-csv]')) csv('pipclash-daily.csv', ['date', 'battle', 'tier', 'players', 'dq', 'in_profit', 'fees', 'pool', 'platform', 'prizes_paid', 'status'],
       (((CACHE.ops || {}).daily || {}).rows || []).map(function (r) { return [r.start_utc, r.no, r.tier, r.players, r.dq, r.in_profit, r.fees, r.pool, r.platform, r.prizes_paid, r.status]; }));
     if (t.matches('[data-p-open]')) openPartner(t.getAttribute('data-p-open'));
+    if (t.matches('[data-cr-toggle]')) {
+      var cr = CR.filter(function (x) { return String(x.id) === t.getAttribute('data-cr-toggle'); })[0];
+      if (cr) A.call('pc_admin_creative_save', { id_: cr.id, title_: cr.title, kind_: cr.kind, url_: cr.url || '', caption_: cr.caption || '', active_: !cr.active }, t, creatives);
+    }
+    if (t.matches('[data-cp-approve]')) {
+      var cp = CP.filter(function (x) { return String(x.id) === t.getAttribute('data-cp-approve'); })[0];
+      if (cp && confirm('Approve "' + cp.name + '"?')) A.call('pc_admin_competition_save', { id_: cp.id, name_: cp.name, kind_: cp.kind, tiers_: cp.tiers, start_: cp.start_date, end_: cp.end_date,
+        days_: cp.days, ts_: cp.trade_start, te_: cp.trade_end, rules_: cp.rules, status_: 'approved' }, t, competitions);
+    }
+    if (t.matches('[data-bc-approve]')) {
+      var bc = BC.filter(function (x) { return String(x.id) === t.getAttribute('data-bc-approve'); })[0];
+      if (bc && confirm('Approve this message? It is sent only after the team group ✅.')) A.call('pc_admin_broadcast_save', { id_: bc.id, segment_: bc.segment, channel_: bc.channel, body_: bc.body, status_: 'approved' }, t, broadcast);
+    }
     if (t.matches('[data-p-close]')) { OPEN = null; $('[data-p-detail]').innerHTML = ''; }
     if (t.matches('[data-p-edit]')) partnerForm((CACHE.partners || []).filter(function (x) { return x.code === t.getAttribute('data-p-edit'); })[0]);
     if (t.matches('[data-p-csv]')) csv('pipclash-influencers.csv', ['code', 'name', 'contact', 'platform', 'followers', 'rate_now', 'bookings', 'players', 'entries', 'fees', 'earned', 'paid', 'due', 'pay_to'],
@@ -434,10 +454,30 @@
   });
   root.addEventListener('submit', function (e) {
     var f = e.target, v = function (n) { return (f.elements[n] && f.elements[n].value || '').trim(); };
+    if (f.matches('[data-cr-save]')) {
+      e.preventDefault(); if (DEMO) { alert('Demo – save only works after login.'); return; }
+      A.call('pc_admin_creative_save', { id_: null, title_: v('t'), kind_: v('k'), url_: v('u'), caption_: v('c'), active_: true }, f.querySelector('[type=submit]'), creatives);
+      return;
+    }
+    if (f.matches('[data-cp-save]')) {
+      e.preventDefault(); if (DEMO) { alert('Demo – save only works after login.'); return; }
+      var tiers = v('tiers').split(/[ ,]+/).map(Number).filter(function (x) { return [10, 25, 50].indexOf(x) >= 0; });
+      if (!tiers.length) { alert('Tables: 10, 25 or 50'); return; }
+      A.call('pc_admin_competition_save', { id_: null, name_: v('n'), kind_: v('k'), tiers_: tiers, start_: v('s') || null, end_: v('e') || null,
+        days_: v('d') || 'Mon-Fri', ts_: v('ts') || '16:30', te_: v('te') || '19:30', rules_: v('r') || null, status_: 'draft' }, f.querySelector('[type=submit]'), competitions);
+      return;
+    }
+    if (f.matches('[data-bc-save]')) {
+      e.preventDefault(); if (DEMO) { alert('Demo – save only works after login.'); return; }
+      if (/\b(game|earn|invest|investment|guaranteed)\b/i.test(v('b'))) { alert('Mana shabd: game / earn / invest / guaranteed – badlo.'); return; }
+      A.call('pc_admin_broadcast_save', { id_: null, segment_: v('s'), channel_: v('c'), body_: v('b'), status_: 'draft' }, f.querySelector('[type=submit]'), broadcast);
+      return;
+    }
     if (f.matches('[data-p-save]')) {
       e.preventDefault();
       var args = { c: v('c'), nm: v('nm'), p: (+v('p') || 0) / 100, bp: (+v('p') || 0) / 100, bd: 0, start: v('start') || null, on_: v('on') === '1',
                    contact_: v('contact') || null, platform_: v('platform') || null, followers_: v('followers') ? +v('followers') : null, country_: v('country') || null, pay_to_: v('pay') || null, notes_: v('notes') || null, own_: v('own') || null };
+      if (!(args.p >= 0.05 && args.p <= 0.10)) { alert('Commission must be between 5% and 10%.'); return; }
       if (DEMO) { alert('Demo – save only works after login.'); return; }
       A.call('pc_admin_partner_save', args, f.querySelector('[type=submit]'), function () { CACHE = null; OPEN = args.c.toUpperCase(); influencers(); });
     }
@@ -460,7 +500,97 @@
   });
   root.addEventListener('change', function (e) { if (e.target.matches('[data-b-tier]')) e.target.dispatchEvent(new Event('input', { bubbles: true })); });
 
-  var SECTIONS = { dash: dash, influencers: influencers, bookings: bookings, command: command, today: today, risk: risk, daily: daily };
+
+  /* ---------- 7 Nov: A20 campaigns · A21 creatives · A22 competitions · A23 broadcast · A11 fraud IP/device ---------- */
+  var CR = [], CP = [], BC = [];
+  function rpcP(fn, args) {
+    if (DEMO) return Promise.resolve({ data: null });
+    return A.sb.rpc(fn, args || {}).then(function (r) { return r; }, function (e) { return { error: e }; });
+  }
+  function tbl(head, rows, empty) {
+    return '<div class="o-scroll"><table class="o-table"><thead><tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      (rows.join('') || '<tr><td colspan="' + head.length + '" class="o-note">' + (empty || 'Abhi kuch nahi.') + '</td></tr>') + '</tbody></table></div>';
+  }
+  function campaigns() {
+    pane().innerHTML = '<div class="o-note">Loading…</div>';
+    rpcP('pc_admin_campaigns').then(function (r) {
+      var d = r.data || {}, B = d.bookings || [], S = d.signups || [];
+      pane().innerHTML = demoBar() + sqlHint(r.error) +
+        '<div class="o-card"><h3>Campaign link kaise banaye</h3><div class="o-note">Har post / reel / ad ka alag tag: <b>pipclash.net/?ref=CODE&amp;c=reel1</b> (c = 1–40 akshar: a-z 0-9 _ . -). Booking aur signup dono pe tag judta.</div></div>' +
+        '<div class="o-grid2"><div class="o-card"><h3>Bookings by campaign</h3>' + tbl(['Ref', 'Campaign', 'Bookings'], B.map(function (x) { return '<tr><td>' + esc(x.ref) + '</td><td><b>' + esc(x.campaign) + '</b></td><td class="r">' + x.n + '</td></tr>'; })) + '</div>' +
+        '<div class="o-card"><h3>Signups + paid entries</h3>' + tbl(['Partner', 'Campaign', 'Signups', 'Paid entries'], S.map(function (x) { return '<tr><td>' + esc(x.partner) + '</td><td><b>' + esc(x.campaign) + '</b></td><td class="r">' + x.n + '</td><td class="r">' + x.paid_entries + '</td></tr>'; })) + '</div></div>';
+    });
+  }
+  function creatives() {
+    pane().innerHTML = '<div class="o-note">Loading…</div>';
+    (DEMO ? Promise.resolve({ data: [] }) : A.sb.from('pc_creatives').select('*').order('created_at', { ascending: false })).then(function (r) {
+      CR = r.data || [];
+      pane().innerHTML = demoBar() + sqlHint(r.error) +
+        '<div class="o-card"><h3>Add creative</h3><div class="o-sub">Partners apne portal (partner.html) me dekhte + download karte. Sirf group ✅ wali post / reel yahan daalo.</div>' +
+        '<form class="o-form" data-cr-save><label>Title<input name="t" required maxlength="120" placeholder="Reel – Then vs Now"></label>' +
+        '<label>Type<select name="k"><option>image</option><option>video</option><option>caption</option><option>link</option></select></label>' +
+        '<label style="grid-column:1/-1">Link (https://…)<input name="u" placeholder="https://ops.pipclash.net/m/…"></label>' +
+        '<label style="grid-column:1/-1">Caption<textarea name="c" rows="3"></textarea></label>' +
+        '<div class="o-row" style="grid-column:1/-1"><button class="btn btn-sm" type="submit">Save</button></div></form></div>' +
+        '<div class="o-card"><h3>Library (' + CR.length + ')</h3>' + tbl(['Title', 'Type', 'Link', 'Active', ''], CR.map(function (x) {
+          return '<tr><td><b>' + esc(x.title) + '</b><div class="o-note">' + esc((x.caption || '').slice(0, 90)) + '</div></td><td>' + esc(x.kind) + '</td><td>' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">open</a>' : '–') + '</td>' +
+            '<td>' + (x.active ? '<span class="o-tag g">on</span>' : '<span class="o-tag">off</span>') + '</td><td><button class="btn btn-ghost btn-sm" data-cr-toggle="' + x.id + '">' + (x.active ? 'Hide' : 'Show') + '</button></td></tr>';
+        }), 'Library khaali hai.') + '</div>';
+    });
+  }
+  function competitions() {
+    pane().innerHTML = '<div class="o-note">Loading…</div>';
+    rpcP('pc_admin_competitions').then(function (r) {
+      CP = r.data || [];
+      var own = DEMO || A.owner();
+      pane().innerHTML = demoBar() + sqlHint(r.error) +
+        '<div class="o-card"><h3>Naya competition (plan)</h3><div class="o-sub">Abhi engine roz ka battle config.py se chalata. Yahan naye type (weekly / special) ka plan + owner approve; engine se jodna agla kadam.</div>' +
+        '<form class="o-form" data-cp-save><label>Name<input name="n" required maxlength="80" placeholder="Weekly Gold Cup"></label>' +
+        '<label>Type<select name="k"><option>daily</option><option>weekly</option><option>special</option></select></label>' +
+        '<label>Tables<input name="tiers" value="10,25,50"></label>' +
+        '<label>Start date<input name="s" type="date"></label><label>End date<input name="e" type="date"></label>' +
+        '<label>Days<input name="d" value="Mon-Fri"></label><label>Trade start (UAE)<input name="ts" type="time" value="16:30"></label><label>Trade end (UAE)<input name="te" type="time" value="19:30"></label>' +
+        '<label style="grid-column:1/-1">Rules / notes<textarea name="r" rows="3"></textarea></label>' +
+        '<div class="o-row" style="grid-column:1/-1"><button class="btn btn-sm" type="submit">Save draft</button></div></form></div>' +
+        '<div class="o-card"><h3>All plans</h3>' + tbl(['Name', 'Type', 'Tables', 'Dates', 'Time (UAE)', 'Status', ''], CP.map(function (x) {
+          return '<tr><td><b>' + esc(x.name) + '</b><div class="o-note">' + esc((x.rules || '').slice(0, 80)) + '</div></td><td>' + esc(x.kind) + '</td><td>' + esc((x.tiers || []).map(function (t) { return '$' + t; }).join(' ')) + '</td>' +
+            '<td>' + esc(x.start_date || '–') + ' → ' + esc(x.end_date || '–') + '<div class="o-note">' + esc(x.days) + '</div></td><td>' + esc(String(x.trade_start).slice(0, 5)) + '–' + esc(String(x.trade_end).slice(0, 5)) + '</td>' +
+            '<td><span class="o-pill ' + (x.status === 'approved' ? 'live' : '') + '">' + esc(x.status) + '</span></td>' +
+            '<td>' + (own && x.status === 'draft' ? '<button class="btn btn-ghost btn-sm" data-cp-approve="' + x.id + '">Approve</button>' : '') + '</td></tr>';
+        }), 'Koi plan nahi.') + '</div>';
+    });
+  }
+  var SEG = { bookers: 'Free seat bookers', players_today: "Today's players", all_players: 'All website players', partners: 'Partners (influencers)', telegram_channel: 'Telegram channel post' };
+  function broadcast() {
+    pane().innerHTML = '<div class="o-note">Loading…</div>';
+    rpcP('pc_admin_broadcasts').then(function (r) {
+      BC = r.data || [];
+      var own = DEMO || A.owner();
+      pane().innerHTML = demoBar() + sqlHint(r.error) +
+        '<div class="o-card"><h3>Naya message (draft)</h3><div class="o-sub">Yahan se seedha kuch nahi jaata. Draft → owner Approve → team group ✅ → tab bhejna. Mana shabd (game / earn / invest / guaranteed) save hi nahi honge.</div>' +
+        '<form class="o-form" data-bc-save><label>Kisko<select name="s">' + Object.keys(SEG).map(function (k) { return '<option value="' + k + '">' + SEG[k] + '</option>'; }).join('') + '</select></label>' +
+        '<label>Kaise<select name="c"><option value="telegram">Telegram</option><option value="email">Email</option></select></label>' +
+        '<label style="grid-column:1/-1">Message (English, UAE time)<textarea name="b" rows="5" required minlength="5" maxlength="4000"></textarea></label>' +
+        '<div class="o-row" style="grid-column:1/-1"><button class="btn btn-sm" type="submit">Save draft</button></div></form></div>' +
+        '<div class="o-card"><h3>Messages</h3>' + tbl(['When', 'To', 'Via', 'Message', 'Status', ''], BC.map(function (x) {
+          return '<tr><td>' + uae(x.created_at) + '</td><td>' + esc(SEG[x.segment] || x.segment) + '</td><td>' + esc(x.channel) + '</td><td class="o-note" style="white-space:pre-wrap;max-width:420px">' + esc(x.body) + '</td>' +
+            '<td><span class="o-pill ' + (x.status === 'approved' ? 'live' : x.status === 'sent' ? 'end' : '') + '">' + esc(x.status) + '</span>' + (x.sent_count ? '<div class="o-note">' + x.sent_count + ' sent</div>' : '') + '</td>' +
+            '<td>' + (own && x.status === 'draft' ? '<button class="btn btn-ghost btn-sm" data-bc-approve="' + x.id + '">Approve</button>' : '') + '</td></tr>';
+        }), 'Koi message nahi.') + '</div>';
+    });
+  }
+  function fraudExtra() {      // risk page ke neeche: IP / device (pc_seen)
+    var box = $('[data-fraud-x]'); if (!box || DEMO) return;
+    rpcP('pc_admin_fraud').then(function (r) {
+      var d = r.data || {};
+      var row = function (x, k) { return '<div class="row"><span>' + esc(k === 'ip' ? 'IP ' + x.ip : 'Device ' + x.dev + '…') + ' · <b>' + x.accounts + ' accounts</b></span><span class="o-note">' + esc((x.names || []).join(', ')) + '</span></div>'; };
+      box.innerHTML = '<div class="o-card"><h3>Same IP / device (30 din)</h3><div class="o-sub">' + (d.tracked_accounts || 0) + ' accounts tracked · ghar / cafe ka WiFi bhi same IP deta – sirf shak, seedha DQ nahi</div>' + sqlHint(r.error) +
+        '<div class="o-list">' + ((d.same_ip || []).map(function (x) { return row(x, 'ip'); }).concat((d.same_device || []).map(function (x) { return row(x, 'dev'); })).join('') || '<span class="o-note">Kuch shak wala nahi.</span>') + '</div>' +
+        '<h3 style="margin-top:12px">Refer – dono ek IP / device pe</h3><div class="o-list">' + ((d.ref_same_place || []).map(function (x) { return '<div class="row"><span>' + esc(x.referrer) + ' → ' + esc(x.friend) + '</span><span class="o-pill bad">' + esc(x.why) + '</span></div>'; }).join('') || '<span class="o-note">Koi nahi.</span>') + '</div></div>';
+    });
+  }
+  var SECTIONS = { dash: dash, influencers: influencers, bookings: bookings, command: command, today: today, risk: risk, daily: daily,
+                   campaigns: campaigns, creatives: creatives, competitions: competitions, broadcast: broadcast };
   function title() { var h = (location.hash || '#dash').slice(1).split('?')[0]; TAB = h; var el = $('[data-ops-title]'); if (el) el.textContent = TITLES[h] || 'Dashboard'; }
   function rerender() { if (SECTIONS[TAB]) SECTIONS[TAB](); else if (A && A.render) A.render(); }
   function route(t) {
@@ -479,5 +609,15 @@
   } else if (A) {
     Object.keys(SECTIONS).forEach(function (k) { A.register(k, function () { TAB = k; title(); SECTIONS[k](); }); });
     window.addEventListener('hashchange', title); title();
+    // A17 (7 Nov): staff ka area (finance / support / marketing) – sirf apne kaam ka menu. Paise wale kaam SQL me pehle se owner-only.
+    var AREA = { finance: ['dash', 'money', 'daily', 'influencers', 'reports', 'log'], support: ['dash', 'today', 'support', 'players', 'bookings', 'battle', 'risk'],
+                 marketing: ['dash', 'command', 'influencers', 'bookings', 'campaigns', 'creatives', 'broadcast'] };
+    setTimeout(function () {
+      if (!A.sb || A.owner()) return;
+      A.sb.rpc('pc_admin_my_area').then(function (r) {
+        var keep = r && r.data && AREA[r.data.area]; if (!keep) return;
+        root.querySelectorAll('[data-a-tab]').forEach(function (b) { if (keep.indexOf(b.getAttribute('data-a-tab')) < 0) b.hidden = true; });
+      }, function () { });
+    }, 1500);
   }
 })();
