@@ -282,7 +282,7 @@
     var tg = $('[data-ref-tg]'); if (tg) tg.href = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Daily MT5 trading battle – join with my link');
     var cellR = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
     if (RF) {
-      $('[data-ref-stats]').innerHTML = cellR(RF.friends, 'friends joined') + cellR(RF.played, 'played a battle') + cellR(usd(RF.earned), 'credited', true) + cellR(usd(RF.due), 'due after today');
+      $('[data-ref-stats]').innerHTML = cellR(RF.friends, 'friends joined') + cellR(RF.played, 'joined a battle') + cellR(usd(RF.earned), 'credited', true) + cellR(usd(RF.due), 'due after today');
       var fl = $('[data-ref-friends]'); if (fl) { fl.hidden = false; fl.innerHTML = '<div class="v2-lbl">Your friends</div>' + RF.list.map(function (f) { return '<div class="v2-row v2-erow"><span>' + f[0] + '</span><span class="v2-mut">' + f[1] + ' battles · <b class="gold">' + usd(f[2]) + '</b></span></div>'; }).join(''); }
       return;
     }
@@ -291,7 +291,7 @@
       var earned = rw.reduce(function (a, r) { return a + Number(r.amount); }, 0);
       var todayAmt = rw.filter(function (r) { return new Date(r.created_at).toLocaleDateString('en-CA', { timeZone: 'Asia/Dubai' }) === today; }).reduce(function (a, r) { return a + Number(r.amount); }, 0);
       var cell = function (v, k, gold) { return '<div class="v2-stat"><b class="tn' + (gold ? ' gold' : '') + '">' + v + '</b><span>' + k + '</span></div>'; };
-      $('[data-ref-stats]').innerHTML = cell(d.friends || 0, 'friends joined') + cell(d.played || 0, 'played a battle') + cell(usd(earned), 'credited', true) + cell(usd(todayAmt), 'earned today');
+      $('[data-ref-stats]').innerHTML = cell(d.friends || 0, 'friends joined') + cell(d.played || 0, 'joined a battle') + cell(usd(earned), 'credited', true) + cell(usd(todayAmt), 'earned today');
     });
     sb.rpc('pc_my_referral_list').then(function (r) {   // #14: "Your friends" (SQL na chala ho to chupchaap kuch nahi)
       var fl = $('[data-ref-friends]'), L = r.data || []; if (!fl || r.error || !L.length) return;
