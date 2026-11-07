@@ -1240,3 +1240,6 @@ a:hover{color:#fff;text-decoration-color:currentColor}
 /* 6 Nov: phone pe chat button scroll ke waqt chhupe (text/table na dhake), rukte hi wapas */
 .cs-chat{transition:opacity .25s,transform .25s}
 .cs-chat.is-hide{opacity:0;transform:translateY(16px);pointer-events:none}
+
+.w-warn.w-warn-big{font-size:15px;color:var(--text);border-width:2px;background:rgba(245,185,66,.12)}
+.w-warn.w-warn-big b{color:#F2C866}
