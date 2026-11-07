@@ -216,7 +216,7 @@
   }
   function renderDuel() {
     var s = standings(), box = $('[data-duel]'); if (!box) return;
-    if (s.length < 2) { box.innerHTML = '<p class="muted">The title fight appears once the battle is running.</p>'; return; }
+    if (s.length < 2) { box.innerHTML = '<p class="muted">The race for #1 appears once the battle is running.</p>'; return; }
     var fin = !(D && D.battle && D.battle.status === 'live');      // battle khatam = 'winner', chal rahi = 'leading'
     var a = s[0], b = s[1], max = Math.max(Math.abs(a.pnl), 1), w = Math.max(5, Math.min(100, (b.pnl / max) * 100));
     box.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span style="font-size:21px;font-weight:700">' + esc(a.name) + '</span><span class="mono gold" style="font-size:24px;font-weight:700">' + money(a.pnl) + '</span></div><div class="bar"><i style="width:100%;background:var(--gold)"></i></div><span class="muted" style="font-size:13px">' + (a.trades || 0) + ' trades · ' + pctOf(a.pnl) + (fin ? ' · winner' : ' · leading') + '</span></div>' +
