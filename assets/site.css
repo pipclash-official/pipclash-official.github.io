@@ -1261,3 +1261,16 @@ body:not(.pc-in) .sn-list a[href="wallet.html"],body:not(.pc-in) .sn-list a[href
 body:not(.pc-in) .sn-list a[href="transactions.html"],body:not(.pc-in) .sn-list .sn-lbl{display:none!important}
 .tr-hl td{color:#4DA3FF;font-weight:700}
 .step-k{white-space:nowrap}
+
+/* 7 Nov: home intro (naya visitor) + footer brand/social */
+.hm-intro{display:flex;flex-direction:column;gap:12px;padding:22px}
+.hm-h1{font-family:var(--f-display);font-size:clamp(22px,4vw,30px);line-height:1.15;margin:0}
+.hm-p{margin:0;color:#C9D2E3;line-height:1.6;max-width:70ch}
+.hm-facts{display:flex;flex-wrap:wrap;gap:8px}
+.hm-facts span{font-size:13px;padding:6px 10px;border-radius:999px;background:rgba(47,128,255,.1);border:1px solid rgba(77,163,255,.25)}
+.hm-cta{display:flex;gap:10px;flex-wrap:wrap}
+body.pc-in .hm-intro{display:none}
+.ft-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.ft-brand{text-decoration:none;color:#EEF2F8}.ft-brand b{font-family:var(--f-display);letter-spacing:.12em}.ft-brand b i{font-style:normal;color:#4DA3FF}
+.ft-brand small{color:#93A0B8;margin-left:6px}
+.ft-soc{display:flex;gap:14px;flex-wrap:wrap}.ft-soc a{color:#93A0B8}
