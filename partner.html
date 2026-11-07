@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Partner portal – PipClash</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/site.css?v=ops1">
+<link rel="stylesheet" href="assets/ops.css?v=ops3">
+<style>.pp{max-width:980px;margin:0 auto;padding:22px 16px 60px;display:flex;flex-direction:column;gap:14px}
+.pp-link{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.pp-link code{background:var(--surface2);padding:8px 10px;border-radius:10px;word-break:break-all}</style>
+</head>
+<body class="ops-body">
+<!-- A18 (7 Nov draft): influencer apne PipClash login se apna hisaab. Pehchaan = admin partner form ka "Their own PipClash email". -->
+<main class="pp" data-pp>
+  <div class="o-row"><h1 style="margin:0">Partner portal</h1><span class="o-sp"></span><a class="btn btn-ghost btn-sm" href="index.html">pipclash.net</a></div>
+  <div data-pp-body><div class="o-note">Loading…</div></div>
+  <p class="o-note">Demo trading competition · 18+ · Reward = 5% of paid entries from players who joined with your link, paid daily after each battle's result (UAE time). Questions: <a href="https://t.me/Pipclashhelpbot">@Pipclashhelpbot</a></p>
+</main>
+<script src="assets/vendor/supabase.js"></script>
+<script>
+(function () {
+  'use strict';
+  var SB_URL = 'https://vrcjgxnafmuxfkybtkbz.supabase.co', SB_KEY = 'sb_publishable_hJfAzBCqJKrJkNmLNEsndA_UuFCLH6f';
+  var box = document.querySelector('[data-pp-body]');
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var money = function (v) { return '$' + (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  var kpi = function (c, l, v) { return '<div class="o-kpi ' + c + '"><span>' + l + '</span><b>' + v + '</b></div>'; };
+  var uae = function (iso) { return iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' }) + ' UAE' : '–'; };
+  if (!window.supabase) { box.innerHTML = '<div class="o-card">Could not load. Please refresh.</div>'; return; }
+  var sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' } });
+  sb.auth.getSession().then(function (r) {
+    if (!(r.data && r.data.session)) { box.innerHTML = '<div class="o-card"><h3>Please log in</h3><p class="o-note">Use the same email you gave the PipClash team.</p><a class="btn" href="account.html#login">Log in</a></div>'; return; }
+    return sb.rpc('pc_partner_me').then(function (x) {
+      var d = x.data;
+      if (x.error || !d) { box.innerHTML = '<div class="o-card">Could not load your data. Please try again later.</div>'; return; }
+      if (!d.partner) { box.innerHTML = '<div class="o-card"><h3>No partner account on this email</h3><p class="o-note">Want to become a PipClash partner? Message us: <a href="https://t.me/Pipclashhelpbot">@Pipclashhelpbot</a></p></div>'; return; }
+      var m = d.me || {}, link = 'https://pipclash.net/?ref=' + encodeURIComponent(m.code);
+      var due = (Number(m.earned) || 0) - (Number(m.paid) || 0);
+      box.innerHTML =
+        '<div class="o-card"><h3>Hi ' + esc(m.name || m.code) + ' – code <b>' + esc(m.code) + '</b> · ' + Math.round((Number(m.pct) || 0) * 100) + '%</h3>' +
+          '<div class="pp-link"><code>' + esc(link) + '</code><button class="btn btn-sm" type="button" data-copy="' + esc(link) + '">Copy link</button></div>' +
+          '<p class="o-note">Track each post: add <b>&amp;c=</b> and a short tag, e.g. <code>' + esc(link) + '&amp;c=reel1</code></p></div>' +
+        '<div class="o-kpis">' + kpi('k4', 'Bookings', m.bookings) + kpi('k5', 'Players', m.players) + kpi('k3', 'Paid entries', m.entries) +
+          kpi('k1', 'Entry fees', money(m.fees)) + kpi('k6', 'Your reward', money(m.earned)) + kpi('k2', 'Due now', money(due)) + '</div>' +
+        '<div class="o-grid2"><div class="o-card"><h3>By battle day</h3><table class="o-table"><thead><tr><th>Day</th><th class="r">Entries</th><th class="r">Fees</th><th class="r">Reward</th></tr></thead><tbody>' +
+          ((d.days || []).map(function (x) { return '<tr><td>' + esc(x.contest_date) + '</td><td class="r">' + x.entries + '</td><td class="r">' + money(x.fees) + '</td><td class="r">' + money(x.amount) + '</td></tr>'; }).join('') || '<tr><td colspan="4" class="o-note">No paid entries yet.</td></tr>') +
+          '</tbody></table></div><div class="o-card"><h3>Payouts</h3><table class="o-table"><thead><tr><th>When</th><th class="r">Amount</th><th>TX</th></tr></thead><tbody>' +
+          ((d.payouts || []).map(function (x) { return '<tr><td>' + uae(x.paid_at) + '</td><td class="r">' + money(x.amount) + '</td><td class="o-note">' + esc(String(x.txid || '').slice(0, 14)) + '…</td></tr>'; }).join('') || '<tr><td colspan="3" class="o-note">Nothing paid yet.</td></tr>') +
+          '</tbody></table><h3 style="margin-top:12px">Your tags</h3><div class="o-list">' +
+          ((d.campaigns || []).map(function (x) { return '<div class="row"><span>' + esc(x.campaign) + '</span><b>' + x.n + '</b></div>'; }).join('') || '<span class="o-note">No players yet.</span>') + '</div></div></div>' +
+        '<div class="o-card"><h3>Posts & captions you can use</h3><div class="o-list" data-pp-cr><span class="o-note">Loading…</span></div></div>';
+      sb.from('pc_creatives').select('title,kind,url,caption').eq('active', true).order('created_at', { ascending: false }).then(function (c) {
+        var el = document.querySelector('[data-pp-cr]'); if (!el) return;
+        el.innerHTML = ((c.data || []).map(function (x) { return '<div class="row" style="flex-direction:column;align-items:flex-start"><b>' + esc(x.title) + '</b>' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open / download</a>' : '') + (x.caption ? '<span class="o-note" style="white-space:pre-wrap">' + esc(x.caption) + '</span>' : '') + '</div>'; }).join('') || '<span class="o-note">Coming soon.</span>');
+      });
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-copy]'); if (!t) return;
+    (navigator.clipboard ? navigator.clipboard.writeText(t.getAttribute('data-copy')) : Promise.reject()).then(function () { t.textContent = 'Copied ✓'; }, function () { prompt('Copy:', t.getAttribute('data-copy')); });
+  });
+})();
+</script>
+</body>
+</html>
