@@ -390,7 +390,7 @@
         if (r.data === -1) {                                   // naya address – 24h hold
           var t = new Date(Date.now() + 864e5);
           msg('[data-w-wd-msg]', 'New address saved 🔒 For your safety, withdrawals to a new address unlock after 24 hours (' +
-            t.toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '). Your balance is not touched. Please submit again then.');
+            t.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Dubai' }) + ' UAE). Your balance is not touched. Please submit again then.');
           return;
         }
         msg('[data-w-wd-msg]', 'Request received ✅ The amount is held from your balance and paid after a check.');
