@@ -44,6 +44,10 @@
         <button type="button" data-a-tab="risk"><i>⚠</i>Risk &amp; fraud</button>
         <div class="ops-grp">Reports &amp; system</div>
         <button type="button" data-a-tab="daily"><i>Σ</i>Daily hisaab</button>
+        <button type="button" data-a-tab="campaigns"><i>↗</i>Campaigns</button>
+        <button type="button" data-a-tab="creatives"><i>▣</i>Creatives</button>
+        <button type="button" data-a-tab="competitions"><i>🏆</i>Competitions</button>
+        <button type="button" data-a-tab="broadcast"><i>📣</i>Broadcast</button>
         <button type="button" data-a-tab="reports"><i>▤</i>Reports</button>
         <button type="button" data-a-tab="settings"><i>⚙</i>Settings</button>
         <button type="button" data-a-tab="team"><i>☺</i>Team</button>
@@ -72,7 +76,7 @@
 (function () {   // ?demo=1 (sirf laptop) = admin.js (login) nahi, sirf design; warna admin.js phir ops.js
   var demo = /[?&]demo=1/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   function add(src, cb) { var s = document.createElement('script'); s.src = src; if (cb) s.onload = cb; document.body.appendChild(s); }
-  if (demo) add('assets/ops.js?v=ops3'); else add('assets/admin.js?v=ops1', function () { add('assets/ops.js?v=ops3'); });
+  if (demo) add('assets/ops.js?v=ops4'); else add('assets/admin.js?v=ops1', function () { add('assets/ops.js?v=ops4'); });
 })();
 </script>
 </body>
