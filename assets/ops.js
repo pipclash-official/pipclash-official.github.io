@@ -73,12 +73,12 @@
     if (CACHE && !force && Date.now() - CACHE_AT < 60e3) return Promise.resolve(CACHE);
     var sb = A.sb, q = function (p) { return p.then(function (r) { return r.error ? { error: r.error } : r; }, function (e) { return { error: e }; }); };
     return Promise.all([
-      q(sb.rpc('pc_admin_bookings')), q(sb.from('profiles').select('id,created_at,partner')),
-      q(sb.from('deposits').select('amount,status,created_at,network')), q(sb.from('withdrawals').select('amount,status,created_at')),
-      q(sb.from('web_entries').select('contest_date,tier,paid_fee,refunded,status,user_id')),
+      q(sb.rpc('pc_admin_bookings')), allRows('profiles', 'id,created_at,partner'),
+      allRows('deposits', 'amount,status,created_at,network'), allRows('withdrawals', 'amount,status,created_at'),
+      allRows('web_entries', 'contest_date,tier,paid_fee,refunded,status,user_id'),
       q(sb.from('kyc').select('user_id', { count: 'exact', head: true }).eq('status', 'pending')),
       q(sb.from('support').select('id', { count: 'exact', head: true }).eq('status', 'open')),
-      q(sb.from('wallets').select('balance')), q(sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(3)),
+      allRows('wallets', 'balance'), q(sb.from('battles').select('*').order('contest_id', { ascending: false }).limit(3)),
       q(sb.rpc('pc_admin_partners')), q(sb.rpc('pc_admin_claims', { cid: null })),
       q(sb.from('pc_ops').select('id,data,updated_at')), q(sb.rpc('pc_admin_booking_sources'))
     ]).then(function (x) {
@@ -203,7 +203,7 @@
         '<div class="o-card"><div class="o-row"><h3>All influencers</h3><span class="o-sp"></span>' +
           '<input class="o-search" placeholder="Search code / name" data-p-q> <button class="btn btn-ghost btn-sm" data-p-csv>Export CSV</button>' +
           (own ? ' <button class="btn btn-sm" data-p-new>+ Add influencer</button>' : '') + '</div>' +
-          '<div class="o-note">Deal: 5% (5–10% for bigger partners) of every paid entry from their players – paid daily, after each battle result. A player from a partner link never gives the 1% referral too. Link = pipclash.net/?ref=CODE</div>' +
+          '<div class="o-note">Deal: flat 5% of every paid entry from their players – paid daily, after each battle result. A player from a partner link never gives the 1% referral too. Link = pipclash.net/?ref=CODE</div>' +
           '<div class="o-scroll"><table class="o-table" data-p-table><thead><tr><th>Code</th><th>Platform</th><th>Rate</th><th class="r">Bookings</th><th class="r">Players</th><th class="r">Entries</th><th class="r">Fees</th><th class="r">Earned</th><th class="r">Paid</th><th class="r">Due</th><th>Status</th><th></th></tr></thead><tbody>' +
           (rows || '<tr><td colspan="12" class="o-note">No influencers yet – add the first one.</td></tr>') + '</tbody></table></div></div>' +
         '<div class="o-row" style="margin:8px 0"><button class="btn btn-sm" data-p-batch-open>Daily payout list</button></div><div data-p-batch></div>' +
@@ -223,7 +223,7 @@
       '<label>Country<input name="country" value="' + esc(p.country || '') + '"></label>' +
       '<label>Deal start<input name="start" type="date" value="' + esc(p.started_on || day(Date.now())) + '"></label>' +
       '<label>Their own PipClash email<input name="own" type="email" value="' + esc(p.own_email || '') + '" placeholder="no 5% on their own entries"></label>' +
-      '<label>Commission % (5–10)<input name="p" type="number" step="0.5" min="5" max="10" value="' + (Number(p.pct) * 100) + '"></label>' +
+      '<label>Commission % (flat 5)<input name="p" type="number" step="0.5" min="5" max="5" readonly value="' + (Number(p.pct) * 100) + '"></label>' +
       '<label>Pay to (USDT address)<input name="pay" value="' + esc(p.pay_to || '') + '" placeholder="0x… (BEP20) or T… (TRC20)"></label>' +
       '<label>Active<select name="on"><option value="1"' + (p.active ? ' selected' : '') + '>Active</option><option value="0"' + (p.active ? '' : ' selected') + '>Off</option></select></label>' +
       '<label style="grid-column:1/-1">Notes<textarea name="notes" rows="2">' + esc(p.notes || '') + '</textarea></label>' +
@@ -341,12 +341,23 @@
     if (!T.length) return '<div class="o-card"><h3>Aaj ki tables</h3>' + feedNote(D, 'today') + '<p class="o-note">Aaj koi table nahi.</p></div>';
     return '<div class="o-card"><h3>Aaj ki tables · ' + esc(((D.ops.today || {}).date) || '') + '</h3>' + feedNote(D, 'today') + '<div class="o-tables" style="margin-top:10px">' + T.map(function (t) {
       return '<div class="o-tbl"><h4>Battle ' + esc(t.no) + ' · $' + t.tier + ' ' + stPill(t.status) + '</h4><div class="o-mini">account $' + Number(t.balance).toLocaleString() + ' · id ' + t.id + '</div>' +
+        stepsHtml(t) +
         '<div class="kv"><span>Players</span><b>' + t.players + ' (' + t.active + ' active, ' + t.dq + ' DQ)</b></div>' +
         '<div class="kv"><span>Pool 80% / platform 20%</span><b>' + money(t.pool) + ' / ' + money(t.platform) + '</b></div>' +
         '<div class="kv"><span>Profit mein</span><b>' + t.in_profit + (t.low_trades_in_profit ? ' <span class="o-pill bad">' + t.low_trades_in_profit + ' × 2/3 trade</span>' : '') + '</b></div>' +
         (t.top || []).map(function (x, i) { return '<div class="kv"><span>#' + (i + 1) + ' ' + esc(x.user) + (x.trades < 3 ? ' <span class="o-pill bad">' + x.trades + '/3</span>' : '') + '</span><b>' + (x.pnl >= 0 ? '+' : '') + x.pnl.toFixed(2) + ' (' + x.pct + '%)</b></div>'; }).join('') +
         (Object.keys(t.flags || {}).length ? '<div class="o-mini" style="margin-top:6px">flags: ' + Object.keys(t.flags).map(function (k) { return esc(window.pcFlag(k)) + ' ×' + t.flags[k]; }).join(' · ') + '</div>' : '') + '</div>';
     }).join('') + '</div></div>';
+  }
+  function stepsHtml(t) {     // C24 (7 Nov): battle-day ek nazar – ✓ ho gaya / ⏳ baaki
+    var S = t.steps || {}, ok = function (b, txt, sub) { return '<div class="kv"><span>' + (b ? '✅ ' : '⏳ ') + txt + '</span><b class="o-mini">' + (sub || '') + '</b></div>'; };
+    if (t.cancelled) return '<div class="kv"><span>❌ Cancelled – kam log</span><b>' + t.players + ' / ' + (t.need || 5) + ' · refund ' + money(t.refund) + '</b></div>';
+    return '<div class="o-steps">' +
+      ok(t.players >= (t.need || 5), '4 PM: kam se kam ' + (t.need || 5) + ' log', t.players + ' / ' + (t.need || 5) + ' joined') +
+      ok(S.creds_sent || t.logins > 0, '4:25 MT5 login', t.logins + ' / ' + t.players + ' ko login') +
+      ok(S.battle_done, '7:30 trades band', '') +
+      ok(S.results_pub, '9:30 final result', '') +
+      ok(S.results_sent, 'Result + inaam players ko gaya', t.nobody_won ? 'koi qualify nahi – 80% wapas' : '') + '</div>';
   }
   function poolsHtml(D) {
     var P = (D.ops || {}).pools || {}, B = P.by_balance || {}, T = P.targets || {};
@@ -404,10 +415,10 @@
     load(true).then(function (D) {
       var Rr = ((D.ops || {}).daily || {}).rows || [], tot = function (f) { return sum(Rr, function (r) { return r[f]; }); };
       pane().innerHTML = demoBar() + sqlHint(D.opsErr) +
-        '<div class="o-kpis">' + kpi('k4', 'Battles (21 din)', Rr.length, '') + kpi('k1', 'Entry fees', money(tot('fees')), '') + kpi('k3', 'Platform 20%', money(tot('platform')), '') +
+        '<div class="o-kpis">' + kpi('k4', 'Battles (21 din)', Rr.filter(function (r) { return !r.cancelled; }).length, '<small>' + Rr.filter(function (r) { return r.cancelled; }).length + ' cancelled (ginti me nahi)</small>') + kpi('k1', 'Entry fees', money(tot('fees')), '') + kpi('k3', 'Platform 20%', money(tot('platform')), '') +
           kpi('k2', 'Prize pool 80%', money(tot('pool')), '') + kpi('k6', 'Inaam diya', money(tot('prizes_paid')), '') + '</div>' +
-        '<div class="o-card"><h3>Har battle ka hisaab</h3>' + feedNote(D, 'daily') + '<div class="o-row"><button class="btn btn-ghost btn-sm" data-d-csv>CSV</button></div><div class="o-scroll"><table class="o-table"><thead><tr><th>Date (UAE)</th><th>Battle</th><th>Table</th><th class="r">Players</th><th class="r">DQ</th><th class="r">Profit mein</th><th class="r">Fees</th><th class="r">Pool 80%</th><th class="r">Platform 20%</th><th class="r">Inaam diya</th><th>Status</th></tr></thead><tbody>' +
-          (Rr.map(function (r) { return '<tr><td>' + uae(r.start_utc) + '</td><td>' + esc(r.no) + '</td><td>' + (r.tier ? '$' + r.tier : 'free') + '</td><td class="r">' + r.players + '</td><td class="r">' + r.dq + '</td><td class="r">' + r.in_profit + '</td><td class="r">' + money(r.fees) + '</td><td class="r">' + money(r.pool) + '</td><td class="r">' + money(r.platform) + '</td><td class="r">' + money(r.prizes_paid) + '</td><td>' + stPill(r.status) + '</td></tr>'; }).join('') || '<tr><td colspan="11" class="o-note">Abhi koi battle khatam nahi hui.</td></tr>') +
+        '<div class="o-card"><h3>Har battle ka hisaab</h3>' + feedNote(D, 'daily') + '<div class="o-row"><button class="btn btn-ghost btn-sm" data-d-csv>CSV</button></div><div class="o-scroll"><table class="o-table"><thead><tr><th>Date (UAE)</th><th>Battle</th><th>Table</th><th class="r">Players</th><th class="r">DQ</th><th class="r">Profit mein</th><th class="r">Fees</th><th class="r">Pool 80%</th><th class="r">Platform 20%</th><th class="r">Inaam diya</th><th class="r">Wapas</th><th>Status</th></tr></thead><tbody>' +
+          (Rr.map(function (r) { return '<tr><td>' + uae(r.start_utc) + '</td><td>' + esc(r.no) + '</td><td>' + (r.tier ? '$' + r.tier : 'free') + '</td><td class="r">' + r.players + '</td><td class="r">' + r.dq + '</td><td class="r">' + r.in_profit + '</td><td class="r">' + money(r.fees) + '</td><td class="r">' + money(r.pool) + '</td><td class="r">' + money(r.platform) + '</td><td class="r">' + money(r.prizes_paid) + '</td><td class="r">' + (r.refund ? money(r.refund) : '–') + '</td><td>' + (r.cancelled ? '<span class="o-pill bad">Cancelled · full refund</span>' : r.nobody_won ? '<span class="o-pill">Koi qualify nahi · 80% wapas</span>' : stPill(r.status)) + '</td></tr>'; }).join('') || '<tr><td colspan="12" class="o-note">Abhi koi battle khatam nahi hui.</td></tr>') +
           '</tbody></table></div></div>';
     });
   }
@@ -582,18 +593,34 @@
       BC = r.data || [];
       var own = DEMO || A.owner();
       pane().innerHTML = demoBar() + sqlHint(r.error) +
-        '<div class="o-card"><h3>Naya message (draft)</h3><div class="o-sub">Yahan se seedha kuch nahi jaata. Draft → owner Approve → team group ✅ → tab bhejna. Mana shabd (game / earn / invest / guaranteed) save hi nahi honge.</div>' +
+        '<div class="o-card"><h3>Naya message (draft)</h3><div class="o-sub">Yahan se message apne-aap NAHI jaata. Draft → owner Approve → team group ✅ → "Copy" daba ke Telegram / email me haath se bhejo. Mana shabd (game / earn / invest / guaranteed) save hi nahi honge.</div>' +
         '<form class="o-form" data-bc-save><label>Kisko<select name="s">' + Object.keys(SEG).map(function (k) { return '<option value="' + k + '">' + SEG[k] + '</option>'; }).join('') + '</select></label>' +
         '<label>Kaise<select name="c"><option value="telegram">Telegram</option><option value="email">Email</option></select></label>' +
         '<label style="grid-column:1/-1">Message (English, UAE time)<textarea name="b" rows="5" required minlength="5" maxlength="4000"></textarea></label>' +
         '<div class="o-row" style="grid-column:1/-1"><button class="btn btn-sm" type="submit">Save draft</button></div></form></div>' +
         '<div class="o-card"><h3>Messages</h3>' + tbl(['When', 'To', 'Via', 'Message', 'Status', ''], BC.map(function (x) {
           return '<tr><td>' + uae(x.created_at) + '</td><td>' + esc(SEG[x.segment] || x.segment) + '</td><td>' + esc(x.channel) + '</td><td class="o-note" style="white-space:pre-wrap;max-width:420px">' + esc(x.body) + '</td>' +
-            '<td><span class="o-pill ' + (x.status === 'approved' ? 'live' : x.status === 'sent' ? 'end' : '') + '">' + esc(x.status) + '</span>' + (x.sent_count ? '<div class="o-note">' + x.sent_count + ' sent</div>' : '') + '</td>' +
-            '<td>' + (own && x.status === 'draft' ? '<button class="btn btn-ghost btn-sm" data-bc-approve="' + x.id + '">Approve</button>' : '') + '</td></tr>';
+            '<td><span class="o-pill ' + (x.status === 'approved' ? 'live' : x.status === 'sent' ? 'end' : '') + '">' + esc(x.status === 'approved' ? 'Approved – haath se bhejo' : x.status) + '</span>' + (x.sent_count ? '<div class="o-note">' + x.sent_count + ' sent</div>' : '') + '</td>' +
+            '<td>' + (own && x.status === 'draft' ? '<button class="btn btn-ghost btn-sm" data-bc-approve="' + x.id + '">Approve</button>' : '') + (x.status === 'approved' ? '<button class="btn btn-ghost btn-sm" data-bc-copy="' + x.id + '">Copy</button>' : '') + '</td></tr>';
         }), 'Koi message nahi.') + '</div>';
     });
   }
+  function allRows(tb, cols) {   // C31 (7 Nov): Supabase 1000 row pe rukta – page-page sab lo, total galat na ho
+    var out = [], step = 1000;
+    function page(i) {
+      return sb.from(tb).select(cols).range(i, i + step - 1).then(function (r) {
+        if (r.error) return { data: out, error: r.error };
+        out = out.concat(r.data || []);
+        return (r.data || []).length === step && i < 50000 ? page(i + step) : { data: out, error: null };
+      }, function (e) { return { data: out, error: e }; });
+    }
+    return page(0);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-bc-copy]'); if (!b) return;
+    var m = (BC || []).filter(function (x) { return String(x.id) === b.getAttribute('data-bc-copy'); })[0]; if (!m) return;
+    (navigator.clipboard ? navigator.clipboard.writeText(m.body) : Promise.reject()).then(function () { b.textContent = 'Copied ✓'; }, function () { b.textContent = 'Copy fail'; });
+  });
   function fraudExtra() {      // risk page ke neeche: IP / device (pc_seen)
     var box = $('[data-fraud-x]'); if (!box || DEMO) return;
     rpcP('pc_admin_fraud').then(function (r) {
