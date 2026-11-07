@@ -15,7 +15,7 @@
   var TX = { TRC20: 'https://tronscan.org/#/transaction/', BEP20: 'https://bscscan.com/tx/' };
   var ROLE = null, ME = '', P = {}, S = {}, TAB = 'dash', BID = null, PB = null, LOGN = 100, CLOSED = false;
   var owner = function () { return ROLE === 'owner'; };
-  var ERR = { OWNER_ONLY: 'Only the owner can do this.', NOT_ADMIN: 'You are not an admin.', NEEDS_SECOND_ADMIN: 'Big withdrawal: another admin must press "Check" first.',
+  var ERR = { OWNER_ONLY: 'Only the owner can do this.', NOT_ADMIN: 'You are not an admin.', NEEDS_SECOND_ADMIN: 'A DIFFERENT admin must do this (you cannot confirm your own USDT address / big money step).', NEEDS_OWNER: 'Only the owner can confirm money steps (deposit approve, withdrawal, USDT address). Ask Sultan.',
               ALREADY_DECIDED: 'Someone already handled this.', NO_SUCH_USER: 'No PipClash account with this email – they must sign up on the website first.',
               NOT_YOURSELF: 'You cannot remove yourself.', REASON_REQUIRED: 'Please write a reason.', INSUFFICIENT_BALANCE: 'Player balance is too low for this.',
               NEEDS_CHECK: 'Someone must press "Check" first.', START_FIRST: 'Press "Start payout" first – before you send any USDT.', TXID_REQUIRED: 'Paste the full payout TXID.',
